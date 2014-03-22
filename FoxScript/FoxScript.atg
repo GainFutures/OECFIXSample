@@ -1,0 +1,1363 @@
+using System.Collections.Generic;
+using OEC.FIX.Sample.FoxScript.AllocationBlocks;
+
+COMPILER FoxScript
+
+	internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
+		: this(scanner)
+	{
+		this.ExecEngine = execEngine;
+		if (errors != null) {
+			this.errors = errors;
+		}
+	}
+
+	internal readonly ExecEngine ExecEngine;
+
+	private Token Peek()
+	{
+		return scanner.Peek();
+	}
+
+	private void ResetPeek()
+	{
+		scanner.ResetPeek();
+	}
+
+	private void SemanticAction(System.Action action)
+	{
+		if (action == null) {
+			return;
+		}
+		
+		if (SemanticActionEnabled())
+		{ 
+			try
+			{
+				action();
+			}
+			catch (System.Exception e)
+			{
+				SemErr(e.Message ?? "Semantic action failed.");
+			}
+		}
+	}
+
+	private bool IsMsgVarNameFormatArg()
+	{
+		ResetPeek();
+		var next = Peek();
+		return next.kind == _comma;
+	}
+	
+	private bool IsRValueFormatArg()
+	{
+		ResetPeek();
+		var next = Peek();
+		return next.kind == _comma;
+	}
+	
+	private bool IsSenderCompID()
+	{
+		ResetPeek();
+		var next = Peek();
+		return next.kind == _comma;
+	}
+
+	private void PushBranchingPredicate(Func<bool> condition)
+	{
+		branchingPredicates.Push(new BranchingPredicate(condition));
+	}
+
+	private BranchingPredicate PopBranchingPredicate()
+	{
+		if (branchingPredicates.Empty()) {
+			throw new InvalidOperationException("No BranchingPredicates assigned.");
+		}
+		return branchingPredicates.Pop();
+	}
+	
+	private bool SemanticActionEnabled()
+	{
+		if (branchingPredicates.Empty()) {
+			return true;
+		}
+		return CurrentBranchingPredicate.Accepted;
+	}
+	
+	private BranchingPredicate CurrentBranchingPredicate
+	{
+		get
+		{
+			if (branchingPredicates.Empty()) {
+				throw new InvalidOperationException("No BranchingPredicates assigned.");
+			}
+			return branchingPredicates.Peek(); 
+		}
+	}
+
+	class BranchingPredicate
+	{
+		public bool Positive = true;
+	
+		public BranchingPredicate(Func<bool> condition)
+		{
+			if (condition == null) {
+				throw new ArgumentException("Condition for BranchingPredicate not specified.");
+			}
+			this.condition = condition;
+		}
+		
+		public bool Accepted
+		{
+			get { return Positive ? condition() : !condition(); }
+		}
+		
+		private readonly Func<bool> condition;
+	}
+	
+	private readonly Stack<BranchingPredicate> branchingPredicates = new Stack<BranchingPredicate>();
+	
+IGNORECASE
+
+CHARACTERS
+	letter = 'A' .. 'Z' + 'a' .. 'z' + '_'.
+	digit = "0123456789".
+	cr = '\r'.
+	lf = '\n'.
+	tab = '\t'.
+	anyChar = ANY.
+	stringChar = anyChar - "'".
+	whiteSpace = tab + '\u0020'.
+
+	contractMonth = "FGHJKMNQUVXZ".
+	hexDigit = 'A'..'F' + 'a'..'f' + digit.
+
+TOKENS
+
+	ident = ('_' | letter) {'_' | letter | digit}.
+	messageField = ('_' | letter) {'_' | letter | digit} "." (('_' | letter) {'_' | letter | digit} | digit {digit}).
+	fixConst = "FIX" "." (('_' | letter) {'_' | letter | digit} | digit {digit}) "." ('_' | letter) {'_' | letter | digit}.
+	globalProp = "PROP:" ('_' | letter) {'_' | letter | digit}.
+	endOfClause = ";".
+	comma = ",".
+	
+	actionNew = "NEW".
+	actionModify = "MODIFY".
+	actionCancel = "CANCEL".
+	actionOrderStatus = "STATUS".
+	actionOrderMassStatus = "MASSSTATUS".
+	actionDelete = "DELETE".
+	actionWait = "WAIT".
+	actionEnsure = "ENSURE".
+	actionPrint = "PRINT".
+	actionPrintf = "PRINTF".
+	actionReset = "RESET".
+	actionSet = "SET".
+	actionGet = "GET".
+	actionPing = "PING".
+	actionBegin = "BEGIN".
+	actionEnd = "END".
+	actionPositions = "POSITIONS".
+	actionBalance = "BALANCE".
+	actionQuit = "QUIT".
+	actionExit = "EXIT".
+	actionStop = "STOP".	
+	actionConnect = "CONNECT".
+	actionAuth = "AUTH".
+	actionDisconnect= "DISCONNECT".
+	actionExec = "EXEC".
+	actionTest = "TEST".
+	actionTestStat = "TESTSTAT".
+	actionEnsureOrderStatus = "EnsureOrderStatus".
+	actionEnsurePureOrderStatus = "EnsurePureOrderStatus".
+	actionEnsureModifyAccepted = "EnsureModifyAccepted".
+	actionEnsureTrade = "EnsureTrade".
+	actionSleep = "SLEEP".
+	actionAnyKey = "ANYKEY".
+	actionContract = "CONTRACT".
+	actionPostAllocation = "POSTALLOCATION".
+	actionPost = "POST".
+	actionPAlloc = "PALLOC".
+	actionUserRequest = "UserRequest".
+	actionMarginCalc = "MarginCalc".
+
+// FAST ACTIONS
+	actionHeartbeat = "Heartbeat".
+	actionConnectFast = "ConnectFast".
+	actionDisconnectFast = "DisconnectFast".
+	actionCancelSubscribe = "CancelSubscribe".
+	actionSubscribeQuotes = "SubscribeQuotes".
+	actionSubscribeDOM = "SubscribeDOM".
+	actionSubscribeHistogram = "SubscribeHistogram".
+	actionSubscribeTicks = "SubscribeTicks".
+	actionLoadTicks = "LoadTicks".
+//
+
+	assignOp = "=".
+	equalOp = "==".
+	notEqualOp = "!=".
+	lessOp = "<".
+	lessOrEqualOp = "<=".
+	greaterOp = ">".
+	greaterOrEqualOp = ">=".
+	orOp = "||".
+	andOp = "&&".
+
+//	General data types
+//	{
+		integer = ['-'] digit {digit}.
+		float = ['-'] digit {digit} '.' {digit} ['E' ['+'|'-'] digit {digit}].
+		string = "'" {stringChar} "'".
+		true = "TRUE".
+		false = "FALSE".
+		on = "ON".
+		off = "OFF".
+		null = "NULL".
+		timespan = '[' [digit {digit} '.'] digit digit ':' digit digit [':' digit digit] ']'.
+		timestamp = '[' (["UTC"] "NOW" [('+' | '-') digit digit ':' digit digit [':' digit digit]] | digit digit digit digit digit digit digit digit '-' digit digit ':' digit digit [':' digit digit] ["UTC"]) ']'.
+		date = '[' digit digit digit digit digit digit digit digit ']'.
+		uuid = { hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit } '-' { hexDigit hexDigit hexDigit hexDigit } '-' { hexDigit hexDigit hexDigit hexDigit } '-' { hexDigit hexDigit hexDigit hexDigit } '-' { hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit hexDigit }.
+//	}
+
+//	Business values
+//	{
+		buy = "BUY".
+		sell = "SELL".
+		put = "PUT".
+		call = "CALL".
+		open = "OPEN".
+		close = "CLOSE".
+//	}
+
+COMMENTS FROM "//" TO lf
+COMMENTS FROM "/*" TO "*/" NESTED
+
+IGNORE cr + lf + tab
+
+PRODUCTIONS
+
+	FoxScript = 
+		{Command | Statement}
+	.
+
+	Statement = 
+		IfStatement
+	.
+
+	IfStatement (. object expr = null; bool actionEnabled = SemanticActionEnabled(); .) = 
+		"IF" "(" LogicalExpr<ref expr> ")"	
+			(.
+				if (actionEnabled)
+				{
+					var predicate = ExecEngine.BuildPredicate(expr); 
+					PushBranchingPredicate(predicate);
+					CurrentBranchingPredicate.Positive = true;
+				}
+			.)
+		"{"
+			{Command | Statement}
+		"}"
+		[
+			"ELSE"	
+				(. 
+					if (actionEnabled) {
+						CurrentBranchingPredicate.Positive = false; 
+					}
+				.)
+			"{"
+				{Command | Statement}
+			"}"
+		]
+		endOfClause		
+			(. 
+				if (actionEnabled) {
+					PopBranchingPredicate(); 
+				}
+			.)
+	.
+	
+	Command = 
+		SimpleCommand | 
+		MsgProducingCommand
+	.
+
+	MsgVarName<ref string msgVarName> = 
+		ident	(. msgVarName = t.val; .)
+	.
+
+	SimpleCommand =
+		(
+			GetPropCommand |
+			SetPropCommand | 
+			PingCommand |
+			PrintCommand | 
+			PrintfCommand | 
+			QuitCommand | 
+			
+			ExecCommand |
+			TestCommand |
+			TestStatCommand |
+			EnsureCommand | 
+			EnsureOrderStatusCommand |
+			EnsurePureOrderStatusCommand |
+			EnsureModifyAcceptedCommand | 
+			EnsureTradeCommand | 
+			SleepCommand | 
+			AnyKeyCommand |
+			
+			ConnectCommand | 
+			DisconnectCommand |
+			ResetSeqnumbers | 
+			AuthorizationCommand |
+		//FAST Command	
+			ConnectFastCommand |
+			DisconnectFastCommand |
+			HeartbeatCommand
+			
+		//	
+		)
+		endOfClause
+	.
+	
+	MsgProducingCommand (. string msgVarName = null; MsgCommand command = null; .) = 
+		[
+			["MSG"]
+			MsgVarName<ref msgVarName> 
+			assignOp
+		]
+		(
+			NewOrderCommand<ref command>
+			| ModifyOrderCommand<ref command>
+			| CancelOrderCommand<ref command>
+			| WaitMessageCommand<ref command>
+			| BalanceCommand<ref command>
+			| OrderStatusCommand<ref command>
+			| OrderMassStatusCommand<ref command>
+			| PositionsCommand<ref command>
+			| ContractCommand<ref command>
+			| PostAllocationCommand<ref command>
+			| UserRequestCommand<ref command>
+			| MarginCalcCommand<ref command>
+		//Fast Commands
+			| CancelSubscribeCommand<ref command>
+			| SubscribeQuotesCommand<ref command>
+			| SubscribeDOMCommand<ref command>
+			| SubscribeHistogramCommand<ref command>
+			| SubscribeTicksCommand<ref command>
+			| LoadTicksCommand<ref command>
+		//
+		)
+		endOfClause			(. ExecEngine.MessageCommand(msgVarName, command); .)
+	.
+
+	MessageFieldAssignments<FixFields fields> (. string name = null; Object value = null; .) = 
+		(
+			ident				(. name = t.val; .)
+			| integer			(. name = t.val; .)
+		)	
+		"="
+		RValue<ref value>		(. fields.Add(name, value); .)
+		{						(. name = null; value = null; .)
+			","
+			(
+				ident			(. name = t.val; .)
+				| integer		(. name = t.val; .)
+			)	
+			"="
+			RValue<ref value>	(. fields.Add(name, value); .)
+		}
+	.
+
+	UserRequestCommand<ref MsgCommand command> (. var userCommand = new UserRequestCommand(); .) = 
+		actionUserRequest [ "UUID" "=" IdentOrString<ref userCommand.UUID> ] IdentOrString<ref userCommand.Name> 		(. command = userCommand; .)
+	.
+
+	MarginCalcPosition<out MarginCalcCommand.Position position> = (. position = new MarginCalcCommand.Position(); .)
+		OrderContract<ref position.Contract>
+		integer (. position.MinQty = int.Parse(t.val); .)
+		integer (. position.MaxQty = int.Parse(t.val); .)
+	.
+
+	MarginCalcPositions<.ref List<MarginCalcCommand.Position> positions.> =
+		(.
+			 positions = new List<MarginCalcCommand.Position>();
+			 MarginCalcCommand.Position item;
+ 		.)		
+		"{"
+			MarginCalcPosition<out item> (. positions.Add(item); .)
+			{
+				"," MarginCalcPosition<out item> (. positions.Add(item); .)
+			}
+		"}".
+
+	MarginCalcCommand<ref MsgCommand command> (. var cmd = new MarginCalcCommand(); .) = 
+		actionMarginCalc 
+		Account<ref cmd.Account>
+		MarginCalcPositions<ref cmd.Positions>
+		[
+			"," 
+			MessageFieldAssignments<cmd.Fields>
+		]		(. command = cmd; .)
+	.
+
+	ContractCommand<ref MsgCommand command> =
+		actionContract
+		(
+			ContractRequest<ref command>
+			| ContractLookup<ref command>
+		)
+	.
+
+	ContractRequest<ref MsgCommand command> =
+		(
+			"REQUEST" | "REQ" | "R"
+		)
+		(
+			(. ContractRequestCommand temp; .)
+			ByBaseContractRequest<out temp>
+			(. command = temp; .)
+		| 
+			(. BaseContractRequestCommand temp; .)
+			BaseContractRequest<out temp> 
+			(. command = temp; .)
+		)
+	.
+
+	ByBaseContractRequest<out ContractRequestCommand command> (. command = new ContractRequestCommand(); .) =
+		IdentOrString<ref command.Name> 
+		[SubscriptionType<ref command.SubscriptionRequestType>]
+		[
+			timestamp		(. command.UpdatesSinceTimestamp = LiteralParser.ParseTimestamp(t.val); .)
+		]
+	.
+
+	BaseContractRequest<out BaseContractRequestCommand command> (. command = new BaseContractRequestCommand(); .) =
+		("BASE" | "B")
+		[SubscriptionType<ref command.SubscriptionRequestType> ","]
+		BaseContractParam<ref command>
+		{
+			"," BaseContractParam<ref command>
+		}
+	.
+
+	ContractLookup<ref MsgCommand command> (. var lcommand = new SymbolLookupCommand(); .) =
+		(
+			"LOOKUP"
+			| "LKP"
+			| "L"
+		)
+		IdentOrString<ref lcommand.Name>	
+		"," "MODE" "=" ContractLookupMode<ref lcommand.Mode>
+		"," "MAX_RECORDS" "=" integer (. lcommand.MaxRecords = LiteralParser.ParseInteger(t.val); .)
+		{ 
+			"," ContractLookupParam<ref lcommand> 
+		}
+		(. command = lcommand; .)
+	.
+
+	SubscriptionType<ref char symbolRequestType> =
+		"SNAPSHOT" (. symbolRequestType = '0'; .)
+		| "SUBSCRIBE" (. symbolRequestType = '1'; .)
+		| "UNSUBSCRIBE" (. symbolRequestType = '2'; .)
+		| "UPDATES_ONLY" (. symbolRequestType = 'U'; .)
+	.
+
+	ContractLookupParam<ref SymbolLookupCommand command> =
+		("KIND" "=" ContractKindList<ref command.ContractKinds>
+		| "TYPE" "=" ContractType<ref command.ContractType>
+		| "OPT_TYPE" "=" OptionType<ref command.OptionType>
+		| "BY_BASE_CONTRACT" "=" BoolOptional<ref command.ByBaseContractsOnly>
+		| "OPT_REQUIRED" "=" BoolOptional<ref command.OptionsRequired>
+		| "BASE_CONTRACT" "=" IdentOrString<ref command.BaseContract>
+		| "UNDERLYING" "=" ContractDescription<ref command.ParentContract>
+		| 
+			(. BaseContractRequestCommand bcommand = command as BaseContractRequestCommand; .) 
+			BaseContractParam<ref bcommand>
+		)
+	.
+
+	BaseContractParam<ref BaseContractRequestCommand command> =
+		("EXCH" "=" IdentOrString<ref command.Exchange>
+		| "CGROUP" "=" IdentOrString<ref command.ContractGroup>
+		| "COMPOUND_TYPE" "=" CompoundType<ref command.CompoundType>
+		)
+	.
+
+	ContractDescription<ref Contract contract> = 
+		(. 
+			var stringValue = string.Empty; 
+			contract = new Contract();
+		.)
+		"("
+		IdentOrString<ref stringValue> 				(. contract.Code = new CFI.Code(stringValue); .)
+		"," IdentOrString<ref contract.Symbol>		
+		"," IdentOrString<ref stringValue>			(. contract.MaturityMonthYear = new MaturityMonthYear(stringValue); .)
+		["," DoubleOptional<ref contract.Strike>]
+		")"
+	.
+
+	CompoundType<ref CompoundType compoundType> =
+	    "UNKNOWN" (. compoundType = Sample.FoxScript.CompoundType.UNKNOWN; .)
+        | "GENERIC" (. compoundType = Sample.FoxScript.CompoundType.GENERIC; .)
+        | "PERFORMANCE_INDEX_BASKET" (. compoundType = Sample.FoxScript.CompoundType.PERFORMANCE_INDEX_BASKET; .)
+        | "NON_PERFORMANCE_INDEX_BASKET" (. compoundType = Sample.FoxScript.CompoundType.NON_PERFORMANCE_INDEX_BASKET; .)
+        | "STRADDLE" (. compoundType = Sample.FoxScript.CompoundType.STRADDLE; .)
+        | "STRANGLE" (. compoundType = Sample.FoxScript.CompoundType.STRANGLE; .)
+        | "FUTURE_TIME_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.FUTURE_TIME_SPREAD; .)
+        | "OPTION_TIME_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.OPTION_TIME_SPREAD; .)
+        | "PRICE_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.PRICE_SPREAD; .)
+        | "SYNTHETIC_UNDERLYING" (. compoundType = Sample.FoxScript.CompoundType.SYNTHETIC_UNDERLYING; .)
+        | "STRADDLE_TIME_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.STRADDLE_TIME_SPREAD; .)
+        | "RATIO_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.RATIO_SPREAD; .)
+        | "RATIO_FUTURE_TIME_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.RATIO_FUTURE_TIME_SPREAD; .)
+        | "RATIO_OPTION_TIME_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.RATIO_OPTION_TIME_SPREAD; .)
+        | "PUT_CALL_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.PUT_CALL_SPREAD; .)
+        | "RATIO_PUT_CALL_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.RATIO_PUT_CALL_SPREAD; .)
+        | "LADDER" (. compoundType = Sample.FoxScript.CompoundType.LADDER; .)
+        | "BOX" (. compoundType = Sample.FoxScript.CompoundType.BOX; .)
+        | "BUTTERFLY" (. compoundType = Sample.FoxScript.CompoundType.BUTTERFLY; .)
+        | "CONDOR" (. compoundType = Sample.FoxScript.CompoundType.CONDOR; .)
+        | "IRON_BUTTERFLY" (. compoundType = Sample.FoxScript.CompoundType.IRON_BUTTERFLY; .)
+        | "DIAGONAL_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.DIAGONAL_SPREAD; .)
+        | "RATIO_DIAGONAL_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.RATIO_DIAGONAL_SPREAD; .)
+        | "STRADDLE_DIAGONAL_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.STRADDLE_DIAGONAL_SPREAD; .)
+        | "CONVERSION_REVERSAL" (. compoundType = Sample.FoxScript.CompoundType.CONVERSION_REVERSAL; .)
+        | "COVERED_OPTION" (. compoundType = Sample.FoxScript.CompoundType.COVERED_OPTION; .)
+        | "RESERVED1" (. compoundType = Sample.FoxScript.CompoundType.RESERVED1; .)
+        | "RESERVED2" (. compoundType = Sample.FoxScript.CompoundType.RESERVED2; .)
+        | "CURRENCY_FUTURE_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.CURRENCY_FUTURE_SPREAD; .)
+        | "RATE_FUTURE_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.RATE_FUTURE_SPREAD; .)
+        | "INDEX_FUTURE_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.INDEX_FUTURE_SPREAD; .)
+        | "FUTURE_BUTTERFLY" (. compoundType = Sample.FoxScript.CompoundType.FUTURE_BUTTERFLY; .)
+        | "FUTURE_CONDOR" (. compoundType = Sample.FoxScript.CompoundType.FUTURE_CONDOR; .)
+        | "STRIP" (. compoundType = Sample.FoxScript.CompoundType.STRIP; .)
+        | "PACK" (. compoundType = Sample.FoxScript.CompoundType.PACK; .)
+        | "BUNDLE" (. compoundType = Sample.FoxScript.CompoundType.BUNDLE; .)
+        | "BOND_DELIVERABLE_BASKET" (. compoundType = Sample.FoxScript.CompoundType.BOND_DELIVERABLE_BASKET; .)
+        | "STOCK_BASKET" (. compoundType = Sample.FoxScript.CompoundType.STOCK_BASKET; .)
+        | "PRICE_SPREAD_VS_OPTION" (. compoundType = Sample.FoxScript.CompoundType.PRICE_SPREAD_VS_OPTION; .)
+        | "STRADDLE_VS_OPTION" (. compoundType = Sample.FoxScript.CompoundType.STRADDLE_VS_OPTION; .)
+        | "BOND_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.BOND_SPREAD; .)
+        | "EXCHANGE_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.EXCHANGE_SPREAD; .)
+        | "FUTURE_PACK_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.FUTURE_PACK_SPREAD; .)
+        | "FUTURE_PACK_BUTTERFLY" (. compoundType = Sample.FoxScript.CompoundType.FUTURE_PACK_BUTTERFLY; .)
+        | "WHOLE_SALE" (. compoundType = Sample.FoxScript.CompoundType.WHOLE_SALE; .)
+        | "COMMODITY_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.COMMODITY_SPREAD; .)
+        | "JELLY_ROLL" (. compoundType = Sample.FoxScript.CompoundType.JELLY_ROLL; .)
+        | "IRON_CONDOR" (. compoundType = Sample.FoxScript.CompoundType.IRON_CONDOR; .)
+        | "OPTIONS_STRIP" (. compoundType = Sample.FoxScript.CompoundType.OPTIONS_STRIP; .)
+        | "CONTINGENT_ORDERS" (. compoundType = Sample.FoxScript.CompoundType.CONTINGENT_ORDERS; .)
+        | "INTERPRODUCT_SPREAD" (. compoundType = Sample.FoxScript.CompoundType.INTERPRODUCT_SPREAD; .)
+        | "PSEUDO_STRADDLE" (. compoundType = Sample.FoxScript.CompoundType.PSEUDO_STRADDLE; .)
+        | "TAILOR_MADE" (. compoundType = Sample.FoxScript.CompoundType.TAILOR_MADE; .)
+        | "FUTURES_GENERIC" (. compoundType = Sample.FoxScript.CompoundType.FUTURES_GENERIC; .)
+        | "OPTIONS_GENERIC" (. compoundType = Sample.FoxScript.CompoundType.OPTIONS_GENERIC; .)
+        | "BASIS_TRADE" (. compoundType = Sample.FoxScript.CompoundType.BASIS_TRADE; .)
+        | "FUTURETIME_SPREAD_REDUCED_TICK_SIZE" (. compoundType = Sample.FoxScript.CompoundType.FUTURETIME_SPREAD_REDUCED_TICK_SIZE; .)
+        | "GENERIC_VOLA_STRATEGY_VS" (. compoundType = Sample.FoxScript.CompoundType.GENERIC_VOLA_STRATEGY_VS; .)
+        | "STRADDLE_VOLA_STRATEGY_VS" (. compoundType = Sample.FoxScript.CompoundType.STRADDLE_VOLA_STRATEGY_VS; .)
+        | "STRANGLE_VS" (. compoundType = Sample.FoxScript.CompoundType.STRANGLE_VS; .)
+        | "OPTION_TIME_SPREAD_VS" (. compoundType = Sample.FoxScript.CompoundType.OPTION_TIME_SPREAD_VS; .)
+        | "PRICE_SPREAD_VS" (. compoundType = Sample.FoxScript.CompoundType.PRICE_SPREAD_VS; .)
+        | "RATIO_SPREAD_VS" (. compoundType = Sample.FoxScript.CompoundType.RATIO_SPREAD_VS; .)
+        | "PUT_CALL_SPREADVS" (. compoundType = Sample.FoxScript.CompoundType.PUT_CALL_SPREADVS; .)
+        | "LADDER_VS" (. compoundType = Sample.FoxScript.CompoundType.LADDER_VS; .)
+        | "PRICE_SPREAD_VS_OPTION_VS" (. compoundType = Sample.FoxScript.CompoundType.PRICE_SPREAD_VS_OPTION_VS; .)
+        | "COLLAR" (. compoundType = Sample.FoxScript.CompoundType.COLLAR; .)
+        | "COMBO" (. compoundType = Sample.FoxScript.CompoundType.COMBO; .)
+        | "PROTECTIVE_PUT" (. compoundType = Sample.FoxScript.CompoundType.PROTECTIVE_PUT; .)
+        | "SPREAD" (. compoundType = Sample.FoxScript.CompoundType.SPREAD; .)
+	.
+
+	OptionType<ref OptionType optionType> (. optionType = Sample.FoxScript.OptionType.ALL; .) =
+      "PUT" (. optionType = Sample.FoxScript.OptionType.PUT; .)
+      | "CALL" (. optionType = Sample.FoxScript.OptionType.CALL; .)
+  	.
+
+	ContractType<ref ContractType? ctype> =
+      "ELECTRONIC" (. ctype = Sample.FoxScript.ContractType.ELECTRONIC; .)
+      | "PIT" (. ctype = Sample.FoxScript.ContractType.PIT; .)
+	.
+
+	ContractKindList<.ref List<ContractKind> list.> (. ContractKind kind; .) = 
+		ContractKind<out kind> (. list.Add(kind); .)
+		| 	
+		"(" 
+		ContractKind<out kind> (. list.Add(kind); .)
+		{
+			"," ContractKind<out kind> (. list.Add(kind); .)
+		}
+		")"
+	.
+
+	ContractKind<out ContractKind kind> (. kind = Sample.FoxScript.ContractKind.UNKNOWN; .) =
+      "FUTURE" (. kind = Sample.FoxScript.ContractKind.FUTURE; .)
+      | "OPTION" (. kind = Sample.FoxScript.ContractKind.OPTION; .)
+      | "FOREX" (. kind = Sample.FoxScript.ContractKind.FOREX; .)
+      | "FUTURE_COMPOUND" (. kind = Sample.FoxScript.ContractKind.FUTURE_COMPOUND; .)
+      | "OPTIONS_COMPOUND" (. kind = Sample.FoxScript.ContractKind.OPTIONS_COMPOUND; .)
+	.
+
+	ContractLookupMode<ref int mode> =
+        "ANY_INCLUSION" (. mode = 0; .)
+        | "SYMBOL_STARTS_WITH" (. mode = 1; .)
+        | "DESCRIPTION_STARTS_WITH" (. mode = 2; .)
+        | "ANY_STARTS_WITH" (. mode = 3; .)
+        | "EXACT_MATCH" (. mode = 4; .)
+	.
+
+	ResetSeqnumbers =
+		actionReset (. SemanticAction(() => ExecEngine.ResetSeqnums()); .)
+		"SEQNUM"
+	.
+
+	BalanceCommand<ref MsgCommand command> (. var cmd = new BalanceCommand(); .) = 
+		actionBalance
+		Account<ref cmd.Account>
+		[
+			"," 
+			MessageFieldAssignments<cmd.Fields>
+		]		(. command = cmd; .)
+	.
+	
+	PositionsCommand<ref MsgCommand command> (. var cmd = new PositionsCommand(); .) = 
+		actionPositions
+		Account<ref cmd.Account>
+		[
+			"," 
+			MessageFieldAssignments<cmd.Fields>
+		]		(. command = cmd; .)
+	.
+	
+	NewOrderCommand<ref MsgCommand command>	(. var cmd = new NewOrderCommand(); .) = 
+		actionNew 
+		OrderBody<cmd>
+		[
+			"," 
+			MessageFieldAssignments<cmd.Fields>
+		]		(. command = cmd; .)
+	.
+
+	ModifyOrderCommand<ref MsgCommand command>	(. var cmd = new ModifyOrderCommand(); .) = 
+		actionModify
+		OrigMsgVarName<ref cmd.OrigMsgVarName>
+		OrderBody<cmd>
+		[
+			"," 
+			MessageFieldAssignments<cmd.Fields>
+		]		(. command = cmd; .)
+	.
+	
+	CancelOrderCommand<ref MsgCommand command>	(. var cmd = new CancelOrderCommand(); .) = 
+		actionCancel
+		OrigMsgVarName<ref cmd.OrigMsgVarName>
+		[
+			"," 
+			MessageFieldAssignments<cmd.Fields>
+		]		(. command = cmd; .)
+	.
+
+	OrderStatusCommand<ref MsgCommand command>	(. var cmd = new OrderStatusCommand(); .) = 
+		actionOrderStatus
+		OrigMsgVarName<ref cmd.OrigMsgVarName>
+		(. command = cmd; .)
+	.
+
+	OrderMassStatusCommand<ref MsgCommand command>  (. var cmd = new OrderMassStatusCommand(); .) =
+		actionOrderMassStatus
+		[ OrderSide<ref cmd.OrderSide> ]
+		[ OrderContract<ref cmd.OrderContract> ]
+		[
+			[ AllocationBlock<out cmd.AllocationBlock> ]
+			"FOR" Account<ref cmd.Account>
+		]
+
+		(. command = cmd; .)
+	.
+
+	PostAllocationCommand<ref MsgCommand command> (.var cmd = new PostAllocationCommand(); .) =
+		(actionPostAllocation
+		| actionPost
+		| actionPAlloc)
+
+		OrigMsgVarName<ref cmd.OrigMsgVarName>
+		[ OrderContract<ref cmd.Contract> ]
+		PostAllocationBlock<out cmd.AllocationBlock>
+		(. command = cmd; .)
+	.
+	
+	OrigMsgVarName<ref string origMsgVarName> = 
+		ident			(. origMsgVarName = t.val; .)
+	.
+	
+	QuitCommand = 
+		(
+			actionQuit		
+			| actionExit	
+			| actionStop
+		)				(. SemanticAction(() => ExecEngine.Exit()); .)
+	.
+	
+	SleepCommand (. TimeSpan timeout; .) = 
+		actionSleep
+		[timespan		(. timeout = LiteralParser.ParseTimespan(t.val); .)
+						(. SemanticAction(() => ExecEngine.Sleep(timeout)); .)]
+	.
+
+	AnyKeyCommand =
+		actionAnyKey (. SemanticAction(() => ExecEngine.AnyKey()); .)
+	.
+	
+	AuthorizationCommand (. string senderCompID = string.Empty; .) = 
+		actionAuth
+		IdentOrString<ref senderCompID> (. SemanticAction(() => ExecEngine.Auth(senderCompID)); .)
+	.
+
+	ConnectCommand (. string senderCompID = null; string password = null; string uuid = null; .) = 
+		actionConnect
+		[
+			IF (IsSenderCompID()) IdentOrString<ref senderCompID> ","
+		]
+		IdentOrString<ref password>	
+		[
+			uuid (. uuid = t.val; .)
+		]
+		(. SemanticAction(() => ExecEngine.Connect(senderCompID, password, uuid)); .)
+	.
+
+	DisconnectCommand = 
+		actionDisconnect	(. SemanticAction(() => ExecEngine.Disconnect()); .)
+	.
+	
+	ExecCommand (. string filename = null; string scriptName = null; .) = 
+		actionExec
+		IdentOrString<ref filename>
+		[
+			","
+			string			(. scriptName = LiteralParser.ParseString(t.val); .)
+		]
+							(. SemanticAction(() => ExecEngine.Exec(filename, scriptName)); .)
+	.
+	
+	TestStatCommand (. bool reset = false; .) = 
+		actionTestStat
+		[
+			"RESET"		(. reset = true; .)
+		]
+							(. SemanticAction(() => ExecEngine.TestStat(reset)); .)
+	.
+	
+	TestCommand (. string filename = null; .) = 
+		actionTest
+		IdentOrString<ref filename>	(. SemanticAction(() => ExecEngine.Test(filename)); .)
+	.
+	
+	EnsureTradeCommand (. string msgVarName = null; Object ordStatus = null; .) = 
+		actionEnsureTrade
+		MsgVarName<ref msgVarName>
+		RValue<ref ordStatus>		(. SemanticAction(() => ExecEngine.EnsureTrade(msgVarName, ordStatus)); .)
+	.
+	
+	EnsureModifyAcceptedCommand (. string msgVarName = null; Object ordStatus = null; .) = 
+		actionEnsureModifyAccepted
+		MsgVarName<ref msgVarName>
+		RValue<ref ordStatus>		(. SemanticAction(() => ExecEngine.EnsureModifyAccepted(msgVarName, ordStatus)); .)
+	.
+	
+	EnsureOrderStatusCommand (. string msgVarName = null; Object ordStatus = null; .) = 
+		actionEnsureOrderStatus
+		MsgVarName<ref msgVarName>
+		RValue<ref ordStatus>		(. SemanticAction(() => ExecEngine.EnsureOrderStatus(msgVarName, ordStatus)); .)
+	.
+	
+	EnsurePureOrderStatusCommand (. string msgVarName = null; Object ordStatus = null; .) = 
+		actionEnsurePureOrderStatus
+		MsgVarName<ref msgVarName>
+		RValue<ref ordStatus>		(. SemanticAction(() => ExecEngine.EnsurePureOrderStatus(msgVarName, ordStatus)); .)
+	.
+
+	EnsureCommand		(. FormatArgs fargs = null; object expr = null; .) = 
+		actionEnsure 
+		LogicalExpr<ref expr>
+		[
+			"," FormatArgs<ref fargs>
+		]
+						(. SemanticAction(() => ExecEngine.Ensure(expr, fargs)); .)
+	.
+	
+	PrintCommand		(. object arg = null; var args = new List<object>(); .) = 
+		actionPrint
+		FormatArg<ref arg>		(. args.Add(arg); .)
+		{
+			","					(. arg = null; .)
+			FormatArg<ref arg>	(. args.Add(arg); .)
+		}
+						(. SemanticAction(() => ExecEngine.Print(args)); .)
+	.
+	
+	PrintfCommand 		(. FormatArgs fargs = null; .) = 
+		actionPrintf
+		FormatArgs<ref fargs>	(. SemanticAction(() => ExecEngine.Printf(fargs)); .)
+	.
+
+	FormatArgs<ref FormatArgs fargs> =	
+		string				(. fargs = new FormatArgs(LiteralParser.ParseString(t.val)); .)
+		{
+			"," 			(. object arg = null; .)
+			FormatArg<ref arg>	(. fargs.AddArg(arg);  .)
+		}
+	.
+	
+	FormatArg<ref object arg> 	(. string msgVarName = null; object expr = null; Object rvalue = null; .) = 
+		IF (IsRValueFormatArg()) RValue<ref rvalue>		(. arg = rvalue; .)
+		| IF (IsMsgVarNameFormatArg()) MsgVarName<ref msgVarName>		(. arg = new Object(ObjectType.FixMsgVar, msgVarName); .)
+		| LogicalExpr<ref expr>							(. arg = expr; .)
+	.
+
+	PingCommand =
+		actionPing		(. SemanticAction(() => ExecEngine.Ping()); .)
+	.
+
+	GetPropCommand	(. string name = null; .) = 
+		actionGet 
+		[
+			ident		(. name = t.val; .)
+		]
+						(. SemanticAction(() => ExecEngine.GetPropsValue(name)); .)
+	.
+
+	SetPropCommand = 
+		actionSet 
+		( SetSeqNumPropCommand | SetCommonPropCommand )
+	.
+
+	SetSeqNumPropCommand =
+		"SEQNUM" (. int SenderSeqNum = -1; int TargetSeqNum = -1; .)
+		IntegerOrDefault<ref SenderSeqNum>
+		","
+		IntegerOrDefault<ref TargetSeqNum>
+		(. SemanticAction(() => ExecEngine.SetSeqNumbers(SenderSeqNum, TargetSeqNum)); .)
+	.
+
+	IntegerOrDefault<ref int result> =
+		'*'			(. result = -1; .)
+		| integer	(. result = LiteralParser.ParseInteger(t.val); .)
+	.
+
+	SetCommonPropCommand (. Object value = null; string name = null; .) = 
+		ident 			(. name = t.val; .)
+		Literal<ref value>	(. SemanticAction(() => ExecEngine.SetPropValue(name, value)); .)
+	.
+
+	OrderBody<OrderCommand command> = 
+		OrderSide<ref command.OrderSide>
+		OrderQty<ref command.OrderQty>
+		OrderContract<ref command.OrderContract>
+		OrderType<ref command.OrderType>
+		[
+			TimeInForce<ref command.TimeInForce>
+		]
+		[
+			TradingSession<ref command.TradingSession>
+		]
+		[
+			AllocationBlock<out command.AllocationBlock>	
+		]
+		[
+			"FOR" Account<ref command.Account>
+		]
+	.
+
+	AllocationBlock<.out AllocationBlock<PreAllocationBlockItem> ab.> = (. string str = string.Empty; .)
+		(.
+			 ab = new AllocationBlock<PreAllocationBlockItem>(); 
+			 PreAllocationBlockItem item;
+ 		.)
+		IdentOrString<ref str> (. ab.Name = str; .)
+		AllocationRule<ref ab.Rule>
+		"{"
+			AllocationItem<out item> (. ab.Add(item); .)
+			{
+				"," AllocationItem<out item> (. ab.Add(item); .)
+			}
+		"}"
+	.
+
+	PostAllocationBlock<.out AllocationBlock<PostAllocationBlockItem> ab.> = 
+		(. 
+			ab = new AllocationBlock<PostAllocationBlockItem>(); 
+			PostAllocationBlockItem item;
+		.)
+		PostAllocationRule<ref ab.Rule>
+		"{"
+			PostAllocationItem<out item> (. ab.Add(item); .)
+			{
+				"," PostAllocationItem<out item> (. ab.Add(item); .)
+			}
+		"}"
+	.
+
+	AllocationItem<out PreAllocationBlockItem item> = (. item = new PreAllocationBlockItem(); .)
+		IdentOrString<ref item.Account>
+		Double<ref item.Weight>
+	.
+
+	PostAllocationItem<out PostAllocationBlockItem item> = (. item = new PostAllocationBlockItem(); .)
+		AccountInfo<ref item.Account>
+		Double<ref item.Price>
+		Double<ref item.Weight>
+	.
+
+	AccountInfo<ref ExtendedAccount account> =
+		IdentOrString<ref account.Spec>
+		[ 
+			":" IdentOrString<ref account.Firm>
+			| "::" IdentOrString<ref account.ClearingHouse> 
+		]
+	.
+
+	AllocationRule<ref AllocationRule rule> =
+		"LOW_ACCT_LOW_PRICE" (. rule = Sample.FoxScript.AllocationRule.LowAcctLowPrice; .)
+		| "LOW_ACCT_HIGH_PRICE" (. rule = Sample.FoxScript.AllocationRule.LowAcctHighPrice; .)
+		| "HIGH_ACCT_LOW_PRICE" (. rule = Sample.FoxScript.AllocationRule.HighAcctLowPrice; .)
+		| "HIGH_ACCT_HIGH_PRICE" (. rule = Sample.FoxScript.AllocationRule.HighAcctHighPrice; .)
+		| "APS" (. rule = Sample.FoxScript.AllocationRule.APS; .)
+	.
+
+	PostAllocationRule<ref AllocationRule rule> = 
+		"POST" (. rule = Sample.FoxScript.AllocationRule.PostAllocation; .)
+		| "APS" (. rule = Sample.FoxScript.AllocationRule.PostAllocationAPS; .)
+	.
+
+	TradingSession<ref string session> = 
+		["TS" ":"]
+		(
+			"PRE"		(. session = t.val; .)
+			| "MAIN"	(. session = t.val; .)
+			| "AFTER"	(. session = t.val; .)
+			| "P1"		(. session = t.val; .)
+			| "P2"		(. session = t.val; .)
+			| "P3"		(. session = t.val; .)
+		)
+	.
+	
+	Account<ref string account> = 
+		ident		(. account = t.val; .)
+		| string	(. account = LiteralParser.ParseString(t.val); .)
+		| integer	(. account = t.val; .)
+		| globalProp	(. var prop = new Object(ObjectType.GlobalProp, t.val); account = (string)ExecEngine.GetObjectValue(prop, null); .)
+	.
+	
+	WaitMessageCommand<ref MsgCommand command> (. var cmd = new WaitMessageCommand(); .) = 
+		actionWait 
+		[
+			Timeout		(. cmd.Timeout = LiteralParser.ParseTimespan(t.val); .)
+		]
+		IdentOrString<ref cmd.MsgTypeName>
+		[
+			"," 
+			MsgCtxLogicalExpr<ref cmd.LogicalExpr>
+		]		(. command = cmd; .)
+	.
+
+	Timeout = 
+		timespan
+	.
+	
+	LogicalExpr<ref object expr> = 
+		OrExpr<ref expr>
+	.
+
+	OrExpr<ref object expr> (. object left = null; object right = null; LogicalOp? op = null; .) = 
+		AndExpr<ref left>		(. expr = left; .)
+		[
+			orOp				(. op = LogicalOp.Or; .)
+			AndExpr<ref right>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; .)
+		]
+	.
+
+	AndExpr<ref object expr> (. object left = null; object right = null; LogicalOp? op = null; .) = 
+		EqlExpr<ref left>		(. expr = left; .)
+		[
+			andOp				(. op = LogicalOp.And; .)
+			EqlExpr<ref right>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; .)
+		]
+	.
+
+	EqlExpr<ref object expr> (. object left = null; object right = null; LogicalOp? op = null; string msgVarName = null; .) = 
+		(
+			RelExpr<ref left>		(. expr = left; .)
+			| null					(. expr = new Object(ObjectType.Null, null); .)
+			| MsgVarName<ref msgVarName>	(. expr = new Object(ObjectType.FixMsgVar, msgVarName); .)
+		)
+		[						(. msgVarName = null; .)
+			(
+				equalOp			(. op = LogicalOp.Equal; .)
+				| notEqualOp	(. op = LogicalOp.NotEqual; .)
+			)
+			(
+				RelExpr<ref right>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; .)
+				| null				(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = new Object(ObjectType.Null, null) }; .)
+				| MsgVarName<ref msgVarName>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = new Object(ObjectType.FixMsgVar, msgVarName) }; .)
+			)
+		]
+	.
+
+	RelExpr<ref object expr> (. object left = null; object right = null; LogicalOp? op = null; .) = 
+		RelExprArg<ref left>	(. expr = left; .)
+		[
+			(
+				lessOp				(. op = LogicalOp.Less; .)
+				| greaterOp			(. op = LogicalOp.Greater; .)
+				| lessOrEqualOp		(. op = LogicalOp.LessOrEqual; .)
+				| greaterOrEqualOp	(. op = LogicalOp.GreaterOrEqual; .)
+			) 
+			RelExprArg<ref right>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; .)
+		]
+	.
+
+	RelExprArg<ref object arg> (. Object rvalue = null; .) = 
+		RValue<ref rvalue>		(. arg = rvalue; .)
+		| "(" LogicalExpr<ref arg> ")"
+	.
+
+	
+	MsgCtxLogicalExpr<ref object expr> = 
+		MsgCtxOrExpr<ref expr>
+	.
+
+	MsgCtxOrExpr<ref object expr> (. object left = null; object right = null; LogicalOp? op = null; .) = 
+		MsgCtxAndExpr<ref left>		(. expr = left; .)
+		[
+			orOp				(. op = LogicalOp.Or; .)
+			MsgCtxAndExpr<ref right>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; .)
+		]
+	.
+
+	MsgCtxAndExpr<ref object expr> (. object left = null; object right = null; LogicalOp? op = null; .) = 
+		MsgCtxEqlExpr<ref left>		(. expr = left; .)
+		[
+			andOp				(. op = LogicalOp.And; .)
+			MsgCtxEqlExpr<ref right>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; .)
+		]
+	.
+
+	MsgCtxEqlExpr<ref object expr> (. object left = null; object right = null; LogicalOp? op = null; .) = 
+		MsgCtxRelExpr<ref left>		(. expr = left; .)
+		[
+			(
+				equalOp			(. op = LogicalOp.Equal; .)
+				| notEqualOp	(. op = LogicalOp.NotEqual; .)
+			)
+			MsgCtxRelExpr<ref right>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; .)
+		]
+	.
+
+	MsgCtxRelExpr<ref object expr> (. object left = null; object right = null; LogicalOp? op = null; .) = 
+		MsgCtxRelExprArg<ref left>	(. expr = left; .)
+		[
+			(
+				lessOp				(. op = LogicalOp.Less; .)
+				| greaterOp			(. op = LogicalOp.Greater; .)
+				| lessOrEqualOp		(. op = LogicalOp.LessOrEqual; .)
+				| greaterOrEqualOp	(. op = LogicalOp.GreaterOrEqual; .)
+			) 
+			MsgCtxRelExprArg<ref right>	(. expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; .)
+		]
+	.
+	
+	MsgCtxRelExprArg<ref object arg> (. string fieldName = null; Object rvalue = null; .) = 
+		FieldName<ref fieldName>	(. arg = new Object(ObjectType.FixField, fieldName); .)
+		| RValue<ref rvalue>		(. arg = rvalue; .)
+		| "(" MsgCtxLogicalExpr<ref arg> ")"
+	.
+	
+	FieldName<ref string fieldName> = 
+		ident	(. fieldName = t.val; .)
+	.
+	
+	Literal<ref Object value> = 
+		integer		(. value = new Object(ObjectType.Integer, t.val); .)
+		| float		(. value = new Object(ObjectType.Float, t.val); .)
+		| string	(. value = new Object(ObjectType.String, t.val); .)
+		| true		(. value = new Object(ObjectType.Bool, t.val); .)
+		| on		(. value = new Object(ObjectType.Bool, "TRUE"); .)
+		| false		(. value = new Object(ObjectType.Bool, t.val); .)
+		| off		(. value = new Object(ObjectType.Bool, "FALSE"); .)
+		| timespan	(. value = new Object(ObjectType.Timespan, t.val); .)
+		| timestamp	(. value = new Object(ObjectType.Timestamp, t.val); .)
+		| date		(. value = new Object(ObjectType.Date, t.val); .)
+	.
+	
+	RValue<ref Object value> = 
+		Literal<ref value> 
+		| messageField		(. value = new Object(ObjectType.FixMsgVarField, t.val); .)
+		| fixConst			(. value = new Object(ObjectType.FixConst, t.val); .)
+		| globalProp		(. value = new Object(ObjectType.GlobalProp, t.val); .)
+	.
+
+	TimeInForce<ref TimeInForce tif> (. tif = new TimeInForce(); .) = 
+		"DAY"		(. tif.Type = QuickFix.TimeInForce.DAY; .)
+		| "GTC"		(. tif.Type = QuickFix.TimeInForce.GOOD_TILL_CANCEL; .)
+		| "GTD"		(. tif.Type = QuickFix.TimeInForce.GOOD_TILL_DATE; .)
+			(
+				timestamp	(. tif.Expiration = LiteralParser.ParseTimestamp(t.val); .)
+				| date		(. tif.Expiration = LiteralParser.ParseDate(t.val); .)
+			)
+		| "FOK"		(. tif.Type = QuickFix.TimeInForce.FILL_OR_KILL; .)
+		| "IOC"		(. tif.Type = QuickFix.TimeInForce.IMMEDIATE_OR_CANCEL; .)
+	.
+	
+	OrderSide<ref OrderSide orderSide> (. orderSide = new OrderSide(); .) = 
+		(
+			buy			(. orderSide.Side = QuickFix.Side.BUY; .)
+			| sell		(. orderSide.Side = QuickFix.Side.SELL; .)
+		)
+		[
+			open	(. orderSide.Open = true; .)
+			| close	(. orderSide.Open = false; .)
+		]
+	.
+	
+	OrderQty<ref int orderQty> = 
+		integer		(. orderQty = LiteralParser.ParseInteger(t.val); .)
+	. 
+
+	OrderType<ref OrderType orderType> (. double stop = 0, limit = 0; orderType = new OrderType(); .) = 
+		"MKT"		(. orderType.Type = QuickFix.OrdType.MARKET; .)
+		| "MOO"		(. orderType.Type = Sample.FoxScript.OrderType.MARKET_ON_OPEN; .)
+		| "MOC"		(. orderType.Type = Sample.FoxScript.OrderType.MARKET_ON_CLOSE; .)
+		| 
+			(
+				"LMT"				(. orderType.Type = QuickFix.OrdType.LIMIT; .)
+				Price<ref limit>	(. orderType.Limit = limit; .)
+			)
+		| 
+			(
+				"STP"		(. orderType.Type = QuickFix.OrdType.STOP; .)
+				Price<ref stop>		(. orderType.Stop = stop; .)
+				[
+					"LMT"	(. orderType.Type = QuickFix.OrdType.STOP_LIMIT; .)
+					Price<ref limit>	(. orderType.Limit = limit; .)
+				]
+				[
+					TrailingStop<ref orderType.TrailingStop>
+				]
+			)
+		| 
+			(
+				"ICE"		(. orderType.Type = Sample.FoxScript.OrderType.ICEBERG; .)
+				integer		(. orderType.MaxFloor = LiteralParser.ParseInteger(t.val); .)
+				"LMT"
+				Price<ref limit>		(. orderType.Limit = limit; .)
+			)
+		| 
+			(
+				"MIT"				(. orderType.Type = QuickFix.OrdType.MARKET_IF_TOUCHED; .)
+				Price<ref limit>	(. orderType.Limit = limit; .)
+			)
+	.
+
+	TrailingStop<ref TrailingStop trailing> (. trailing = new TrailingStop(); .) = 
+		"TRAILING"
+		(
+			(
+				(
+					"LAST"		(. trailing.TriggerType = TokenParser.ParseTrailingTriggerType(t.val); .)
+					| "BID"		(. trailing.TriggerType = TokenParser.ParseTrailingTriggerType(t.val); .)
+					| "ASK"		(. trailing.TriggerType = TokenParser.ParseTrailingTriggerType(t.val); .)
+				)
+				(
+					integer		(. trailing.Amount = LiteralParser.ParseInteger(t.val); .)
+					| float		(. trailing.Amount = LiteralParser.ParseFloat(t.val); .)
+				)
+				[
+					"%"			(. trailing.AmountInPercents = true; .)
+				]
+			)
+			|
+			(
+				integer		(. trailing.Amount = LiteralParser.ParseInteger(t.val); .)
+				| float		(. trailing.Amount = LiteralParser.ParseFloat(t.val); .)
+			)
+		)
+	.
+	
+	Price<ref double value> = 
+		integer		(. value = LiteralParser.ParseFloat(t.val); .)
+		| float		(. value = LiteralParser.ParseFloat(t.val); .)
+	.
+
+	OrderContract<ref OrderContract contract> (. contract = new OrderContract(); .) = 
+		Symbol<ref contract.Symbol>
+		[
+			StrikeSide<contract>
+		]
+	.
+	
+	Symbol<ref OrderSymbol symbol> = 
+		ident		(. symbol = TokenParser.ParseOrderSymbol(t.val); .)
+		| string	(. symbol = TokenParser.ParseOrderSymbol(LiteralParser.ParseString(t.val)); .)
+	.
+
+	IdentOrString<ref string str> =
+		ident 		(. str = t.val; .)
+		| string 	(. str = LiteralParser.ParseString(t.val); .)
+	.
+		
+	StrikeSide<OrderContract contract>	(. double strike = 0; .) = 
+		(
+			call	(. contract.Put = false; .)
+			| put	(. contract.Put = true; .)
+		) 
+		Price<ref strike>	(. contract.Strike = strike; .)
+	.
+
+	BoolOptional<ref bool? value> =
+		true    (. value = true; .)
+		| false (. value = false; .)
+	.
+
+	DoubleOptional<ref double? value> =
+		integer		(. value = LiteralParser.ParseFloat(t.val); .)
+		| float		(. value = LiteralParser.ParseFloat(t.val); .)
+	.
+
+	Double<ref double value> =
+		integer		(. value = LiteralParser.ParseFloat(t.val); .)
+		| float		(. value = LiteralParser.ParseFloat(t.val); .)
+	.
+	//FAST Commands
+
+	ConnectFastCommand (. string username = null; .) = 
+		actionConnectFast
+		[
+			IdentOrString<ref username>
+		] 
+		(. SemanticAction(() => ExecEngine.ConnectFast(username)); .)
+	.
+	
+	HeartbeatCommand =
+		actionHeartbeat
+		(. SemanticAction(() => ExecEngine.FASTHeartbeat()); .)
+	.
+
+	DisconnectFastCommand =
+		actionDisconnectFast
+		(. SemanticAction(() => ExecEngine.DisconnectFast()); .)
+	.
+
+	FASTUpdateType<MDMessageCommand command> = 
+		[ 
+			"FULL" (. command.UpdateType = 0; .)
+		]
+	.
+
+	FASTContract<MDMessageCommand command> =
+		(
+			FASTSymbolBasedContract<command>
+			| FASTFuturesBasedContract<command>
+		) 
+	.
+
+	FASTSymbolBasedContract<MDMessageCommand command> =
+		(
+			"SPREAD" (. command.ContractKind = Sample.FoxScript.ContractKind.FUTURE_COMPOUND; .)
+			| "FOREX" (. command.ContractKind = Sample.FoxScript.ContractKind.FOREX; .)
+		)
+		IdentOrString<ref command.BaseSymbol>   
+		[ 
+			FASTStrikeSide<command> (. command.ContractKind = Sample.FoxScript.ContractKind.OPTIONS_COMPOUND; .)
+		]
+	.
+
+	FASTFuturesBasedContract<MDMessageCommand command> (. command.ContractKind = Sample.FoxScript.ContractKind.FUTURE; .) =
+		IdentOrString<ref command.BaseSymbol>   
+		integer 	(. command.ExpirationMonth = LiteralParser.ParseInteger(t.val);   .)
+		[
+			FASTStrikeSide<command> (. command.ContractKind = Sample.FoxScript.ContractKind.OPTION; .)
+		]
+	.
+
+	FASTStrikeSide<MDMessageCommand command>	(.  command.StrikeSide = new FASTStrikeSide(); double strike = 0; .) = 
+		(
+			call	(. command.StrikeSide.Put = false; .)
+			| put	(. command.StrikeSide.Put = true; .)
+		) 
+		Price<ref strike>	(. command.StrikeSide.Strike = strike; .)
+	.
+
+	SubscribeMarketDataToFile<ref MDMessageCommand command> =
+		[
+			">"
+			string	(. command.OutputFileName = LiteralParser.ParseString(t.val); .)
+		]
+	.
+
+	SubscribeQuotesCommand<ref MsgCommand command> (. var cmd = new SubscribeQuotesCommand(); var mdCmd = cmd as MDMessageCommand; .) = 
+		actionSubscribeQuotes
+		FASTUpdateType<mdCmd>
+		FASTContract<mdCmd>
+		SubscribeMarketDataToFile<ref mdCmd>
+		(. command = cmd; .)
+	.
+
+	SubscribeDOMCommand<ref MsgCommand command> (. var cmd = new SubscribeDOMCommand(); var mdCmd = cmd as MDMessageCommand; .) = 
+		actionSubscribeDOM
+		FASTUpdateType<mdCmd>
+		FASTContract<mdCmd>
+		SubscribeMarketDataToFile<ref mdCmd>
+		(. command = cmd; .)
+	.
+
+	SubscribeHistogramCommand<ref MsgCommand command> (. var cmd = new SubscribeHistogramCommand(); var mdCmd = cmd as MDMessageCommand; .) =
+		actionSubscribeHistogram
+		FASTUpdateType<mdCmd>
+		FASTContract<mdCmd>
+		SubscribeMarketDataToFile<ref mdCmd>
+		(. command = cmd; .)
+	.
+
+	SubscribeTicksCommand<ref MsgCommand command> (. var cmd = new SubscribeTicksCommand(); var mdCmd = cmd as MDMessageCommand; .) = 
+		actionSubscribeTicks
+		FASTUpdateType<mdCmd>
+		FASTContract<mdCmd>
+		[
+			(
+				"FROM" 
+				timestamp (. cmd.SetStartTime(LiteralParser.ParseTimestamp(t.val)); .)
+				| "LAST" 
+				timespan (. cmd.SetStartTime(LiteralParser.ParseTimespan(t.val)); .)
+		 	)
+		]
+		SubscribeMarketDataToFile<ref mdCmd>
+		(. command = cmd; .)
+	.
+
+	CancelSubscribeCommand<ref MsgCommand command> (. var cmd = new CancelSubscribeCommand(); .) = 
+		actionCancelSubscribe
+		OrigMsgVarName<ref cmd.MDMessageVar> 
+		(. command = cmd; .)
+	.
+
+	LoadTicksCommand<ref MsgCommand command> (. var cmd = new LoadTicksCommand(); var mdCmd = cmd as MDMessageCommand; .) = 
+		actionLoadTicks
+		FASTUpdateType<mdCmd>
+		FASTContract<mdCmd>
+		(
+			"FROM" 
+			timestamp (. cmd.SetStartTime(LiteralParser.ParseTimestamp(t.val)); .)
+			"TO" 
+			timestamp (. cmd.SetEndTime(LiteralParser.ParseTimestamp(t.val)); .)
+			| "LAST" 
+			timespan (. cmd.SetStartTime(LiteralParser.ParseTimespan(t.val)); .)
+	 	)
+		SubscribeMarketDataToFile<ref mdCmd>
+		(. command = cmd; .)
+	.
+
+//
+
+	
+END FoxScript.

@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F908729A-834C-4BC8-A761-5729517E2322}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OEC.FIX.Sample</RootNamespace>
+    <AssemblyName>OECFIXSample</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>OEC.FIX.Sample.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="openfast, Version=1.0.5087.25043, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\openfast\openfast.dll</HintPath>
+    </Reference>
+    <Reference Include="quickfix_net, Version=1.13.3.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\quickfix\x64.NET4\quickfix_net.dll</HintPath>
+    </Reference>
+    <Reference Include="quickfix_net_messages, Version=1.13.3.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\quickfix\x64.NET4\quickfix_net_messages.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CFI\BaseCode.cs" />
+    <Compile Include="CFI\Category.cs" />
+    <Compile Include="CFI\Code.cs" />
+    <Compile Include="CFI\Equities.cs" />
+    <Compile Include="CFI\Futures.cs" />
+    <Compile Include="CFI\Options.cs" />
+    <Compile Include="Exceptions.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FAST\ClientMessageHandler.cs" />
+    <Compile Include="FAST\FASTClient.cs" />
+    <Compile Include="FAST\FASTConstants.cs" />
+    <Compile Include="FAST\FastMessageFactory.cs" />
+    <Compile Include="FAST\OFReflector.cs" />
+    <Compile Include="FIX\ConnectionBase.cs" />
+    <Compile Include="FIX\Extensions.cs" />
+    <Compile Include="FIX\Fields\ByBaseContractsOnlyField.cs" />
+    <Compile Include="FIX\Fields\ClearingFirmID.cs" />
+    <Compile Include="FIX\Fields\ContractGroupField.cs" />
+    <Compile Include="FIX\Fields\ContractTypeField.cs" />
+    <Compile Include="FIX\Fields\MaxQty.cs" />
+    <Compile Include="FIX\Fields\MaxRecordsField.cs" />
+    <Compile Include="FIX\Fields\OptionsRequiredField.cs" />
+    <Compile Include="FIX\Fields\SymbolLookupModeField.cs" />
+    <Compile Include="FIX\Fields\UpdatesSinceTimestamp.cs" />
+    <Compile Include="FIX\FIXException.cs" />
+    <Compile Include="FIX\MarginCalcRequest.cs" />
+    <Compile Include="FIX\MessageFactory.cs" />
+    <Compile Include="FIX\MessageLog.cs" />
+    <Compile Include="FIX\MessageLogFactory.cs" />
+    <Compile Include="FIX\MessageStoreBase.cs" />
+    <Compile Include="FIX\MessageStoreFactory.cs" />
+    <Compile Include="FIX\QFReflector.cs" />
+    <Compile Include="FIX\Fields\TrailingAmountInPercents.cs" />
+    <Compile Include="FIX\Fields\TrailingTriggerType.cs" />
+    <Compile Include="FIX\Fields\UUIDField.cs" />
+    <Compile Include="FoxScript\AllocationBlocks\AllocationBlock.cs" />
+    <Compile Include="FoxScript\AllocationBlocks\AllocationBlockItem.cs" />
+    <Compile Include="FoxScript\Contract.cs" />
+    <Compile Include="FoxScript\Enums.cs" />
+    <Compile Include="FoxScript\ExecEngine.cs" />
+    <Compile Include="FoxScript\ExecEngine.Impl.cs" />
+    <Compile Include="FoxScript\ExecEngine.SemanticActions.cs" />
+    <Compile Include="FIX\Connection.cs" />
+    <Compile Include="FIX\FixEngine.cs" />
+    <Compile Include="FIX\MessageStore.cs" />
+    <Compile Include="FoxScript\ExtendedAccount.cs" />
+    <Compile Include="FoxScript\LiteralParser.cs" />
+    <Compile Include="FoxScript\MsgVar.cs" />
+    <Compile Include="FoxScript\Parser.cs" />
+    <Compile Include="FoxScript\Scanner.cs" />
+    <Compile Include="FoxScript\StrictErrors.cs" />
+    <Compile Include="FoxScript\SyntaxConstructions.cs" />
+    <Compile Include="FoxScript\TestStatistics.cs" />
+    <Compile Include="FoxScript\TokenParser.cs" />
+    <Compile Include="MaturityMonthYear.cs" />
+    <Compile Include="MessageWrapper.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Props.cs" />
+    <Compile Include="SslTunnel.cs" />
+    <Compile Include="Tools.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="FoxScript\FoxScript.atg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="template\template.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>"$(ProjectDir)..\..\..\ThirdParty\CocoR\Coco.exe" "$(ProjectDir)FoxScript\FoxScript.atg" -frames "$(ProjectDir)..\..\..\ThirdParty\CocoR" -namespace OEC.FIX.Sample.FoxScript
+</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

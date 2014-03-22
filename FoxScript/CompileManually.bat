@@ -1,0 +1,1 @@
+"..\..\..\..\ThirdParty\CocoR\Coco.exe" "..\FoxScript\FoxScript.atg" -frames "..\..\..\..\ThirdParty\CocoR" -namespace OEC.FIX.Sample.FoxScript
