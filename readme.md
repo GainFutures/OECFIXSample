@@ -383,16 +383,16 @@ Please [download the coco.exe](http://www.ssw.uni-linz.ac.at/Coco/CS/Coco.exe) a
 
 ## QuickFIX
 
-Wiki: [http://en.wikipedia.org/wiki/QuickFIX](http://en.wikipedia.org/wiki/QuickFIX)
+Wiki: [http://en.wikipedia.org/wiki/QuickFIX](http://en.wikipedia.org/wiki/QuickFIX)<br />
 Home page: [http://www.quickfixengine.org/](http://www.quickfixengine.org/)<br />
 Intallation: [http://www.quickfixengine.org/quickfix/doc/html/install.html](http://www.quickfixengine.org/quickfix/doc/html/install.html)<br />
 Place quickfix_net.dll and quickfix_net_messages.dll wrappers into ThirdParty\QuickFix folder
 
 ## OpenFAST
 
-Wiki: [http://en.wikipedia.org/wiki/FAST_protocol](http://en.wikipedia.org/wiki/FAST_protocol)
-Home page: [http://www.fixprotocol.org/fast](http://www.fixprotocol.org/fast)
-C# Implementation: [http://sourceforge.net/projects/openfastdotnet/](http://sourceforge.net/projects/openfastdotnet/)
+Wiki: [http://en.wikipedia.org/wiki/FAST_protocol](http://en.wikipedia.org/wiki/FAST_protocol)<br />
+Home page: [http://www.fixprotocol.org/fast](http://www.fixprotocol.org/fast)<br />
+C# Implementation: [http://sourceforge.net/projects/openfastdotnet/](http://sourceforge.net/projects/openfastdotnet/)<br />
 Place openfast.dll into ThirdParty\OpenFAST folder
 
 
