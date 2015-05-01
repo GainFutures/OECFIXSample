@@ -152,7 +152,7 @@ Disconnects OEC FIX Sample application from OEC FIX server.
 ###PING Command 
 ####PING;
 
-Pings OEC FIX server sending FIX TestRequest message. The command prints sequence numbers from both test request and test response FIX messages. It’s recommended to execute PING command after CONNECT command to synchronize sequence numbers on both sides. 
+Pings OEC FIX server sending FIX TestRequest message. The command prints sequence numbers from both test request and test response FIX messages. Itâ€™s recommended to execute PING command after CONNECT command to synchronize sequence numbers on both sides. 
 
 ###EXEC Command 
 ####EXEC FileName [, 'ScriptName'];
@@ -352,3 +352,50 @@ Similar to SubscribeTicks, but loads only historical ticks without real-time upd
 ####CancelSubscribe OrigMsg
 
 Cancels previous subscription
+
+#Basic example
+
+	get host
+
+will return you the host where you connect to
+	
+	connect vitaly, vitaly
+
+connects to FIX engine with user name vitaly and password vitaly
+
+	connectfast
+
+connects to FIX Price engine
+
+	disconnectfast
+	disconnect
+
+----
+
+Project requires third party libraries:
+
+## Coco/R compiler generator
+
+Wiki: [http://en.wikipedia.org/wiki/Coco/R](http://en.wikipedia.org/wiki/Coco/R)<br />
+Home page: [http://www.ssw.uni-linz.ac.at/Coco/](http://www.ssw.uni-linz.ac.at/Coco/)<br />
+User manual: [http://www.ssw.uni-linz.ac.at/Coco/Doc/UserManual.pdf](http://www.ssw.uni-linz.ac.at/Coco/Doc/UserManual.pdf)<br />
+Please [download the coco.exe](http://www.ssw.uni-linz.ac.at/Coco/CS/Coco.exe) and place it into ThirdParty\CocoR folder
+
+## QuickFIX
+
+Wiki: [http://en.wikipedia.org/wiki/QuickFIX](http://en.wikipedia.org/wiki/QuickFIX)
+Home page: [http://www.quickfixengine.org/](http://www.quickfixengine.org/)<br />
+Intallation: [http://www.quickfixengine.org/quickfix/doc/html/install.html](http://www.quickfixengine.org/quickfix/doc/html/install.html)<br />
+Place quickfix_net.dll and quickfix_net_messages.dll wrappers into ThirdParty\QuickFix folder
+
+## OpenFAST
+
+Wiki: [http://en.wikipedia.org/wiki/FAST_protocol](http://en.wikipedia.org/wiki/FAST_protocol)
+Home page: [http://www.fixprotocol.org/fast](http://www.fixprotocol.org/fast)
+C# Implementation: [http://sourceforge.net/projects/openfastdotnet/](http://sourceforge.net/projects/openfastdotnet/)
+Place openfast.dll into ThirdParty\OpenFAST folder
+
+
+
+
+

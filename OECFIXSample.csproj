@@ -56,17 +56,14 @@
     <StartupObject>OEC.FIX.Sample.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="openfast, Version=1.0.5087.25043, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\openfast\openfast.dll</HintPath>
+    <Reference Include="openfast">
+      <HintPath>ThirdParty\OpenFAST\openfast.dll</HintPath>
     </Reference>
-    <Reference Include="quickfix_net, Version=1.13.3.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\quickfix\x64.NET4\quickfix_net.dll</HintPath>
+    <Reference Include="quickfix_net">
+      <HintPath>ThirdParty\QuickFIX\quickfix_net.dll</HintPath>
     </Reference>
-    <Reference Include="quickfix_net_messages, Version=1.13.3.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>lib\quickfix\x64.NET4\quickfix_net_messages.dll</HintPath>
+    <Reference Include="quickfix_net_messages">
+      <HintPath>ThirdParty\QuickFIX\quickfix_net_messages.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -148,7 +145,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>"$(ProjectDir)..\..\..\ThirdParty\CocoR\Coco.exe" "$(ProjectDir)FoxScript\FoxScript.atg" -frames "$(ProjectDir)..\..\..\ThirdParty\CocoR" -namespace OEC.FIX.Sample.FoxScript
+    <PreBuildEvent>"$(ProjectDir)ThirdParty\CocoR\Coco.exe" "$(ProjectDir)FoxScript\FoxScript.atg" -frames "$(ProjectDir)ThirdParty\CocoR" -namespace OEC.FIX.Sample.FoxScript
 </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
