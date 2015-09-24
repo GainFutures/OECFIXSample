@@ -30,7 +30,7 @@ namespace OEC.FIX.Sample
 
 		private static void CreatePredefinedProps()
 		{
-			CreatePropsBase("api.openecry.com", "MY_SENDER_COMPID", "OEC_TEST", "API000001", "APIFX0001", false);
+			CreatePropsBase("api.gainfutures.com", "MY_SENDER_COMPID", "OEC_TEST", "API000001", "APIFX0001", false);
 		}
 
 		private static void CreatePropsBase(

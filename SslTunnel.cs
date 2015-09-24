@@ -24,7 +24,7 @@ namespace OEC.FIX.Sample
 			client.Connect(Host, Port);
 			NetworkStream s = client.GetStream();
 			var stream = new SslStream(s);
-			stream.AuthenticateAsClient("openecry.com");
+			stream.AuthenticateAsClient("gainfutures.com");
 
 			var listener = new TcpListener(LocalPort);
 			listener.Start();

@@ -152,7 +152,7 @@ Disconnects OEC FIX Sample application from OEC FIX server.
 ###PING Command 
 ####PING;
 
-Pings OEC FIX server sending FIX TestRequest message. The command prints sequence numbers from both test request and test response FIX messages. Itâ€™s recommended to execute PING command after CONNECT command to synchronize sequence numbers on both sides. 
+Pings OEC FIX server sending FIX TestRequest message. The command prints sequence numbers from both test request and test response FIX messages. It’s recommended to execute PING command after CONNECT command to synchronize sequence numbers on both sides. 
 
 ###EXEC Command 
 ####EXEC FileName [, 'ScriptName'];

@@ -50,7 +50,7 @@ namespace OEC.FIX.Sample.FAST
 				try
 				{
 					var client = new WebClient();
-					client.DownloadFile("http://api.openecry.com/Sections/Misc/DownloadFile.aspx?ClientUpdate=0_5008_1", LocalFilename);
+					client.DownloadFile("http://api.gainfutures.com/Sections/Misc/DownloadFile.aspx?ClientUpdate=0_5008_1", LocalFilename);
 				}
 				catch (Exception)
 				{
