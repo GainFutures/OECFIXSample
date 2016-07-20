@@ -1,0 +1,10 @@
+//
+//	Sends Future/TrailingStop orders and cancels them. 
+//
+
+order1 = New BUY 2 ESU1 STP 2000 TRAILING 1;
+Exec 'Tests/Cancellation.Order1.fox';
+
+
+order1 = New BUY 2 ESU1 STP 2000 LMT 2001 TRAILING 11;
+Exec 'Tests/Cancellation.Order1.fox';

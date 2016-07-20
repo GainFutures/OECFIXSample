@@ -1,0 +1,82 @@
+bracket OSO { [orderRoot] buy 2 'ESH6' MKT FOR 'TEST00083', [orderOCO1] buy 2 'ESH6' LMT 1993.75 FOR 'TEST00083', [orderOCO2] sell 2 'ESH6' LMT 1996.50 FOR 'TEST00083'};
+	
+	pendingOSO = Wait ExecutionReport, ClOrdID == orderRoot.ClOrdID;
+	Ensure pendingOSO != null, 'ExecReport not received';
+	EnsureOrderStatus pendingOSO FIX.OrdStatus.PENDING_NEW;
+
+	acceptedOSO = Wait ExecutionReport, ClOrdID == orderRoot.ClOrdID;
+	Ensure acceptedOSO != null, 'ExecReport not received';
+	EnsureOrderStatus acceptedOSO FIX.OrdStatus.NEW;
+
+	pendingOCO1 = Wait ExecutionReport, ClOrdID == orderOCO1.ClOrdID;
+	Ensure pendingOCO1!= null, 'ExecReport not received';
+	EnsureOrderStatus pendingOCO1 FIX.OrdStatus.PENDING_NEW;
+
+	suspendedOCO1 = Wait ExecutionReport, ClOrdID == orderOCO1.ClOrdID;
+	Ensure suspendedOCO1 != null, 'ExecReport not received';
+	EnsureOrderStatus suspendedOCO1 FIX.OrdStatus.Suspended;
+
+	pendingOCO2 = Wait ExecutionReport, ClOrdID == orderOCO2.ClOrdID;
+	Ensure pendingOCO2!= null, 'ExecReport not received';
+	EnsureOrderStatus pendingOCO1 FIX.OrdStatus.PENDING_NEW;
+
+	suspendedOCO2 = Wait ExecutionReport, ClOrdID == orderOCO2.ClOrdID;
+	Ensure suspendedOCO2 != null, 'ExecReport not received';
+	EnsureOrderStatus suspendedOCO2 FIX.OrdStatus.Suspended;
+
+	filledOSO = Wait ExecutionReport, ClOrdID == orderRoot.ClOrdID;
+	Ensure filledOSO != null, 'ExecReport not received';
+	EnsureTrade filledOSO FIX.OrdStatus.FILLED;
+	
+	acceptedOCO1 = Wait ExecutionReport, ClOrdID == orderOCO1.ClOrdID;
+	Ensure acceptedOCO1 != null, 'ExecReport not received';
+	EnsureOrderStatus acceptedOCO1 FIX.OrdStatus.NEW;
+	
+	acceptedOCO2 = Wait ExecutionReport, ClOrdID == orderOCO2.ClOrdID;
+	Ensure acceptedOCO2 != null, 'ExecReport not received';
+	EnsureOrderStatus acceptedOCO2 FIX.OrdStatus.NEW;
+	
+
+
+orderOCO1Modify = modify orderOCO1 buy 4 'ESH6' LMT 1993.75 FOR 'TEST00083';
+
+	pending2 = Wait ExecutionReport, ClOrdID == orderOCO1Modify.ClOrdID;
+	Ensure pending2 != null, 'ExecReport not received';
+	EnsureOrderStatus pending2 FIX.OrdStatus.PENDING_REPLACE;
+
+	accepted2 = Wait ExecutionReport, ClOrdID == orderOCO1Modify.ClOrdID;
+	Ensure accepted2 != null, 'ExecReport not received';
+	EnsureModifyAccepted accepted2 FIX.OrdStatus.NEW;
+
+	accepted22 = Wait ExecutionReport,  ClOrdID != orderOCO2.ClOrdID && OrigClOrdID == orderOCO2.ClOrdID;
+	Ensure accepted22 != null, 'ExecReport not received';
+	EnsureModifyAccepted accepted22 FIX.OrdStatus.NEW;
+	
+
+
+orderOCO2Modify = modify orderOCO2 sell 4 'ESH6' LMT 1996.75 FOR 'TEST00083';
+
+	pending3 = Wait ExecutionReport, ClOrdID == orderOCO2Modify.ClOrdID;
+	Ensure pending3 != null, 'ExecReport not received';
+	EnsureOrderStatus pending3 FIX.OrdStatus.PENDING_REPLACE;
+
+	accepted3 = Wait ExecutionReport, ClOrdID == orderOCO2Modify.ClOrdID;
+	Ensure accepted3 != null, 'ExecReport not received';
+	EnsureModifyAccepted accepted3 FIX.OrdStatus.NEW;
+
+
+
+cancelOCO1 = cancel orderOCO1Modify;
+	
+	pending_cancel = wait ExecutionReport, ClOrdID == cancelOCO1.ClOrdID;
+	Ensure pending_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+
+	cancel1 = wait ExecutionReport, ClOrdID == cancelOCO1.ClOrdID;
+	Ensure cancel1 != null, 'ExecReport not received';
+	EnsureOrderStatus cancel1 FIX.OrdStatus.CANCELED;
+
+	cancel11 = wait ExecutionReport,  ClOrdID != orderOCO2Modify.ClOrdID && OrigClOrdID == orderOCO2Modify.ClOrdID;
+	Ensure cancel11 != null, 'ExecReport not received';
+	EnsureOrderStatus cancel11 FIX.OrdStatus.CANCELED;
+

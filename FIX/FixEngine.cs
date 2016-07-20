@@ -10,12 +10,18 @@ namespace OEC.FIX.Sample.FIX
 {
 	internal class FixEngine
 	{
+        private readonly Props _properties;
 		private readonly object _connectionLock = new object();
 		private readonly ManualResetEvent _messageEvent = new ManualResetEvent(false);
 		private readonly List<Message> _messages = new List<Message>();
 		private Connection _connection;
 		private ManualResetEvent _logonEvent;
 		private ManualResetEvent _logoutEvent;
+
+	    public FixEngine(Props properties)
+	    {
+	        _properties = properties;
+	    }
 
 		public void SendMessage(Message msg)
 		{
@@ -36,9 +42,11 @@ namespace OEC.FIX.Sample.FIX
 
 		public void Connect(string password, string uuid)
 			{
-			if (string.IsNullOrEmpty(password)) {
-				throw new ExecutionException("Password not specified");
-			}
+		    if (string.IsNullOrWhiteSpace(password))
+		        password = _properties[Prop.Password].Value as String;
+
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ExecutionException("Password is not specified");
 
 			lock (_connectionLock)
 			{
@@ -48,13 +56,13 @@ namespace OEC.FIX.Sample.FIX
 					return;
 				}
 
-				_connection = new Connection();
+				_connection = new Connection(_properties);
 				_connection.Logon += Connection_Logon;
 				_connection.Logout += Connection_Logout;
 				_connection.FromAdmin += Connection_FromAdmin;
 				_connection.FromApp += Connection_FromApp;
 
-				_connection.Create((int) Program.Props[Prop.SenderSeqNum].Value, (int) Program.Props[Prop.TargetSeqNum].Value);
+			    _connection.Create((int) _properties[Prop.SenderSeqNum].Value, (int) _properties[Prop.TargetSeqNum].Value);
 
 				MessageLog.SessionEvent += MessageLog_SessionEvent;
 				MessageLog.OnIncomingMessage += MessageLog_OnIncomingMessage;
@@ -65,8 +73,8 @@ namespace OEC.FIX.Sample.FIX
 				bool connected;
 				using (_logonEvent = new ManualResetEvent(false))
 				{
-					_connection.Open(null, password);
-					connected = _logonEvent.WaitOne((TimeSpan) Program.Props[Prop.ConnectTimeout].Value);
+					_connection.Open(password, uuid);
+                    connected = _logonEvent.WaitOne((TimeSpan)_properties[Prop.ConnectTimeout].Value);
 				}
 				_logonEvent = null;
 
@@ -231,12 +239,12 @@ namespace OEC.FIX.Sample.FIX
 
 		private void MessageStore_TargetSeqNumChanged(SessionID sessionID, int seqnum)
 		{
-			Program.Props[Prop.TargetSeqNum].Value = seqnum;
+            _properties[Prop.TargetSeqNum].Value = seqnum;
 		}
 
 		private void MessageStore_SenderSeqNumChanged(SessionID sessionID, int seqnum)
 		{
-			Program.Props[Prop.SenderSeqNum].Value = seqnum;
+            _properties[Prop.SenderSeqNum].Value = seqnum;
 		}
 
 		private void MessageLog_SessionEvent(SessionID sessionID, string text)
@@ -263,12 +271,12 @@ namespace OEC.FIX.Sample.FIX
 				{
 					WriteLine("From server: {0}", text);
 				}
-			}
-			if (msgType == MsgType.UserResponse || msgType == MsgType.Logon)
+				if (msgType == MsgType.Logon)
 			{
-				Program.Props[Prop.FastHashCode].Value = msg.getString(12004);
+                    _properties[Prop.FastHashCode].Value = msg.getString(12004);
 			}
-			if (msgType == MsgType.Heartbeat)
+			}
+			else if (msgType == MsgType.Heartbeat)
 			{
 				if (msg.isSetField(TestReqID.FIELD))
 				{

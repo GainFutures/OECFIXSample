@@ -3,12 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using OEC.FIX.Sample.FIX;
+using OpenFAST.Sessions;
 using QuickFix;
 
 namespace OEC.FIX.Sample.FoxScript
 {
 	partial class ExecEngine
 	{
+        private bool IsHandleSeqNumbers
+        {
+            get
+            {
+                return !(_properties.Contains(Prop.ResetSeqNumbers) && (bool) _properties[Prop.ResetSeqNumbers].Value);
+            }
+        }
+        
 		public void Exit()
 		{
 			WriteLine("Exiting...");
@@ -45,7 +54,7 @@ namespace OEC.FIX.Sample.FoxScript
 
 		public void SetPropValue(string name, Object value)
 		{
-			Program.Props[name].Value = GetObjectValue(value, null);
+            _properties[name].Value = GetObjectValue(value, null);
 			GetPropsValue(name);
 		}
 
@@ -53,14 +62,14 @@ namespace OEC.FIX.Sample.FoxScript
 		{
 			if (string.IsNullOrEmpty(name))
 			{
-				foreach (Prop prop in Program.Props)
+                foreach (Prop prop in _properties)
 				{
 					WriteLine(Tools.FormatProp(prop));
 				}
 			}
 			else
 			{
-				WriteLine(Tools.FormatProp(Program.Props[name]));
+                WriteLine(Tools.FormatProp(_properties[name]));
 			}
 		}
 
@@ -72,7 +81,7 @@ namespace OEC.FIX.Sample.FoxScript
 		public void Auth(string senderCompID)
 		{
 			StoreSeqNumbers();
-			Program.Props[Prop.SenderCompID].Value = senderCompID;
+            _properties[Prop.SenderCompID].Value = senderCompID;
 			LoadSeqNumbers();
 		}
 
@@ -82,9 +91,9 @@ namespace OEC.FIX.Sample.FoxScript
 				Auth(senderCompID);
 
 			WriteLine("Connecting to {0}:{1} as '{2}' ...",
-				Program.Props[Prop.Host].Value,
-				Program.Props[Prop.Port].Value,
-				Program.Props[Prop.SenderCompID].Value);
+                _properties[Prop.Host].Value,
+                _properties[Prop.Port].Value,
+                _properties[Prop.SenderCompID].Value);
 
 			_fixEngine.Connect(password, uuid);
 		}
@@ -92,18 +101,22 @@ namespace OEC.FIX.Sample.FoxScript
 		public void ConnectFast(string userName)
 		{
 			if (String.IsNullOrWhiteSpace(userName))
-				userName = Program.Props[Prop.SenderCompID].Value.ToString();
+                userName = _properties[Prop.SenderCompID].Value.ToString();
 
-			string password = Program.Props[Prop.FastHashCode].Value.ToString();
+            string password = _properties[Prop.FastHashCode].Value.ToString();
 
 			if (String.IsNullOrWhiteSpace(password))
 				throw new ExecutionException("FastHashCode not set.");
+
+		    if (!IsFastAvailable)
+                throw new ExecutionException("FASTClient is disabled");
 
 			_fastClient.Connect(userName, password);
 		}
 
 		public void FASTHeartbeat()
 		{
+            if (IsFastAvailable)
 			_fastClient.SendHearbeat();
 		}
 
@@ -116,26 +129,33 @@ namespace OEC.FIX.Sample.FoxScript
 
 		public void DisconnectFast()
 		{
+            if (IsFastAvailable)
 			_fastClient.Disconnect();
 		}
 
 		public void StoreSeqNumbers()
 		{
-			string senderCompID = Program.Props[Prop.SenderCompID].Value.ToString();
-			string targetCompID = Program.Props[Prop.TargetCompID].Value.ToString();
+            if (!IsHandleSeqNumbers)
+                return;
+
+            string senderCompID = _properties[Prop.SenderCompID].Value.ToString();
+            string targetCompID = _properties[Prop.TargetCompID].Value.ToString();
 			string fileName = MakeFileName(senderCompID, targetCompID);
 
 			using (FileStream file = File.Open(fileName, FileMode.Create))
 			{
 				using (var stream = new StreamWriter(file))
-					stream.Write("{0} : {1}", Program.Props[Prop.SenderSeqNum].Value, Program.Props[Prop.TargetSeqNum].Value);
+                    stream.Write("{0} : {1}", _properties[Prop.SenderSeqNum].Value, _properties[Prop.TargetSeqNum].Value);
 			}
 		}
 
 		public void LoadSeqNumbers()
 		{
-			string senderCompID = Program.Props[Prop.SenderCompID].Value.ToString();
-			string targetCompID = Program.Props[Prop.TargetCompID].Value.ToString();
+            if (!IsHandleSeqNumbers)
+                return;
+
+            string senderCompID = _properties[Prop.SenderCompID].Value.ToString();
+            string targetCompID = _properties[Prop.TargetCompID].Value.ToString();
 			string fileName = MakeFileName(senderCompID, targetCompID);
 
 			if (!File.Exists(fileName)) return;
@@ -146,8 +166,8 @@ namespace OEC.FIX.Sample.FoxScript
 				{
 					string[] items = stream.ReadLine().Split(new[] {':'}, StringSplitOptions.RemoveEmptyEntries);
 
-					Program.Props.AddProp(Prop.SenderSeqNum, int.Parse(items[0]));
-					Program.Props.AddProp(Prop.TargetSeqNum, int.Parse(items[1]));
+                    _properties.AddProp(Prop.SenderSeqNum, int.Parse(items[0]));
+                    _properties.AddProp(Prop.TargetSeqNum, int.Parse(items[1]));
 				}
 			}
 		}
@@ -238,9 +258,9 @@ namespace OEC.FIX.Sample.FoxScript
 		public void SetSeqNumbers(int senderSeqNum, int targetSeqNum)
 		{
 			if (senderSeqNum != -1)
-				Program.Props[Prop.SenderSeqNum].Value = senderSeqNum;
+                _properties[Prop.SenderSeqNum].Value = senderSeqNum;
 			if (targetSeqNum != -1)
-				Program.Props[Prop.TargetSeqNum].Value = targetSeqNum;
+                _properties[Prop.TargetSeqNum].Value = targetSeqNum;
 		}
 
 		public void EnsurePureOrderStatus(string msgVarName, Object ordStatus)
@@ -251,7 +271,7 @@ namespace OEC.FIX.Sample.FoxScript
 			object value = GetObjectValue(ordStatus, null);
 			value = QFReflector.DenormalizeFieldValue(value, typeof (OrdStatus));
 
-			FixProtocol.Current.EnsurePureOrderStatus(varbl.Value.QFMessage, (char) value);
+			FixProtocol.EnsurePureOrderStatus(varbl.Value.QFMessage, (char) value);
 		}
 
 		public void EnsureOrderStatus(string msgVarName, Object ordStatus)
@@ -262,7 +282,7 @@ namespace OEC.FIX.Sample.FoxScript
 			object value = GetObjectValue(ordStatus, null);
 			value = QFReflector.DenormalizeFieldValue(value, typeof (OrdStatus));
 
-			FixProtocol.Current.EnsureOrderStatus(varbl.Value.QFMessage, (char) value);
+			FixProtocol.EnsureOrderStatus(varbl.Value.QFMessage, (char) value);
 		}
 
 		public void EnsureModifyAccepted(string msgVarName, Object ordStatus)
@@ -273,7 +293,7 @@ namespace OEC.FIX.Sample.FoxScript
 			object value = GetObjectValue(ordStatus, null);
 			value = QFReflector.DenormalizeFieldValue(value, typeof (OrdStatus));
 
-			FixProtocol.Current.EnsureModifyAccepted(varbl.Value.QFMessage, (char) value);
+			FixProtocol.EnsureModifyAccepted(varbl.Value.QFMessage, (char) value);
 		}
 
 		public void EnsureTrade(string msgVarName, Object ordStatus, int? qty = null, double? price = null)
@@ -284,7 +304,7 @@ namespace OEC.FIX.Sample.FoxScript
 			object value = GetObjectValue(ordStatus, null);
 			value = QFReflector.DenormalizeFieldValue(value, typeof (OrdStatus));
 
-			FixProtocol.Current.EnsureTrade(varbl.Value.QFMessage, (char) value, qty, price);
+			FixProtocol.EnsureTrade(varbl.Value.QFMessage, (char) value, qty, price);
 		}
 
 		public void Sleep(TimeSpan timeout)

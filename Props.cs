@@ -48,6 +48,11 @@ namespace OEC.FIX.Sample
 		{
 			_props[name.ToUpperInvariant()] = new ValueProp<T>(name, value);
 		}
+
+        public bool Contains(string name)
+        {
+            return _props.ContainsKey(name);
+        }
 	}
 
 	internal abstract class Prop
@@ -75,9 +80,12 @@ namespace OEC.FIX.Sample
 		public static readonly string ForexAccount = "ForexAccount";
 
 		public static readonly string FastHashCode = "FastHashCode";
+        public static readonly string ResetSeqNumbers = "ResetSeqNumbers";
 
+	    public static readonly string LogonTimeout = "LogonTimeout";
 
 		public static readonly string SSL = "SSL";
+	    public static readonly string Password = "Password";
 
 		public readonly string Name;
 		public readonly Type Type;

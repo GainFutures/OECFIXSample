@@ -1,0 +1,165 @@
+connect vitalyTM, ;
+sleep [00:00:03];
+
+//account new/cancel
+buy_limit = new buy 1 YMM3 LMT 0.25 FOR VIT0002;
+
+	er_pending_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_pending_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_new FIX.OrdStatus.PENDING_NEW;
+
+	er_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_new FIX.OrdStatus.NEW;
+
+er_cancel = cancel buy_limit;
+
+	er_pending_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_pending_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+
+	er_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_cancel FIX.OrdStatus.CANCELED;
+
+//--------------------------------------------------------------------------------------------
+// account new/incorrect cancel/cancel
+buy_limit = new buy 1 YMM3 LMT 0.25 FOR VIT0002;
+
+	er_pending_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_pending_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_new FIX.OrdStatus.PENDING_NEW;
+
+	er_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_new FIX.OrdStatus.NEW;
+
+er_cancel = cancel buy_limit, Account = 'VIT0004';
+
+	er_pending_cancel = wait OrderCancelReject, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_pending_cancel != null, 'OrderCancelReject not received';
+	Ensure er_pending_cancel.OrdStatus == FIX.OrdStatus.REJECTED, 'OrdStatus must be REJECTED';
+
+er_cancel = cancel buy_limit, Account = 'VIT0002';
+
+	er_pending_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_pending_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+
+	er_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_cancel FIX.OrdStatus.CANCELED;
+
+//--------------------------------------------------------------------------------------------
+//account new/incorrect cancel/cancel
+buy_limit = new buy 2 YMM3 LMT 0.25 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { VIT0002 1, VIT0004 1 } FOR VIT0003;
+
+	er_pending_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_pending_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_new FIX.OrdStatus.PENDING_NEW;
+
+	er_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_new FIX.OrdStatus.NEW;
+
+er_cancel = cancel buy_limit, Account = 'VIT0002';
+
+	er_pending_cancel = wait OrderCancelReject, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_pending_cancel != null, 'OrderCancelReject not received';
+	Ensure er_pending_cancel.OrdStatus == FIX.OrdStatus.REJECTED, 'OrdStatus must be REJECTED';
+
+er_cancel = cancel buy_limit;
+
+	er_pending_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_pending_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+
+	er_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_cancel FIX.OrdStatus.CANCELED;
+
+//--------------------------------------------------------------------------------------------
+buy_limit = new buy 1 YMM3 LMT 0.25 FOR VIT0002;
+
+	er_pending_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_pending_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_new FIX.OrdStatus.PENDING_NEW;
+
+	er_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_new FIX.OrdStatus.NEW;
+
+modify_buy = modify buy_limit buy 2 YMM3 LMT 0.25 FOR VIT0002;
+
+	er_modify = wait ExecutionReport, ClOrdID == modify_buy.ClOrdID;
+	Ensure er_modify != null, 'ExecReport not received';
+	EnsureOrderStatus er_modify FIX.OrdStatus.PENDING_REPLACE;
+
+	er_modify = wait ExecutionReport, ClOrdID == modify_buy.ClOrdID;
+	Ensure er_modify != null, 'ExecReport not received';
+	EnsureModifyAccepted er_modify FIX.OrdStatus.NEW;
+
+er_cancel = cancel modify_buy;
+
+	er_pending_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_pending_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+
+	er_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_cancel FIX.OrdStatus.CANCELED;
+
+//--------------------------------------------------------------------------------------------
+buy_limit = new buy 1 YMM3 LMT 0.25 FOR VIT0002;
+
+	er_pending_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_pending_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_new FIX.OrdStatus.PENDING_NEW;
+
+	er_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_new FIX.OrdStatus.NEW;
+
+modify_buy = modify buy_limit buy 2 YMM3 LMT 0.25 FOR VIT0003;
+
+	er_pending_modify = wait OrderCancelReject, ClOrdID == modify_buy.ClOrdID;
+	Ensure er_pending_modify != null, 'OrderCancelReject not received';
+	Ensure er_pending_modify.OrdStatus == FIX.OrdStatus.REJECTED, 'OrdStatus must be REJECTED';
+
+er_cancel = cancel buy_limit;
+
+	er_pending_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_pending_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+
+	er_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_cancel FIX.OrdStatus.CANCELED;
+
+//--------------------------------------------------------------------------------------------
+buy_limit = new buy 1 YMM3 LMT 0.25 FOR VIT0003;
+
+	er_pending_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_pending_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_new FIX.OrdStatus.PENDING_NEW;
+
+	er_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_new FIX.OrdStatus.NEW;
+
+modify_buy = modify buy_limit buy 2 YMM3 LMT 0.25 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { VIT0002 1, VIT0004 1 } FOR VIT0003;
+
+	er_pending_modify = wait OrderCancelReject, ClOrdID == modify_buy.ClOrdID;
+	Ensure er_pending_modify != null, 'OrderCancelReject not received';
+	Ensure er_pending_modify.OrdStatus == FIX.OrdStatus.REJECTED, 'OrdStatus must be REJECTED';
+
+er_cancel = cancel buy_limit;
+
+	er_pending_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_pending_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+
+	er_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+	Ensure er_cancel != null, 'ExecReport not received';
+	EnsureOrderStatus er_cancel FIX.OrdStatus.CANCELED;
+disconnect;

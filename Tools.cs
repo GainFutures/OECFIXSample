@@ -57,21 +57,6 @@ namespace OEC.FIX.Sample
 
 		public static readonly string ContractMonths = "FGHJKMNQUVXZ";
 
-		public static string GetAccountFor(ContractAsset asset)
-		{
-			switch (asset)
-			{
-				case ContractAsset.Forex:
-					return (string) Program.Props[Prop.ForexAccount].Value;
-
-				case ContractAsset.Future:
-					return (string) Program.Props[Prop.FutureAccount].Value;
-
-				default:
-					throw new ExecutionException("Invalid ContractAsset.");
-			}
-		}
-
 		public static DateTime CreateMonthYear(int month, int year)
 		{
 			return new DateTime(year, month, 1);

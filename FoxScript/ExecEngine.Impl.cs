@@ -17,6 +17,22 @@ namespace OEC.FIX.Sample.FoxScript
 		private readonly Dictionary<string, MsgVar> _msgVars = new Dictionary<string, MsgVar>();
 		private readonly TestStatistics _testStat = new TestStatistics();
 		private bool _running = true;
+        private FixProtocol _fixProtocol;
+
+	    private FixProtocol FixProtocol
+	    {
+	        get
+	        {
+                if (_fixProtocol == null || _fixProtocol.BeginString != FixVersion.Current(_properties))
+                    _fixProtocol = FixVersion.Create(_properties);
+                return _fixProtocol;
+            }
+	    }
+
+	    public ExecEngine(Props properties)
+	    {
+            _fixProtocol = FixVersion.Create(properties);
+        }
 
 		private void AssignFields(MessageWrapper target, FixFields fields)
 		{
@@ -70,14 +86,15 @@ namespace OEC.FIX.Sample.FoxScript
 		private MessageWrapper ExecuteWaitMessageCommand(WaitMessageCommand command)
 		{
 			bool isQF = false;
-			string msgType = _fastClient.GetMsgTypeValue(command.MsgTypeName);
+
+		    string msgType = IsFastAvailable ? _fastClient.GetMsgTypeValue(command.MsgTypeName) : null;
 			if (msgType == null)
 			{
 				msgType = QFReflector.GetMsgTypeValue(command.MsgTypeName);
 				isQF = true;
 			}
 
-			var timeout = (TimeSpan) Program.Props[Prop.ResponseTimeout].Value;
+		    var timeout = (TimeSpan) _properties[Prop.ResponseTimeout].Value;
 			if (command.Timeout.HasValue)
 			{
 				timeout = command.Timeout.Value;
@@ -314,7 +331,7 @@ namespace OEC.FIX.Sample.FoxScript
 
 			if (command is NewOrderCommand)
 			{
-				return MessageWrapper.Create(FixProtocol.Current.NewOrderSingle(command as NewOrderCommand));
+				return MessageWrapper.Create(FixProtocol.NewOrderSingle(command as NewOrderCommand));
 			}
 			if (command is ModifyOrderCommand)
 			{
@@ -323,57 +340,65 @@ namespace OEC.FIX.Sample.FoxScript
 				MsgVar varbl = GetMsgVar(cmd.OrigMsgVarName);
 				varbl.EnsureValueFix();
 
-				return MessageWrapper.Create(FixProtocol.Current.OrderCancelReplaceRequest(cmd, varbl.Value.QFMessage));
+                return MessageWrapper.Create(FixProtocol.OrderCancelReplaceRequest(cmd, varbl.Value.QFMessage));
 			}
 			if (command is CancelOrderCommand)
 			{
 				return
-					MessageWrapper.Create(FixProtocol.Current.OrderCancelRequest(command as CancelOrderCommand,
+                    MessageWrapper.Create(FixProtocol.OrderCancelRequest(command as CancelOrderCommand,
 						variable.Value.QFMessage));
 			}
 			if (command is OrderStatusCommand)
 			{
 				return
-					MessageWrapper.Create(FixProtocol.Current.OrderStatusRequest(command as OrderStatusCommand,
+                    MessageWrapper.Create(FixProtocol.OrderStatusRequest(command as OrderStatusCommand,
 						variable.Value.QFMessage));
 			}
+            if (command is OrderMassStatusCommand)
+            {
+                return MessageWrapper.Create(FixProtocol.OrderMassStatusRequest(command as OrderMassStatusCommand));
+            }
 			if (command is BalanceCommand)
 			{
-				return MessageWrapper.Create(FixProtocol.Current.CollateralInquiry(command as BalanceCommand));
+                return MessageWrapper.Create(FixProtocol.CollateralInquiry(command as BalanceCommand));
 			}
 			if (command is PositionsCommand)
 			{
-				return MessageWrapper.Create(FixProtocol.Current.RequestForPositions(command as PositionsCommand));
+                return MessageWrapper.Create(FixProtocol.RequestForPositions(command as PositionsCommand));
 			}
 			if (command is SymbolLookupCommand)
 			{
-				return MessageWrapper.Create(FixProtocol.Current.SymbolLookupRequest(command as SymbolLookupCommand));
+                return MessageWrapper.Create(FixProtocol.SymbolLookupRequest(command as SymbolLookupCommand));
 			}
 			if (command is BaseContractRequestCommand)
 			{
-				return MessageWrapper.Create(FixProtocol.Current.BaseContractRequest(command as BaseContractRequestCommand));
+                return MessageWrapper.Create(FixProtocol.BaseContractRequest(command as BaseContractRequestCommand));
 			}
 			if (command is ContractRequestCommand)
 			{
-				return MessageWrapper.Create(FixProtocol.Current.ContractRequest(command as ContractRequestCommand));
+                return MessageWrapper.Create(FixProtocol.ContractRequest(command as ContractRequestCommand));
 			}
 			if (command is PostAllocationCommand)
 				return
-					MessageWrapper.Create(FixProtocol.Current.AllocationInstruction(command as PostAllocationCommand,
+                    MessageWrapper.Create(FixProtocol.AllocationInstruction(command as PostAllocationCommand,
 						variable.Value.QFMessage));
 			if (command is UserRequestCommand)
-				return MessageWrapper.Create(FixProtocol.Current.UserRequest(command as UserRequestCommand));
+                return MessageWrapper.Create(FixProtocol.UserRequest(command as UserRequestCommand));
 			if (command is MarginCalcCommand)
-				return MessageWrapper.Create(FixProtocol.Current.MarginCalc(command as MarginCalcCommand));
-			if (command is MDMessageCommand)
+                return MessageWrapper.Create(FixProtocol.MarginCalc(command as MarginCalcCommand));
+            if (command is MDMessageCommand && IsFastAvailable)
 				return MessageWrapper.Create(_fastClient.MessageFactory.MarketDataRequest(command as MDMessageCommand));
-			if (command is CancelSubscribeCommand)
+            if (command is CancelSubscribeCommand && IsFastAvailable)
 			{
 				var cancelCommand = command as CancelSubscribeCommand;
 				MsgVar varCancel = GetMsgVar(cancelCommand.MDMessageVar);
 				varCancel.EnsureValueFAST();
 				return MessageWrapper.Create(_fastClient.MessageFactory.CancelMDMessage(varCancel.Value.OFMessage));
 			}
+            if (command is BracketOrderCommand)
+            {
+                return MessageWrapper.Create(FixProtocol.NewOrderList(command as BracketOrderCommand, (msgVar, message) => SetMsgVar(msgVar, MessageWrapper.Create(message))));
+            }
 			throw new ExecutionException("Unknown OutgoingMsgCommand.");
 		}
 
@@ -388,7 +413,7 @@ namespace OEC.FIX.Sample.FoxScript
 				case ObjectType.GlobalProp:
 				{
 					string s = obj.Token.Substring(5); //	skip "PROP:" prefix
-					return Program.Props[s].Value;
+				    return _properties[s].Value;
 				}
 
 				case ObjectType.FixConst:

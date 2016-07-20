@@ -1,0 +1,57 @@
+bracket OCO { [orderOCO1] Buy 2 'ESH6' LMT 1993.75 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { TEST00083 1, TEST00085 1 } FOR TEST00082_1, [orderOCO2] Sell 2 'ESH6' LMT 1996.50 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { TEST00083 1, TEST00085 1 } FOR TEST00082_1};
+	
+	pendingOCO1 = Wait ExecutionReport, ClOrdID == orderOCO1.ClOrdID;
+	Ensure pendingOCO1!= null, 'ExecReport not received 1';
+	EnsureOrderStatus pendingOCO1 FIX.OrdStatus.PENDING_NEW;
+
+	pendingOCO2 = Wait ExecutionReport, ClOrdID == orderOCO2.ClOrdID;
+	Ensure pendingOCO2!= null, 'ExecReport not received 2';
+	EnsureOrderStatus pendingOCO1 FIX.OrdStatus.PENDING_NEW;	
+
+	acceptedOCO1 = Wait ExecutionReport, ClOrdID == orderOCO1.ClOrdID;
+	Ensure acceptedOCO1 != null, 'ExecReport not received 3';
+	EnsureOrderStatus acceptedOCO1 FIX.OrdStatus.NEW;
+
+	acceptedOCO2 = Wait ExecutionReport, ClOrdID == orderOCO2.ClOrdID;
+	Ensure acceptedOCO2 != null, 'ExecReport not received 4';
+	EnsureOrderStatus acceptedOCO2 FIX.OrdStatus.NEW;
+
+
+orderOCO1Modify  = modify orderOCO1 Buy 4 'ESH6' LMT 1993.75 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { TEST00083 1, TEST00085 1 } FOR TEST00082_1;
+	
+	pending2 = Wait ExecutionReport, ClOrdID == orderOCO1Modify.ClOrdID;
+	Ensure pending2 != null, 'ExecReport not received 5';
+	EnsureOrderStatus pending2 FIX.OrdStatus.PENDING_REPLACE;
+
+	accepted2 = Wait ExecutionReport, ClOrdID == orderOCO1Modify.ClOrdID;
+	Ensure accepted2 != null, 'ExecReport not received 6';
+	EnsureModifyAccepted accepted2 FIX.OrdStatus.NEW;
+
+	accepted22 = Wait ExecutionReport,  ClOrdID != orderOCO2.ClOrdID && OrigClOrdID == orderOCO2.ClOrdID;
+	Ensure accepted22 != null, 'ExecReport not received 7';
+	EnsureModifyAccepted accepted22 FIX.OrdStatus.NEW;
+
+orderOCO2Modify = modify orderOCO2 Sell 4 'ESH6' LMT 1996.25 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { TEST00083 1, TEST00085 1 } FOR TEST00082_1;
+
+	pending3 = Wait ExecutionReport, ClOrdID == orderOCO2Modify.ClOrdID;
+	Ensure pending3 != null, 'ExecReport not received 8';
+	EnsureOrderStatus pending3 FIX.OrdStatus.PENDING_REPLACE;
+
+	accepted3 = Wait ExecutionReport, ClOrdID == orderOCO2Modify.ClOrdID;
+	Ensure accepted3 != null, 'ExecReport not received 9';
+	EnsureModifyAccepted accepted3 FIX.OrdStatus.NEW;
+
+cancelOCO1 = cancel orderOCO1Modify;
+	
+	pending_cancel = wait ExecutionReport, ClOrdID == cancelOCO1.ClOrdID;
+	Ensure pending_cancel != null, 'ExecReport not received 10';
+	EnsureOrderStatus pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+
+	cancel1 = wait ExecutionReport, ClOrdID == cancelOCO1.ClOrdID;
+	Ensure cancel1 != null, 'ExecReport not received 11';
+	EnsureOrderStatus cancel1 FIX.OrdStatus.CANCELED;
+
+	cancel11 = wait ExecutionReport,  ClOrdID != orderOCO2Modify.ClOrdID && OrigClOrdID == orderOCO2Modify.ClOrdID;
+	Ensure cancel11 != null, 'ExecReport not received 12';
+	EnsureOrderStatus cancel11 FIX.OrdStatus.CANCELED;
+

@@ -1,0 +1,7 @@
+//
+//	Sends positions request for Future account and waits for balance reports. 
+//
+
+positions1 = Positions prop:FutureAccount;
+
+Exec 'Tests/PositionReports.Positions1.fox';

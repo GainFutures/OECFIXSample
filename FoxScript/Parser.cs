@@ -56,46 +56,47 @@ public class Parser {
 	public const int _actionPAlloc = 43;
 	public const int _actionUserRequest = 44;
 	public const int _actionMarginCalc = 45;
-	public const int _actionHeartbeat = 46;
-	public const int _actionConnectFast = 47;
-	public const int _actionDisconnectFast = 48;
-	public const int _actionCancelSubscribe = 49;
-	public const int _actionSubscribeQuotes = 50;
-	public const int _actionSubscribeDOM = 51;
-	public const int _actionSubscribeHistogram = 52;
-	public const int _actionSubscribeTicks = 53;
-	public const int _actionLoadTicks = 54;
-	public const int _assignOp = 55;
-	public const int _equalOp = 56;
-	public const int _notEqualOp = 57;
-	public const int _lessOp = 58;
-	public const int _lessOrEqualOp = 59;
-	public const int _greaterOp = 60;
-	public const int _greaterOrEqualOp = 61;
-	public const int _orOp = 62;
-	public const int _andOp = 63;
-	public const int _integer = 64;
-	public const int _float = 65;
-	public const int _string = 66;
-	public const int _true = 67;
-	public const int _false = 68;
-	public const int _on = 69;
-	public const int _off = 70;
-	public const int _null = 71;
-	public const int _timespan = 72;
-	public const int _timestamp = 73;
-	public const int _date = 74;
-	public const int _uuid = 75;
-	public const int _buy = 76;
-	public const int _sell = 77;
-	public const int _put = 78;
-	public const int _call = 79;
-	public const int _open = 80;
-	public const int _close = 81;
-	public const int maxT = 233;
+	public const int _actionBracket = 46;
+	public const int _actionHeartbeat = 47;
+	public const int _actionConnectFast = 48;
+	public const int _actionDisconnectFast = 49;
+	public const int _actionCancelSubscribe = 50;
+	public const int _actionSubscribeQuotes = 51;
+	public const int _actionSubscribeDOM = 52;
+	public const int _actionSubscribeHistogram = 53;
+	public const int _actionSubscribeTicks = 54;
+	public const int _actionLoadTicks = 55;
+	public const int _assignOp = 56;
+	public const int _equalOp = 57;
+	public const int _notEqualOp = 58;
+	public const int _lessOp = 59;
+	public const int _lessOrEqualOp = 60;
+	public const int _greaterOp = 61;
+	public const int _greaterOrEqualOp = 62;
+	public const int _orOp = 63;
+	public const int _andOp = 64;
+	public const int _integer = 65;
+	public const int _float = 66;
+	public const int _string = 67;
+	public const int _true = 68;
+	public const int _false = 69;
+	public const int _on = 70;
+	public const int _off = 71;
+	public const int _null = 72;
+	public const int _timespan = 73;
+	public const int _timestamp = 74;
+	public const int _date = 75;
+	public const int _uuid = 76;
+	public const int _buy = 77;
+	public const int _sell = 78;
+	public const int _put = 79;
+	public const int _call = 80;
+	public const int _open = 81;
+	public const int _close = 82;
+	public const int maxT = 247;
 
-	const bool _T = true;
-	const bool _x = false;
+	const bool T = true;
+	const bool x = false;
 	const int minErrDist = 2;
 	
 	public Scanner scanner;
@@ -294,7 +295,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			SimpleCommand();
 		} else if (StartOf(4)) {
 			MsgProducingCommand();
-		} else SynErr(234);
+		} else SynErr(248);
 	}
 
 	void Statement() {
@@ -303,18 +304,18 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void IfStatement() {
 		object expr = null; bool actionEnabled = SemanticActionEnabled(); 
-		Expect(82);
 		Expect(83);
-		LogicalExpr(ref expr);
 		Expect(84);
+		LogicalExpr(ref expr);
+		Expect(85);
 		if (actionEnabled)
 		{
-		var predicate = ExecEngine.BuildPredicate(expr); 
-		PushBranchingPredicate(predicate);
-		CurrentBranchingPredicate.Positive = true;
+			var predicate = ExecEngine.BuildPredicate(expr); 
+			PushBranchingPredicate(predicate);
+			CurrentBranchingPredicate.Positive = true;
 		}
 		
-		Expect(85);
+		Expect(86);
 		while (StartOf(1)) {
 			if (StartOf(2)) {
 				Command();
@@ -322,14 +323,14 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 				Statement();
 			}
 		}
-		Expect(86);
-		if (la.kind == 87) {
+		Expect(87);
+		if (la.kind == 88) {
 			Get();
 			if (actionEnabled) {
 			CurrentBranchingPredicate.Positive = false; 
 			}
 			
-			Expect(85);
+			Expect(86);
 			while (StartOf(1)) {
 				if (StartOf(2)) {
 					Command();
@@ -337,7 +338,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 					Statement();
 				}
 			}
-			Expect(86);
+			Expect(87);
 		}
 		Expect(5);
 		if (actionEnabled) {
@@ -432,31 +433,31 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			AuthorizationCommand();
 			break;
 		}
-		case 47: {
+		case 48: {
 			ConnectFastCommand();
 			break;
 		}
-		case 48: {
+		case 49: {
 			DisconnectFastCommand();
 			break;
 		}
-		case 46: {
+		case 47: {
 			HeartbeatCommand();
 			break;
 		}
-		default: SynErr(235); break;
+		default: SynErr(249); break;
 		}
 		Expect(5);
 	}
 
 	void MsgProducingCommand() {
 		string msgVarName = null; MsgCommand command = null; 
-		if (la.kind == 1 || la.kind == 88) {
-			if (la.kind == 88) {
+		if (la.kind == 1 || la.kind == 89) {
+			if (la.kind == 89) {
 				Get();
 			}
 			MsgVarName(ref msgVarName);
-			Expect(55);
+			Expect(56);
 		}
 		switch (la.kind) {
 		case 7: {
@@ -507,31 +508,35 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			MarginCalcCommand(ref command);
 			break;
 		}
-		case 49: {
-			CancelSubscribeCommand(ref command);
+		case 46: {
+			BracketOrderCommand(ref command);
 			break;
 		}
 		case 50: {
-			SubscribeQuotesCommand(ref command);
+			CancelSubscribeCommand(ref command);
 			break;
 		}
 		case 51: {
-			SubscribeDOMCommand(ref command);
+			SubscribeQuotesCommand(ref command);
 			break;
 		}
 		case 52: {
-			SubscribeHistogramCommand(ref command);
+			SubscribeDOMCommand(ref command);
 			break;
 		}
 		case 53: {
-			SubscribeTicksCommand(ref command);
+			SubscribeHistogramCommand(ref command);
 			break;
 		}
 		case 54: {
+			SubscribeTicksCommand(ref command);
+			break;
+		}
+		case 55: {
 			LoadTicksCommand(ref command);
 			break;
 		}
-		default: SynErr(236); break;
+		default: SynErr(250); break;
 		}
 		Expect(5);
 		ExecEngine.MessageCommand(msgVarName, command); 
@@ -554,11 +559,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void SetPropCommand() {
 		Expect(18);
-		if (la.kind == 196) {
+		if (la.kind == 197) {
 			SetSeqNumPropCommand();
 		} else if (la.kind == 1) {
 			SetCommonPropCommand();
-		} else SynErr(237);
+		} else SynErr(251);
 	}
 
 	void PingCommand() {
@@ -594,7 +599,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 		} else if (la.kind == 27) {
 			Get();
-		} else SynErr(238);
+		} else SynErr(252);
 		SemanticAction(() => ExecEngine.Exit()); 
 	}
 
@@ -604,7 +609,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		IdentOrString(ref filename);
 		if (la.kind == 6) {
 			Get();
-			Expect(66);
+			Expect(67);
 			scriptName = LiteralParser.ParseString(t.val); 
 		}
 		SemanticAction(() => ExecEngine.Exec(filename, scriptName)); 
@@ -673,7 +678,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	void SleepCommand() {
 		TimeSpan timeout; 
 		Expect(38);
-		if (la.kind == 72) {
+		if (la.kind == 73) {
 			Get();
 			timeout = LiteralParser.ParseTimespan(t.val); 
 			SemanticAction(() => ExecEngine.Sleep(timeout)); 
@@ -692,8 +697,10 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			IdentOrString(ref senderCompID);
 			Expect(6);
 		}
-		IdentOrString(ref password);
-		if (la.kind == 75) {
+		if (la.kind == 1 || la.kind == 67) {
+			IdentOrString(ref password);
+		}
+		if (la.kind == 76) {
 			Get();
 			uuid = t.val; 
 		}
@@ -708,7 +715,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	void ResetSeqnumbers() {
 		Expect(17);
 		SemanticAction(() => ExecEngine.ResetSeqnums()); 
-		Expect(196);
+		Expect(197);
 	}
 
 	void AuthorizationCommand() {
@@ -720,20 +727,20 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void ConnectFastCommand() {
 		string username = null; 
-		Expect(47);
-		if (la.kind == 1 || la.kind == 66) {
+		Expect(48);
+		if (la.kind == 1 || la.kind == 67) {
 			IdentOrString(ref username);
 		}
 		SemanticAction(() => ExecEngine.ConnectFast(username)); 
 	}
 
 	void DisconnectFastCommand() {
-		Expect(48);
+		Expect(49);
 		SemanticAction(() => ExecEngine.DisconnectFast()); 
 	}
 
 	void HeartbeatCommand() {
-		Expect(46);
+		Expect(47);
 		SemanticAction(() => ExecEngine.FASTHeartbeat()); 
 	}
 
@@ -774,7 +781,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	void WaitMessageCommand(ref MsgCommand command) {
 		var cmd = new WaitMessageCommand(); 
 		Expect(13);
-		if (la.kind == 72) {
+		if (la.kind == 73) {
 			Timeout();
 			cmd.Timeout = LiteralParser.ParseTimespan(t.val); 
 		}
@@ -807,17 +814,17 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	void OrderMassStatusCommand(ref MsgCommand command) {
 		var cmd = new OrderMassStatusCommand(); 
 		Expect(11);
-		if (la.kind == 76 || la.kind == 77) {
+		if (la.kind == 77 || la.kind == 78) {
 			OrderSide(ref cmd.OrderSide);
 		}
-		if (la.kind == 1 || la.kind == 66) {
+		if (la.kind == 1 || la.kind == 67) {
 			OrderContract(ref cmd.OrderContract);
 		}
-		if (la.kind == 1 || la.kind == 66 || la.kind == 197) {
-			if (la.kind == 1 || la.kind == 66) {
+		if (la.kind == 1 || la.kind == 67 || la.kind == 200) {
+			if (la.kind == 1 || la.kind == 67) {
 				AllocationBlock(out cmd.AllocationBlock);
 			}
-			Expect(197);
+			Expect(200);
 			Account(ref cmd.Account);
 		}
 		command = cmd; 
@@ -836,11 +843,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void ContractCommand(ref MsgCommand command) {
 		Expect(40);
-		if (la.kind == 90 || la.kind == 91 || la.kind == 92) {
+		if (la.kind == 91 || la.kind == 92 || la.kind == 93) {
 			ContractRequest(ref command);
-		} else if (la.kind == 95 || la.kind == 96 || la.kind == 97) {
+		} else if (la.kind == 96 || la.kind == 97 || la.kind == 98) {
 			ContractLookup(ref command);
-		} else SynErr(239);
+		} else SynErr(253);
 	}
 
 	void PostAllocationCommand(ref MsgCommand command) {
@@ -851,9 +858,9 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 		} else if (la.kind == 43) {
 			Get();
-		} else SynErr(240);
+		} else SynErr(254);
 		OrigMsgVarName(ref cmd.OrigMsgVarName);
-		if (la.kind == 1 || la.kind == 66) {
+		if (la.kind == 1 || la.kind == 67) {
 			OrderContract(ref cmd.Contract);
 		}
 		PostAllocationBlock(out cmd.AllocationBlock);
@@ -863,9 +870,9 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	void UserRequestCommand(ref MsgCommand command) {
 		var userCommand = new UserRequestCommand(); 
 		Expect(44);
-		if (la.kind == 89) {
+		if (la.kind == 90) {
 			Get();
-			Expect(55);
+			Expect(56);
 			IdentOrString(ref userCommand.UUID);
 		}
 		IdentOrString(ref userCommand.Name);
@@ -884,17 +891,48 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		command = cmd; 
 	}
 
+	void BracketOrderCommand(ref MsgCommand command) {
+		var cmd = new BracketOrderCommand(); cmd.BracketCommands = new List<BracketCommandItem>(); 
+		Expect(46);
+		BracketType(ref cmd.Type);
+		Expect(86);
+		var item = new BracketCommandItem(); 
+		if (la.kind == 198) {
+			Get();
+			OrigMsgVarName(ref item.MsgVarName);
+			Expect(199);
+		}
+		OrderBody(item);
+		cmd.BracketCommands.Add(item); 
+		while (la.kind == 6) {
+			Get();
+			item = new BracketCommandItem(); 
+			if (la.kind == 198) {
+				Get();
+				OrigMsgVarName(ref item.MsgVarName);
+				Expect(199);
+			}
+			OrderBody(item);
+			cmd.BracketCommands.Add(item); 
+		}
+		Expect(87);
+		command = cmd; 
+	}
+
 	void CancelSubscribeCommand(ref MsgCommand command) {
 		var cmd = new CancelSubscribeCommand(); 
-		Expect(49);
+		Expect(50);
 		OrigMsgVarName(ref cmd.MDMessageVar);
 		command = cmd; 
 	}
 
 	void SubscribeQuotesCommand(ref MsgCommand command) {
 		var cmd = new SubscribeQuotesCommand(); var mdCmd = cmd as MDMessageCommand; 
-		Expect(50);
+		Expect(51);
 		FASTUpdateType(mdCmd);
+		if (la.kind == 236) {
+			FASTMDEntries(mdCmd);
+		}
 		FASTContract(mdCmd);
 		SubscribeMarketDataToFile(ref mdCmd);
 		command = cmd; 
@@ -902,7 +940,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void SubscribeDOMCommand(ref MsgCommand command) {
 		var cmd = new SubscribeDOMCommand(); var mdCmd = cmd as MDMessageCommand; 
-		Expect(51);
+		Expect(52);
 		FASTUpdateType(mdCmd);
 		FASTContract(mdCmd);
 		SubscribeMarketDataToFile(ref mdCmd);
@@ -911,7 +949,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void SubscribeHistogramCommand(ref MsgCommand command) {
 		var cmd = new SubscribeHistogramCommand(); var mdCmd = cmd as MDMessageCommand; 
-		Expect(52);
+		Expect(53);
 		FASTUpdateType(mdCmd);
 		FASTContract(mdCmd);
 		SubscribeMarketDataToFile(ref mdCmd);
@@ -920,17 +958,17 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void SubscribeTicksCommand(ref MsgCommand command) {
 		var cmd = new SubscribeTicksCommand(); var mdCmd = cmd as MDMessageCommand; 
-		Expect(53);
+		Expect(54);
 		FASTUpdateType(mdCmd);
 		FASTContract(mdCmd);
-		if (la.kind == 226 || la.kind == 231) {
-			if (la.kind == 231) {
+		if (la.kind == 229 || la.kind == 245) {
+			if (la.kind == 245) {
 				Get();
-				Expect(73);
+				Expect(74);
 				cmd.SetStartTime(LiteralParser.ParseTimestamp(t.val)); 
 			} else {
 				Get();
-				Expect(72);
+				Expect(73);
 				cmd.SetStartTime(LiteralParser.ParseTimespan(t.val)); 
 			}
 		}
@@ -940,21 +978,21 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void LoadTicksCommand(ref MsgCommand command) {
 		var cmd = new LoadTicksCommand(); var mdCmd = cmd as MDMessageCommand; 
-		Expect(54);
+		Expect(55);
 		FASTUpdateType(mdCmd);
 		FASTContract(mdCmd);
-		if (la.kind == 231) {
+		if (la.kind == 245) {
 			Get();
-			Expect(73);
+			Expect(74);
 			cmd.SetStartTime(LiteralParser.ParseTimestamp(t.val)); 
-			Expect(232);
-			Expect(73);
+			Expect(246);
+			Expect(74);
 			cmd.SetEndTime(LiteralParser.ParseTimestamp(t.val)); 
-		} else if (la.kind == 226) {
+		} else if (la.kind == 229) {
 			Get();
-			Expect(72);
+			Expect(73);
 			cmd.SetStartTime(LiteralParser.ParseTimespan(t.val)); 
-		} else SynErr(241);
+		} else SynErr(255);
 		SubscribeMarketDataToFile(ref mdCmd);
 		command = cmd; 
 	}
@@ -964,11 +1002,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		if (la.kind == 1) {
 			Get();
 			name = t.val; 
-		} else if (la.kind == 64) {
+		} else if (la.kind == 65) {
 			Get();
 			name = t.val; 
-		} else SynErr(242);
-		Expect(55);
+		} else SynErr(256);
+		Expect(56);
 		RValue(ref value);
 		fields.Add(name, value); 
 		while (la.kind == 6) {
@@ -977,11 +1015,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			if (la.kind == 1) {
 				Get();
 				name = t.val; 
-			} else if (la.kind == 64) {
+			} else if (la.kind == 65) {
 				Get();
 				name = t.val; 
-			} else SynErr(243);
-			Expect(55);
+			} else SynErr(257);
+			Expect(56);
 			RValue(ref value);
 			fields.Add(name, value); 
 		}
@@ -999,32 +1037,32 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 4) {
 			Get();
 			value = new Object(ObjectType.GlobalProp, t.val); 
-		} else SynErr(244);
+		} else SynErr(258);
 	}
 
 	void IdentOrString(ref string str) {
 		if (la.kind == 1) {
 			Get();
 			str = t.val; 
-		} else if (la.kind == 66) {
+		} else if (la.kind == 67) {
 			Get();
 			str = LiteralParser.ParseString(t.val); 
-		} else SynErr(245);
+		} else SynErr(259);
 	}
 
 	void MarginCalcPosition(out MarginCalcCommand.Position position) {
 		position = new MarginCalcCommand.Position(); 
 		OrderContract(ref position.Contract);
-		Expect(64);
+		Expect(65);
 		position.MinQty = int.Parse(t.val); 
-		Expect(64);
+		Expect(65);
 		position.MaxQty = int.Parse(t.val); 
 	}
 
 	void OrderContract(ref OrderContract contract) {
 		contract = new OrderContract(); 
 		Symbol(ref contract.Symbol);
-		if (la.kind == 78 || la.kind == 79) {
+		if (la.kind == 79 || la.kind == 80) {
 			StrikeSide(contract);
 		}
 	}
@@ -1033,7 +1071,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		positions = new List<MarginCalcCommand.Position>();
 		MarginCalcCommand.Position item;
 		
-		Expect(85);
+		Expect(86);
 		MarginCalcPosition(out item);
 		positions.Add(item); 
 		while (la.kind == 6) {
@@ -1041,62 +1079,62 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			MarginCalcPosition(out item);
 			positions.Add(item); 
 		}
-		Expect(86);
+		Expect(87);
 	}
 
 	void Account(ref string account) {
 		if (la.kind == 1) {
 			Get();
 			account = t.val; 
-		} else if (la.kind == 66) {
+		} else if (la.kind == 67) {
 			Get();
 			account = LiteralParser.ParseString(t.val); 
-		} else if (la.kind == 64) {
+		} else if (la.kind == 65) {
 			Get();
 			account = t.val; 
 		} else if (la.kind == 4) {
 			Get();
 			var prop = new Object(ObjectType.GlobalProp, t.val); account = (string)ExecEngine.GetObjectValue(prop, null); 
-		} else SynErr(246);
+		} else SynErr(260);
 	}
 
 	void ContractRequest(ref MsgCommand command) {
-		if (la.kind == 90) {
-			Get();
-		} else if (la.kind == 91) {
+		if (la.kind == 91) {
 			Get();
 		} else if (la.kind == 92) {
 			Get();
-		} else SynErr(247);
-		if (la.kind == 1 || la.kind == 66) {
+		} else if (la.kind == 93) {
+			Get();
+		} else SynErr(261);
+		if (la.kind == 1 || la.kind == 67) {
 			ContractRequestCommand temp; 
 			ByBaseContractRequest(out temp);
 			command = temp; 
-		} else if (la.kind == 93 || la.kind == 94) {
+		} else if (la.kind == 94 || la.kind == 95) {
 			BaseContractRequestCommand temp; 
 			BaseContractRequest(out temp);
 			command = temp; 
-		} else SynErr(248);
+		} else SynErr(262);
 	}
 
 	void ContractLookup(ref MsgCommand command) {
 		var lcommand = new SymbolLookupCommand(); 
-		if (la.kind == 95) {
-			Get();
-		} else if (la.kind == 96) {
+		if (la.kind == 96) {
 			Get();
 		} else if (la.kind == 97) {
 			Get();
-		} else SynErr(249);
+		} else if (la.kind == 98) {
+			Get();
+		} else SynErr(263);
 		IdentOrString(ref lcommand.Name);
 		Expect(6);
-		Expect(98);
-		Expect(55);
+		Expect(99);
+		Expect(56);
 		ContractLookupMode(ref lcommand.Mode);
 		Expect(6);
-		Expect(99);
-		Expect(55);
-		Expect(64);
+		Expect(100);
+		Expect(56);
+		Expect(65);
 		lcommand.MaxRecords = LiteralParser.ParseInteger(t.val); 
 		while (la.kind == 6) {
 			Get();
@@ -1111,7 +1149,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		if (StartOf(6)) {
 			SubscriptionType(ref command.SubscriptionRequestType);
 		}
-		if (la.kind == 73) {
+		if (la.kind == 74) {
 			Get();
 			command.UpdatesSinceTimestamp = LiteralParser.ParseTimestamp(t.val); 
 		}
@@ -1119,11 +1157,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void BaseContractRequest(out BaseContractRequestCommand command) {
 		command = new BaseContractRequestCommand(); 
-		if (la.kind == 93) {
+		if (la.kind == 94) {
 			Get();
-		} else if (la.kind == 94) {
+		} else if (la.kind == 95) {
 			Get();
-		} else SynErr(250);
+		} else SynErr(264);
 		if (StartOf(6)) {
 			SubscriptionType(ref command.SubscriptionRequestType);
 			Expect(6);
@@ -1136,106 +1174,106 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	}
 
 	void SubscriptionType(ref char symbolRequestType) {
-		if (la.kind == 100) {
+		if (la.kind == 101) {
 			Get();
 			symbolRequestType = '0'; 
-		} else if (la.kind == 101) {
-			Get();
-			symbolRequestType = '1'; 
 		} else if (la.kind == 102) {
 			Get();
-			symbolRequestType = '2'; 
+			symbolRequestType = '1'; 
 		} else if (la.kind == 103) {
 			Get();
+			symbolRequestType = '2'; 
+		} else if (la.kind == 104) {
+			Get();
 			symbolRequestType = 'U'; 
-		} else SynErr(251);
+		} else SynErr(265);
 	}
 
 	void BaseContractParam(ref BaseContractRequestCommand command) {
-		if (la.kind == 111) {
+		if (la.kind == 112) {
 			Get();
-			Expect(55);
+			Expect(56);
 			IdentOrString(ref command.Exchange);
-		} else if (la.kind == 112) {
-			Get();
-			Expect(55);
-			IdentOrString(ref command.ContractGroup);
 		} else if (la.kind == 113) {
 			Get();
-			Expect(55);
+			Expect(56);
+			IdentOrString(ref command.ContractGroup);
+		} else if (la.kind == 114) {
+			Get();
+			Expect(56);
 			CompoundType(ref command.CompoundType);
-		} else SynErr(252);
+		} else SynErr(266);
 	}
 
 	void ContractLookupMode(ref int mode) {
-		if (la.kind == 191) {
+		if (la.kind == 192) {
 			Get();
 			mode = 0; 
-		} else if (la.kind == 192) {
-			Get();
-			mode = 1; 
 		} else if (la.kind == 193) {
 			Get();
-			mode = 2; 
+			mode = 1; 
 		} else if (la.kind == 194) {
 			Get();
-			mode = 3; 
+			mode = 2; 
 		} else if (la.kind == 195) {
 			Get();
+			mode = 3; 
+		} else if (la.kind == 196) {
+			Get();
 			mode = 4; 
-		} else SynErr(253);
+		} else SynErr(267);
 	}
 
 	void ContractLookupParam(ref SymbolLookupCommand command) {
 		switch (la.kind) {
-		case 104: {
-			Get();
-			Expect(55);
-			ContractKindList(ref command.ContractKinds);
-			break;
-		}
 		case 105: {
 			Get();
-			Expect(55);
-			ContractType(ref command.ContractType);
+			Expect(56);
+			ContractKindList(ref command.ContractKinds);
 			break;
 		}
 		case 106: {
 			Get();
-			Expect(55);
-			OptionType(ref command.OptionType);
+			Expect(56);
+			ContractType(ref command.ContractType);
 			break;
 		}
 		case 107: {
 			Get();
-			Expect(55);
-			BoolOptional(ref command.ByBaseContractsOnly);
+			Expect(56);
+			OptionType(ref command.OptionType);
 			break;
 		}
 		case 108: {
 			Get();
-			Expect(55);
-			BoolOptional(ref command.OptionsRequired);
+			Expect(56);
+			BoolOptional(ref command.ByBaseContractsOnly);
 			break;
 		}
 		case 109: {
 			Get();
-			Expect(55);
-			IdentOrString(ref command.BaseContract);
+			Expect(56);
+			BoolOptional(ref command.OptionsRequired);
 			break;
 		}
 		case 110: {
 			Get();
-			Expect(55);
+			Expect(56);
+			IdentOrString(ref command.BaseContract);
+			break;
+		}
+		case 111: {
+			Get();
+			Expect(56);
 			ContractDescription(ref command.ParentContract);
 			break;
 		}
-		case 111: case 112: case 113: {
+		case 112: case 113: case 114: {
 			BaseContractRequestCommand bcommand = command as BaseContractRequestCommand; 
 			BaseContractParam(ref bcommand);
 			break;
 		}
-		default: SynErr(254); break;
+		default: SynErr(268); break;
 		}
 	}
 
@@ -1244,7 +1282,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		if (StartOf(7)) {
 			ContractKind(out kind);
 			list.Add(kind); 
-		} else if (la.kind == 83) {
+		} else if (la.kind == 84) {
 			Get();
 			ContractKind(out kind);
 			list.Add(kind); 
@@ -1253,46 +1291,46 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 				ContractKind(out kind);
 				list.Add(kind); 
 			}
-			Expect(84);
-		} else SynErr(255);
+			Expect(85);
+		} else SynErr(269);
 	}
 
 	void ContractType(ref ContractType? ctype) {
-		if (la.kind == 184) {
+		if (la.kind == 185) {
 			Get();
 			ctype = Sample.FoxScript.ContractType.ELECTRONIC; 
-		} else if (la.kind == 185) {
+		} else if (la.kind == 186) {
 			Get();
 			ctype = Sample.FoxScript.ContractType.PIT; 
-		} else SynErr(256);
+		} else SynErr(270);
 	}
 
 	void OptionType(ref OptionType optionType) {
 		optionType = Sample.FoxScript.OptionType.ALL; 
-		if (la.kind == 78) {
+		if (la.kind == 79) {
 			Get();
 			optionType = Sample.FoxScript.OptionType.PUT; 
-		} else if (la.kind == 79) {
+		} else if (la.kind == 80) {
 			Get();
 			optionType = Sample.FoxScript.OptionType.CALL; 
-		} else SynErr(257);
+		} else SynErr(271);
 	}
 
 	void BoolOptional(ref bool? value) {
-		if (la.kind == 67) {
+		if (la.kind == 68) {
 			Get();
 			value = true; 
-		} else if (la.kind == 68) {
+		} else if (la.kind == 69) {
 			Get();
 			value = false; 
-		} else SynErr(258);
+		} else SynErr(272);
 	}
 
 	void ContractDescription(ref Contract contract) {
 		var stringValue = string.Empty; 
 		contract = new Contract();
 		
-		Expect(83);
+		Expect(84);
 		IdentOrString(ref stringValue);
 		contract.Code = new CFI.Code(stringValue); 
 		Expect(6);
@@ -1304,393 +1342,393 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 			DoubleOptional(ref contract.Strike);
 		}
-		Expect(84);
+		Expect(85);
 	}
 
 	void CompoundType(ref CompoundType compoundType) {
 		switch (la.kind) {
-		case 114: {
+		case 115: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.UNKNOWN; 
 			break;
 		}
-		case 115: {
+		case 116: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.GENERIC; 
 			break;
 		}
-		case 116: {
+		case 117: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PERFORMANCE_INDEX_BASKET; 
 			break;
 		}
-		case 117: {
+		case 118: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.NON_PERFORMANCE_INDEX_BASKET; 
 			break;
 		}
-		case 118: {
+		case 119: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STRADDLE; 
 			break;
 		}
-		case 119: {
+		case 120: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STRANGLE; 
 			break;
 		}
-		case 120: {
+		case 121: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.FUTURE_TIME_SPREAD; 
 			break;
 		}
-		case 121: {
+		case 122: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.OPTION_TIME_SPREAD; 
 			break;
 		}
-		case 122: {
+		case 123: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PRICE_SPREAD; 
 			break;
 		}
-		case 123: {
+		case 124: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.SYNTHETIC_UNDERLYING; 
 			break;
 		}
-		case 124: {
+		case 125: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STRADDLE_TIME_SPREAD; 
 			break;
 		}
-		case 125: {
+		case 126: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RATIO_SPREAD; 
 			break;
 		}
-		case 126: {
+		case 127: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RATIO_FUTURE_TIME_SPREAD; 
 			break;
 		}
-		case 127: {
+		case 128: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RATIO_OPTION_TIME_SPREAD; 
 			break;
 		}
-		case 128: {
+		case 129: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PUT_CALL_SPREAD; 
 			break;
 		}
-		case 129: {
+		case 130: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RATIO_PUT_CALL_SPREAD; 
 			break;
 		}
-		case 130: {
+		case 131: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.LADDER; 
 			break;
 		}
-		case 131: {
+		case 132: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.BOX; 
 			break;
 		}
-		case 132: {
+		case 133: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.BUTTERFLY; 
 			break;
 		}
-		case 133: {
+		case 134: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.CONDOR; 
 			break;
 		}
-		case 134: {
+		case 135: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.IRON_BUTTERFLY; 
 			break;
 		}
-		case 135: {
+		case 136: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.DIAGONAL_SPREAD; 
 			break;
 		}
-		case 136: {
+		case 137: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RATIO_DIAGONAL_SPREAD; 
 			break;
 		}
-		case 137: {
+		case 138: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STRADDLE_DIAGONAL_SPREAD; 
 			break;
 		}
-		case 138: {
+		case 139: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.CONVERSION_REVERSAL; 
 			break;
 		}
-		case 139: {
+		case 140: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.COVERED_OPTION; 
 			break;
 		}
-		case 140: {
+		case 141: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RESERVED1; 
 			break;
 		}
-		case 141: {
+		case 142: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RESERVED2; 
 			break;
 		}
-		case 142: {
+		case 143: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.CURRENCY_FUTURE_SPREAD; 
 			break;
 		}
-		case 143: {
+		case 144: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RATE_FUTURE_SPREAD; 
 			break;
 		}
-		case 144: {
+		case 145: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.INDEX_FUTURE_SPREAD; 
 			break;
 		}
-		case 145: {
+		case 146: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.FUTURE_BUTTERFLY; 
 			break;
 		}
-		case 146: {
+		case 147: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.FUTURE_CONDOR; 
 			break;
 		}
-		case 147: {
+		case 148: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STRIP; 
 			break;
 		}
-		case 148: {
+		case 149: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PACK; 
 			break;
 		}
-		case 149: {
+		case 150: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.BUNDLE; 
 			break;
 		}
-		case 150: {
+		case 151: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.BOND_DELIVERABLE_BASKET; 
 			break;
 		}
-		case 151: {
+		case 152: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STOCK_BASKET; 
 			break;
 		}
-		case 152: {
+		case 153: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PRICE_SPREAD_VS_OPTION; 
 			break;
 		}
-		case 153: {
+		case 154: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STRADDLE_VS_OPTION; 
 			break;
 		}
-		case 154: {
+		case 155: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.BOND_SPREAD; 
 			break;
 		}
-		case 155: {
+		case 156: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.EXCHANGE_SPREAD; 
 			break;
 		}
-		case 156: {
+		case 157: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.FUTURE_PACK_SPREAD; 
 			break;
 		}
-		case 157: {
+		case 158: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.FUTURE_PACK_BUTTERFLY; 
 			break;
 		}
-		case 158: {
+		case 159: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.WHOLE_SALE; 
 			break;
 		}
-		case 159: {
+		case 160: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.COMMODITY_SPREAD; 
 			break;
 		}
-		case 160: {
+		case 161: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.JELLY_ROLL; 
 			break;
 		}
-		case 161: {
+		case 162: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.IRON_CONDOR; 
 			break;
 		}
-		case 162: {
+		case 163: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.OPTIONS_STRIP; 
 			break;
 		}
-		case 163: {
+		case 164: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.CONTINGENT_ORDERS; 
 			break;
 		}
-		case 164: {
+		case 165: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.INTERPRODUCT_SPREAD; 
 			break;
 		}
-		case 165: {
+		case 166: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PSEUDO_STRADDLE; 
 			break;
 		}
-		case 166: {
+		case 167: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.TAILOR_MADE; 
 			break;
 		}
-		case 167: {
+		case 168: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.FUTURES_GENERIC; 
 			break;
 		}
-		case 168: {
+		case 169: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.OPTIONS_GENERIC; 
 			break;
 		}
-		case 169: {
+		case 170: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.BASIS_TRADE; 
 			break;
 		}
-		case 170: {
+		case 171: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.FUTURETIME_SPREAD_REDUCED_TICK_SIZE; 
 			break;
 		}
-		case 171: {
+		case 172: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.GENERIC_VOLA_STRATEGY_VS; 
 			break;
 		}
-		case 172: {
+		case 173: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STRADDLE_VOLA_STRATEGY_VS; 
 			break;
 		}
-		case 173: {
+		case 174: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.STRANGLE_VS; 
 			break;
 		}
-		case 174: {
+		case 175: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.OPTION_TIME_SPREAD_VS; 
 			break;
 		}
-		case 175: {
+		case 176: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PRICE_SPREAD_VS; 
 			break;
 		}
-		case 176: {
+		case 177: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.RATIO_SPREAD_VS; 
 			break;
 		}
-		case 177: {
+		case 178: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PUT_CALL_SPREADVS; 
 			break;
 		}
-		case 178: {
+		case 179: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.LADDER_VS; 
 			break;
 		}
-		case 179: {
+		case 180: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PRICE_SPREAD_VS_OPTION_VS; 
 			break;
 		}
-		case 180: {
+		case 181: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.COLLAR; 
 			break;
 		}
-		case 181: {
+		case 182: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.COMBO; 
 			break;
 		}
-		case 182: {
+		case 183: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.PROTECTIVE_PUT; 
 			break;
 		}
-		case 183: {
+		case 184: {
 			Get();
 			compoundType = Sample.FoxScript.CompoundType.SPREAD; 
 			break;
 		}
-		default: SynErr(259); break;
+		default: SynErr(273); break;
 		}
 	}
 
 	void DoubleOptional(ref double? value) {
-		if (la.kind == 64) {
+		if (la.kind == 65) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else if (la.kind == 65) {
+		} else if (la.kind == 66) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else SynErr(260);
+		} else SynErr(274);
 	}
 
 	void ContractKind(out ContractKind kind) {
 		kind = Sample.FoxScript.ContractKind.UNKNOWN; 
-		if (la.kind == 186) {
+		if (la.kind == 187) {
 			Get();
 			kind = Sample.FoxScript.ContractKind.FUTURE; 
-		} else if (la.kind == 187) {
-			Get();
-			kind = Sample.FoxScript.ContractKind.OPTION; 
 		} else if (la.kind == 188) {
 			Get();
-			kind = Sample.FoxScript.ContractKind.FOREX; 
+			kind = Sample.FoxScript.ContractKind.OPTION; 
 		} else if (la.kind == 189) {
 			Get();
-			kind = Sample.FoxScript.ContractKind.FUTURE_COMPOUND; 
+			kind = Sample.FoxScript.ContractKind.FOREX; 
 		} else if (la.kind == 190) {
 			Get();
+			kind = Sample.FoxScript.ContractKind.FUTURE_COMPOUND; 
+		} else if (la.kind == 191) {
+			Get();
 			kind = Sample.FoxScript.ContractKind.OPTIONS_COMPOUND; 
-		} else SynErr(261);
+		} else SynErr(275);
 	}
 
 	void OrderBody(OrderCommand command) {
@@ -1704,13 +1742,23 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		if (StartOf(9)) {
 			TradingSession(ref command.TradingSession);
 		}
-		if (la.kind == 1 || la.kind == 66) {
+		if (la.kind == 1 || la.kind == 67) {
 			AllocationBlock(out command.AllocationBlock);
 		}
-		if (la.kind == 197) {
+		if (la.kind == 200) {
 			Get();
 			Account(ref command.Account);
 		}
+	}
+
+	void BracketType(ref BracketType btype) {
+		if (la.kind == 233) {
+			Get();
+			btype = Sample.FoxScript.BracketType.OCO; 
+		} else if (la.kind == 234) {
+			Get();
+			btype = Sample.FoxScript.BracketType.OSO; 
+		} else SynErr(276);
 	}
 
 	void OrigMsgVarName(ref string origMsgVarName) {
@@ -1720,15 +1768,15 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void OrderSide(ref OrderSide orderSide) {
 		orderSide = new OrderSide(); 
-		if (la.kind == 76) {
+		if (la.kind == 77) {
 			Get();
 			orderSide.Side = QuickFix.Side.BUY; 
-		} else if (la.kind == 77) {
+		} else if (la.kind == 78) {
 			Get();
 			orderSide.Side = QuickFix.Side.SELL; 
-		} else SynErr(262);
-		if (la.kind == 80 || la.kind == 81) {
-			if (la.kind == 80) {
+		} else SynErr(277);
+		if (la.kind == 81 || la.kind == 82) {
+			if (la.kind == 81) {
 				Get();
 				orderSide.Open = true; 
 			} else {
@@ -1746,7 +1794,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		IdentOrString(ref str);
 		ab.Name = str; 
 		AllocationRule(ref ab.Rule);
-		Expect(85);
+		Expect(86);
 		AllocationItem(out item);
 		ab.Add(item); 
 		while (la.kind == 6) {
@@ -1754,7 +1802,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			AllocationItem(out item);
 			ab.Add(item); 
 		}
-		Expect(86);
+		Expect(87);
 	}
 
 	void PostAllocationBlock(out AllocationBlock<PostAllocationBlockItem> ab) {
@@ -1762,7 +1810,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		PostAllocationBlockItem item;
 		
 		PostAllocationRule(ref ab.Rule);
-		Expect(85);
+		Expect(86);
 		PostAllocationItem(out item);
 		ab.Add(item); 
 		while (la.kind == 6) {
@@ -1770,11 +1818,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			PostAllocationItem(out item);
 			ab.Add(item); 
 		}
-		Expect(86);
+		Expect(87);
 	}
 
 	void FormatArgs(ref FormatArgs fargs) {
-		Expect(66);
+		Expect(67);
 		fargs = new FormatArgs(LiteralParser.ParseString(t.val)); 
 		while (la.kind == 6) {
 			Get();
@@ -1795,11 +1843,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (StartOf(10)) {
 			LogicalExpr(ref expr);
 			arg = expr; 
-		} else SynErr(263);
+		} else SynErr(278);
 	}
 
 	void SetSeqNumPropCommand() {
-		Expect(196);
+		Expect(197);
 		int SenderSeqNum = -1; int TargetSeqNum = -1; 
 		IntegerOrDefault(ref SenderSeqNum);
 		Expect(6);
@@ -1816,40 +1864,30 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	}
 
 	void IntegerOrDefault(ref int result) {
-		if (la.kind == 198) {
+		if (la.kind == 201) {
 			Get();
 			result = -1; 
-		} else if (la.kind == 64) {
+		} else if (la.kind == 65) {
 			Get();
 			result = LiteralParser.ParseInteger(t.val); 
-		} else SynErr(264);
+		} else SynErr(279);
 	}
 
 	void Literal(ref Object value) {
 		switch (la.kind) {
-		case 64: {
+		case 65: {
 			Get();
 			value = new Object(ObjectType.Integer, t.val); 
 			break;
 		}
-		case 65: {
+		case 66: {
 			Get();
 			value = new Object(ObjectType.Float, t.val); 
 			break;
 		}
-		case 66: {
-			Get();
-			value = new Object(ObjectType.String, t.val); 
-			break;
-		}
 		case 67: {
 			Get();
-			value = new Object(ObjectType.Bool, t.val); 
-			break;
-		}
-		case 69: {
-			Get();
-			value = new Object(ObjectType.Bool, "TRUE"); 
+			value = new Object(ObjectType.String, t.val); 
 			break;
 		}
 		case 68: {
@@ -1859,143 +1897,138 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		}
 		case 70: {
 			Get();
-			value = new Object(ObjectType.Bool, "FALSE"); 
+			value = new Object(ObjectType.Bool, "TRUE"); 
 			break;
 		}
-		case 72: {
+		case 69: {
 			Get();
-			value = new Object(ObjectType.Timespan, t.val); 
+			value = new Object(ObjectType.Bool, t.val); 
+			break;
+		}
+		case 71: {
+			Get();
+			value = new Object(ObjectType.Bool, "FALSE"); 
 			break;
 		}
 		case 73: {
 			Get();
-			value = new Object(ObjectType.Timestamp, t.val); 
+			value = new Object(ObjectType.Timespan, t.val); 
 			break;
 		}
 		case 74: {
 			Get();
+			value = new Object(ObjectType.Timestamp, t.val); 
+			break;
+		}
+		case 75: {
+			Get();
 			value = new Object(ObjectType.Date, t.val); 
 			break;
 		}
-		default: SynErr(265); break;
+		default: SynErr(280); break;
 		}
 	}
 
 	void OrderQty(ref int orderQty) {
-		Expect(64);
+		Expect(65);
 		orderQty = LiteralParser.ParseInteger(t.val); 
 	}
 
 	void OrderType(ref OrderType orderType) {
 		double stop = 0, limit = 0; orderType = new OrderType(); 
 		switch (la.kind) {
-		case 218: {
+		case 221: {
 			Get();
 			orderType.Type = QuickFix.OrdType.MARKET; 
 			break;
 		}
-		case 219: {
+		case 222: {
 			Get();
 			orderType.Type = Sample.FoxScript.OrderType.MARKET_ON_OPEN; 
 			break;
 		}
-		case 220: {
+		case 223: {
 			Get();
 			orderType.Type = Sample.FoxScript.OrderType.MARKET_ON_CLOSE; 
 			break;
 		}
-		case 221: {
+		case 224: {
 			Get();
 			orderType.Type = QuickFix.OrdType.LIMIT; 
 			Price(ref limit);
 			orderType.Limit = limit; 
 			break;
 		}
-		case 222: {
+		case 225: {
 			Get();
 			orderType.Type = QuickFix.OrdType.STOP; 
 			Price(ref stop);
 			orderType.Stop = stop; 
-			if (la.kind == 221) {
+			if (la.kind == 224) {
 				Get();
 				orderType.Type = QuickFix.OrdType.STOP_LIMIT; 
 				Price(ref limit);
 				orderType.Limit = limit; 
 			}
-			if (la.kind == 225) {
+			if (la.kind == 228) {
 				TrailingStop(ref orderType.TrailingStop);
 			}
 			break;
 		}
-		case 223: {
+		case 226: {
 			Get();
 			orderType.Type = Sample.FoxScript.OrderType.ICEBERG; 
-			Expect(64);
+			Expect(65);
 			orderType.MaxFloor = LiteralParser.ParseInteger(t.val); 
-			Expect(221);
+			Expect(224);
 			Price(ref limit);
 			orderType.Limit = limit; 
 			break;
 		}
-		case 224: {
+		case 227: {
 			Get();
 			orderType.Type = QuickFix.OrdType.MARKET_IF_TOUCHED; 
 			Price(ref limit);
 			orderType.Limit = limit; 
 			break;
 		}
-		default: SynErr(266); break;
+		default: SynErr(281); break;
 		}
 	}
 
 	void TimeInForce(ref TimeInForce tif) {
 		tif = new TimeInForce(); 
-		if (la.kind == 213) {
+		if (la.kind == 216) {
 			Get();
 			tif.Type = QuickFix.TimeInForce.DAY; 
-		} else if (la.kind == 214) {
-			Get();
-			tif.Type = QuickFix.TimeInForce.GOOD_TILL_CANCEL; 
-		} else if (la.kind == 215) {
-			Get();
-			tif.Type = QuickFix.TimeInForce.GOOD_TILL_DATE; 
-			if (la.kind == 73) {
-				Get();
-				tif.Expiration = LiteralParser.ParseTimestamp(t.val); 
-			} else if (la.kind == 74) {
-				Get();
-				tif.Expiration = LiteralParser.ParseDate(t.val); 
-			} else SynErr(267);
-		} else if (la.kind == 216) {
-			Get();
-			tif.Type = QuickFix.TimeInForce.FILL_OR_KILL; 
 		} else if (la.kind == 217) {
 			Get();
+			tif.Type = QuickFix.TimeInForce.GOOD_TILL_CANCEL; 
+		} else if (la.kind == 218) {
+			Get();
+			tif.Type = QuickFix.TimeInForce.GOOD_TILL_DATE; 
+			if (la.kind == 74) {
+				Get();
+				tif.Expiration = LiteralParser.ParseTimestamp(t.val); 
+			} else if (la.kind == 75) {
+				Get();
+				tif.Expiration = LiteralParser.ParseDate(t.val); 
+			} else SynErr(282);
+		} else if (la.kind == 219) {
+			Get();
+			tif.Type = QuickFix.TimeInForce.FILL_OR_KILL; 
+		} else if (la.kind == 220) {
+			Get();
 			tif.Type = QuickFix.TimeInForce.IMMEDIATE_OR_CANCEL; 
-		} else SynErr(268);
+		} else SynErr(283);
 	}
 
 	void TradingSession(ref string session) {
-		if (la.kind == 206) {
+		if (la.kind == 209) {
 			Get();
-			Expect(199);
+			Expect(202);
 		}
 		switch (la.kind) {
-		case 207: {
-			Get();
-			session = t.val; 
-			break;
-		}
-		case 208: {
-			Get();
-			session = t.val; 
-			break;
-		}
-		case 209: {
-			Get();
-			session = t.val; 
-			break;
-		}
 		case 210: {
 			Get();
 			session = t.val; 
@@ -2011,27 +2044,42 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			session = t.val; 
 			break;
 		}
-		default: SynErr(269); break;
+		case 213: {
+			Get();
+			session = t.val; 
+			break;
+		}
+		case 214: {
+			Get();
+			session = t.val; 
+			break;
+		}
+		case 215: {
+			Get();
+			session = t.val; 
+			break;
+		}
+		default: SynErr(284); break;
 		}
 	}
 
 	void AllocationRule(ref AllocationRule rule) {
-		if (la.kind == 201) {
+		if (la.kind == 204) {
 			Get();
 			rule = Sample.FoxScript.AllocationRule.LowAcctLowPrice; 
-		} else if (la.kind == 202) {
-			Get();
-			rule = Sample.FoxScript.AllocationRule.LowAcctHighPrice; 
-		} else if (la.kind == 203) {
-			Get();
-			rule = Sample.FoxScript.AllocationRule.HighAcctLowPrice; 
-		} else if (la.kind == 204) {
-			Get();
-			rule = Sample.FoxScript.AllocationRule.HighAcctHighPrice; 
 		} else if (la.kind == 205) {
 			Get();
+			rule = Sample.FoxScript.AllocationRule.LowAcctHighPrice; 
+		} else if (la.kind == 206) {
+			Get();
+			rule = Sample.FoxScript.AllocationRule.HighAcctLowPrice; 
+		} else if (la.kind == 207) {
+			Get();
+			rule = Sample.FoxScript.AllocationRule.HighAcctHighPrice; 
+		} else if (la.kind == 208) {
+			Get();
 			rule = Sample.FoxScript.AllocationRule.APS; 
-		} else SynErr(270);
+		} else SynErr(285);
 	}
 
 	void AllocationItem(out PreAllocationBlockItem item) {
@@ -2044,10 +2092,10 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		if (la.kind == 42) {
 			Get();
 			rule = Sample.FoxScript.AllocationRule.PostAllocation; 
-		} else if (la.kind == 205) {
+		} else if (la.kind == 208) {
 			Get();
 			rule = Sample.FoxScript.AllocationRule.PostAllocationAPS; 
-		} else SynErr(271);
+		} else SynErr(286);
 	}
 
 	void PostAllocationItem(out PostAllocationBlockItem item) {
@@ -2058,19 +2106,19 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	}
 
 	void Double(ref double value) {
-		if (la.kind == 64) {
+		if (la.kind == 65) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else if (la.kind == 65) {
+		} else if (la.kind == 66) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else SynErr(272);
+		} else SynErr(287);
 	}
 
 	void AccountInfo(ref ExtendedAccount account) {
 		IdentOrString(ref account.Spec);
-		if (la.kind == 199 || la.kind == 200) {
-			if (la.kind == 199) {
+		if (la.kind == 202 || la.kind == 203) {
+			if (la.kind == 202) {
 				Get();
 				IdentOrString(ref account.Firm);
 			} else {
@@ -2081,7 +2129,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	}
 
 	void Timeout() {
-		Expect(72);
+		Expect(73);
 	}
 
 	void MsgCtxLogicalExpr(ref object expr) {
@@ -2092,7 +2140,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		object left = null; object right = null; LogicalOp? op = null; 
 		AndExpr(ref left);
 		expr = left; 
-		if (la.kind == 62) {
+		if (la.kind == 63) {
 			Get();
 			op = LogicalOp.Or; 
 			AndExpr(ref right);
@@ -2104,7 +2152,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		object left = null; object right = null; LogicalOp? op = null; 
 		EqlExpr(ref left);
 		expr = left; 
-		if (la.kind == 63) {
+		if (la.kind == 64) {
 			Get();
 			op = LogicalOp.And; 
 			EqlExpr(ref right);
@@ -2117,16 +2165,16 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		if (StartOf(11)) {
 			RelExpr(ref left);
 			expr = left; 
-		} else if (la.kind == 71) {
+		} else if (la.kind == 72) {
 			Get();
 			expr = new Object(ObjectType.Null, null); 
 		} else if (la.kind == 1) {
 			MsgVarName(ref msgVarName);
 			expr = new Object(ObjectType.FixMsgVar, msgVarName); 
-		} else SynErr(273);
-		if (la.kind == 56 || la.kind == 57) {
+		} else SynErr(288);
+		if (la.kind == 57 || la.kind == 58) {
 			msgVarName = null; 
-			if (la.kind == 56) {
+			if (la.kind == 57) {
 				Get();
 				op = LogicalOp.Equal; 
 			} else {
@@ -2136,13 +2184,13 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			if (StartOf(11)) {
 				RelExpr(ref right);
 				expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = right }; 
-			} else if (la.kind == 71) {
+			} else if (la.kind == 72) {
 				Get();
 				expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = new Object(ObjectType.Null, null) }; 
 			} else if (la.kind == 1) {
 				MsgVarName(ref msgVarName);
 				expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = new Object(ObjectType.FixMsgVar, msgVarName) }; 
-			} else SynErr(274);
+			} else SynErr(289);
 		}
 	}
 
@@ -2151,13 +2199,13 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		RelExprArg(ref left);
 		expr = left; 
 		if (StartOf(12)) {
-			if (la.kind == 58) {
+			if (la.kind == 59) {
 				Get();
 				op = LogicalOp.Less; 
-			} else if (la.kind == 60) {
+			} else if (la.kind == 61) {
 				Get();
 				op = LogicalOp.Greater; 
-			} else if (la.kind == 59) {
+			} else if (la.kind == 60) {
 				Get();
 				op = LogicalOp.LessOrEqual; 
 			} else {
@@ -2174,18 +2222,18 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		if (StartOf(13)) {
 			RValue(ref rvalue);
 			arg = rvalue; 
-		} else if (la.kind == 83) {
+		} else if (la.kind == 84) {
 			Get();
 			LogicalExpr(ref arg);
-			Expect(84);
-		} else SynErr(275);
+			Expect(85);
+		} else SynErr(290);
 	}
 
 	void MsgCtxOrExpr(ref object expr) {
 		object left = null; object right = null; LogicalOp? op = null; 
 		MsgCtxAndExpr(ref left);
 		expr = left; 
-		if (la.kind == 62) {
+		if (la.kind == 63) {
 			Get();
 			op = LogicalOp.Or; 
 			MsgCtxAndExpr(ref right);
@@ -2197,7 +2245,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		object left = null; object right = null; LogicalOp? op = null; 
 		MsgCtxEqlExpr(ref left);
 		expr = left; 
-		if (la.kind == 63) {
+		if (la.kind == 64) {
 			Get();
 			op = LogicalOp.And; 
 			MsgCtxEqlExpr(ref right);
@@ -2209,8 +2257,8 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		object left = null; object right = null; LogicalOp? op = null; 
 		MsgCtxRelExpr(ref left);
 		expr = left; 
-		if (la.kind == 56 || la.kind == 57) {
-			if (la.kind == 56) {
+		if (la.kind == 57 || la.kind == 58) {
+			if (la.kind == 57) {
 				Get();
 				op = LogicalOp.Equal; 
 			} else {
@@ -2227,13 +2275,13 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		MsgCtxRelExprArg(ref left);
 		expr = left; 
 		if (StartOf(12)) {
-			if (la.kind == 58) {
+			if (la.kind == 59) {
 				Get();
 				op = LogicalOp.Less; 
-			} else if (la.kind == 60) {
+			} else if (la.kind == 61) {
 				Get();
 				op = LogicalOp.Greater; 
-			} else if (la.kind == 59) {
+			} else if (la.kind == 60) {
 				Get();
 				op = LogicalOp.LessOrEqual; 
 			} else {
@@ -2253,11 +2301,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (StartOf(13)) {
 			RValue(ref rvalue);
 			arg = rvalue; 
-		} else if (la.kind == 83) {
+		} else if (la.kind == 84) {
 			Get();
 			MsgCtxLogicalExpr(ref arg);
-			Expect(84);
-		} else SynErr(276);
+			Expect(85);
+		} else SynErr(291);
 	}
 
 	void FieldName(ref string fieldName) {
@@ -2266,99 +2314,168 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	}
 
 	void Price(ref double value) {
-		if (la.kind == 64) {
+		if (la.kind == 65) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else if (la.kind == 65) {
+		} else if (la.kind == 66) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else SynErr(277);
+		} else SynErr(292);
 	}
 
 	void TrailingStop(ref TrailingStop trailing) {
 		trailing = new TrailingStop(); 
-		Expect(225);
-		if (la.kind == 226 || la.kind == 227 || la.kind == 228) {
-			if (la.kind == 226) {
+		Expect(228);
+		if (la.kind == 229 || la.kind == 230 || la.kind == 231) {
+			if (la.kind == 229) {
 				Get();
 				trailing.TriggerType = TokenParser.ParseTrailingTriggerType(t.val); 
-			} else if (la.kind == 227) {
+			} else if (la.kind == 230) {
 				Get();
 				trailing.TriggerType = TokenParser.ParseTrailingTriggerType(t.val); 
 			} else {
 				Get();
 				trailing.TriggerType = TokenParser.ParseTrailingTriggerType(t.val); 
 			}
-			if (la.kind == 64) {
+			if (la.kind == 65) {
 				Get();
 				trailing.Amount = LiteralParser.ParseInteger(t.val); 
-			} else if (la.kind == 65) {
+			} else if (la.kind == 66) {
 				Get();
 				trailing.Amount = LiteralParser.ParseFloat(t.val); 
-			} else SynErr(278);
-			if (la.kind == 229) {
+			} else SynErr(293);
+			if (la.kind == 232) {
 				Get();
 				trailing.AmountInPercents = true; 
 			}
-		} else if (la.kind == 64 || la.kind == 65) {
-			if (la.kind == 64) {
+		} else if (la.kind == 65 || la.kind == 66) {
+			if (la.kind == 65) {
 				Get();
 				trailing.Amount = LiteralParser.ParseInteger(t.val); 
 			} else {
 				Get();
 				trailing.Amount = LiteralParser.ParseFloat(t.val); 
 			}
-		} else SynErr(279);
+		} else SynErr(294);
 	}
 
 	void Symbol(ref OrderSymbol symbol) {
 		if (la.kind == 1) {
 			Get();
 			symbol = TokenParser.ParseOrderSymbol(t.val); 
-		} else if (la.kind == 66) {
+		} else if (la.kind == 67) {
 			Get();
 			symbol = TokenParser.ParseOrderSymbol(LiteralParser.ParseString(t.val)); 
-		} else SynErr(280);
+		} else SynErr(295);
 	}
 
 	void StrikeSide(OrderContract contract) {
 		double strike = 0; 
-		if (la.kind == 79) {
+		if (la.kind == 80) {
 			Get();
 			contract.Put = false; 
-		} else if (la.kind == 78) {
+		} else if (la.kind == 79) {
 			Get();
 			contract.Put = true; 
-		} else SynErr(281);
+		} else SynErr(296);
 		Price(ref strike);
 		contract.Strike = strike; 
 	}
 
 	void FASTUpdateType(MDMessageCommand command) {
-		if (la.kind == 230) {
+		if (la.kind == 235) {
 			Get();
 			command.UpdateType = 0; 
 		}
 	}
 
+	void FASTMDEntries(MDMessageCommand command) {
+		command.ResetMDEntries(); 
+		Expect(236);
+		Expect(198);
+		if (StartOf(14)) {
+			FAST.MDEntryType type; 
+			FASTMDEntryType(out type);
+			command.Add(type); 
+			while (la.kind == 6) {
+				Get();
+				FASTMDEntryType(out type);
+				command.Add(type); 
+			}
+		}
+		Expect(199);
+	}
+
+	void FASTMDEntryType(out FAST.MDEntryType type) {
+		type = FAST.MDEntryType.BID; 
+		switch (la.kind) {
+		case 230: {
+			Get();
+			type = FAST.MDEntryType.BID; 
+			break;
+		}
+		case 237: {
+			Get();
+			type = FAST.MDEntryType.OFFER; 
+			break;
+		}
+		case 238: {
+			Get();
+			type = FAST.MDEntryType.TRADE; 
+			break;
+		}
+		case 239: {
+			Get();
+			type = FAST.MDEntryType.OPENING_PRICE; 
+			break;
+		}
+		case 240: {
+			Get();
+			type = FAST.MDEntryType.SETTLEMENT_PRICE; 
+			break;
+		}
+		case 241: {
+			Get();
+			type = FAST.MDEntryType.TRADE_VOLUME; 
+			break;
+		}
+		case 242: {
+			Get();
+			type = FAST.MDEntryType.OPEN_INTEREST; 
+			break;
+		}
+		case 243: {
+			Get();
+			type = FAST.MDEntryType.WORKUP_TRADE; 
+			break;
+		}
+		case 244: {
+			Get();
+			type = FAST.MDEntryType.EMPTY_BOOK; 
+			break;
+		}
+		default: SynErr(297); break;
+		}
+	}
+
 	void FASTContract(MDMessageCommand command) {
-		if (la.kind == 183 || la.kind == 188) {
+		if (la.kind == 184 || la.kind == 189) {
 			FASTSymbolBasedContract(command);
-		} else if (la.kind == 1 || la.kind == 66) {
+		} else if (la.kind == 1 || la.kind == 67) {
 			FASTFuturesBasedContract(command);
-		} else SynErr(282);
+		} else SynErr(298);
 	}
 
 	void FASTSymbolBasedContract(MDMessageCommand command) {
-		if (la.kind == 183) {
+		if (la.kind == 184) {
 			Get();
 			command.ContractKind = Sample.FoxScript.ContractKind.FUTURE_COMPOUND; 
-		} else if (la.kind == 188) {
+		} else if (la.kind == 189) {
 			Get();
 			command.ContractKind = Sample.FoxScript.ContractKind.FOREX; 
-		} else SynErr(283);
+		} else SynErr(299);
 		IdentOrString(ref command.BaseSymbol);
-		if (la.kind == 78 || la.kind == 79) {
+		if (la.kind == 79 || la.kind == 80) {
 			FASTStrikeSide(command);
 			command.ContractKind = Sample.FoxScript.ContractKind.OPTIONS_COMPOUND; 
 		}
@@ -2367,9 +2484,11 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	void FASTFuturesBasedContract(MDMessageCommand command) {
 		command.ContractKind = Sample.FoxScript.ContractKind.FUTURE; 
 		IdentOrString(ref command.BaseSymbol);
-		Expect(64);
-		command.ExpirationMonth = LiteralParser.ParseInteger(t.val);   
-		if (la.kind == 78 || la.kind == 79) {
+		if (la.kind == 65) {
+			Get();
+			command.ExpirationMonth = LiteralParser.ParseInteger(t.val);   
+		}
+		if (la.kind == 79 || la.kind == 80) {
 			FASTStrikeSide(command);
 			command.ContractKind = Sample.FoxScript.ContractKind.OPTION; 
 		}
@@ -2377,21 +2496,21 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void FASTStrikeSide(MDMessageCommand command) {
 		command.StrikeSide = new FASTStrikeSide(); double strike = 0; 
-		if (la.kind == 79) {
+		if (la.kind == 80) {
 			Get();
 			command.StrikeSide.Put = false; 
-		} else if (la.kind == 78) {
+		} else if (la.kind == 79) {
 			Get();
 			command.StrikeSide.Put = true; 
-		} else SynErr(284);
+		} else SynErr(300);
 		Price(ref strike);
 		command.StrikeSide.Strike = strike; 
 	}
 
 	void SubscribeMarketDataToFile(ref MDMessageCommand command) {
-		if (la.kind == 60) {
+		if (la.kind == 61) {
 			Get();
-			Expect(66);
+			Expect(67);
 			command.OutputFileName = LiteralParser.ParseString(t.val); 
 		}
 	}
@@ -2408,20 +2527,21 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	}
 	
 	static readonly bool[,] set = {
-		{_T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_T,_T, _T,_T,_T,_T, _T,_x,_x,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_T,_T, _T,_T,_T,_T, _T,_x,_x,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_T, _T,_T,_T,_T, _T,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_x,_x, _x,_T,_T,_T, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_T,_x, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_T, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_T, _T,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_T,_x, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_T, _T,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x},
-		{_x,_x,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_T,_x, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x}
+		{T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,T,x,x, x,x,x,T, T,T,T,T, x,T,T,T, T,T,T,T, T,x,x,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,T,x,x, x,x,x,T, T,T,T,T, x,T,T,T, T,T,T,T, T,x,x,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,T, T,T,T,T, T,x,x,x, x,T,T,T, T,T,T,T, T,T,T,T, T,T,T,T, x,x,x,x, x,x,x,T, T,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,T,x,x, x,x,x,T, T,T,T,T, x,T,x,x, x,x,x,x, x,x,x,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,T,T,x, x,x,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,T, x,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, T,T,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,T,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,T, T,T,T,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,T, x,T,T,T, x,x,x,x, x,x,x,x, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,T, T,T,T,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,T,T, T,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,T,T,T, T,T,T,T, x,T,T,T, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x},
+		{x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,x,x, x,x,T,x, x,x,x,x, x,T,T,T, T,T,T,T, T,x,x,x, x}
 
 	};
 } // end Parser
@@ -2481,245 +2601,261 @@ public class Errors {
 			case 43: s = "actionPAlloc expected"; break;
 			case 44: s = "actionUserRequest expected"; break;
 			case 45: s = "actionMarginCalc expected"; break;
-			case 46: s = "actionHeartbeat expected"; break;
-			case 47: s = "actionConnectFast expected"; break;
-			case 48: s = "actionDisconnectFast expected"; break;
-			case 49: s = "actionCancelSubscribe expected"; break;
-			case 50: s = "actionSubscribeQuotes expected"; break;
-			case 51: s = "actionSubscribeDOM expected"; break;
-			case 52: s = "actionSubscribeHistogram expected"; break;
-			case 53: s = "actionSubscribeTicks expected"; break;
-			case 54: s = "actionLoadTicks expected"; break;
-			case 55: s = "assignOp expected"; break;
-			case 56: s = "equalOp expected"; break;
-			case 57: s = "notEqualOp expected"; break;
-			case 58: s = "lessOp expected"; break;
-			case 59: s = "lessOrEqualOp expected"; break;
-			case 60: s = "greaterOp expected"; break;
-			case 61: s = "greaterOrEqualOp expected"; break;
-			case 62: s = "orOp expected"; break;
-			case 63: s = "andOp expected"; break;
-			case 64: s = "integer expected"; break;
-			case 65: s = "float expected"; break;
-			case 66: s = "string expected"; break;
-			case 67: s = "true expected"; break;
-			case 68: s = "false expected"; break;
-			case 69: s = "on expected"; break;
-			case 70: s = "off expected"; break;
-			case 71: s = "null expected"; break;
-			case 72: s = "timespan expected"; break;
-			case 73: s = "timestamp expected"; break;
-			case 74: s = "date expected"; break;
-			case 75: s = "uuid expected"; break;
-			case 76: s = "buy expected"; break;
-			case 77: s = "sell expected"; break;
-			case 78: s = "put expected"; break;
-			case 79: s = "call expected"; break;
-			case 80: s = "open expected"; break;
-			case 81: s = "close expected"; break;
-			case 82: s = "\"if\" expected"; break;
-			case 83: s = "\"(\" expected"; break;
-			case 84: s = "\")\" expected"; break;
-			case 85: s = "\"{\" expected"; break;
-			case 86: s = "\"}\" expected"; break;
-			case 87: s = "\"else\" expected"; break;
-			case 88: s = "\"msg\" expected"; break;
-			case 89: s = "\"uuid\" expected"; break;
-			case 90: s = "\"request\" expected"; break;
-			case 91: s = "\"req\" expected"; break;
-			case 92: s = "\"r\" expected"; break;
-			case 93: s = "\"base\" expected"; break;
-			case 94: s = "\"b\" expected"; break;
-			case 95: s = "\"lookup\" expected"; break;
-			case 96: s = "\"lkp\" expected"; break;
-			case 97: s = "\"l\" expected"; break;
-			case 98: s = "\"mode\" expected"; break;
-			case 99: s = "\"max_records\" expected"; break;
-			case 100: s = "\"snapshot\" expected"; break;
-			case 101: s = "\"subscribe\" expected"; break;
-			case 102: s = "\"unsubscribe\" expected"; break;
-			case 103: s = "\"updates_only\" expected"; break;
-			case 104: s = "\"kind\" expected"; break;
-			case 105: s = "\"type\" expected"; break;
-			case 106: s = "\"opt_type\" expected"; break;
-			case 107: s = "\"by_base_contract\" expected"; break;
-			case 108: s = "\"opt_required\" expected"; break;
-			case 109: s = "\"base_contract\" expected"; break;
-			case 110: s = "\"underlying\" expected"; break;
-			case 111: s = "\"exch\" expected"; break;
-			case 112: s = "\"cgroup\" expected"; break;
-			case 113: s = "\"compound_type\" expected"; break;
-			case 114: s = "\"unknown\" expected"; break;
-			case 115: s = "\"generic\" expected"; break;
-			case 116: s = "\"performance_index_basket\" expected"; break;
-			case 117: s = "\"non_performance_index_basket\" expected"; break;
-			case 118: s = "\"straddle\" expected"; break;
-			case 119: s = "\"strangle\" expected"; break;
-			case 120: s = "\"future_time_spread\" expected"; break;
-			case 121: s = "\"option_time_spread\" expected"; break;
-			case 122: s = "\"price_spread\" expected"; break;
-			case 123: s = "\"synthetic_underlying\" expected"; break;
-			case 124: s = "\"straddle_time_spread\" expected"; break;
-			case 125: s = "\"ratio_spread\" expected"; break;
-			case 126: s = "\"ratio_future_time_spread\" expected"; break;
-			case 127: s = "\"ratio_option_time_spread\" expected"; break;
-			case 128: s = "\"put_call_spread\" expected"; break;
-			case 129: s = "\"ratio_put_call_spread\" expected"; break;
-			case 130: s = "\"ladder\" expected"; break;
-			case 131: s = "\"box\" expected"; break;
-			case 132: s = "\"butterfly\" expected"; break;
-			case 133: s = "\"condor\" expected"; break;
-			case 134: s = "\"iron_butterfly\" expected"; break;
-			case 135: s = "\"diagonal_spread\" expected"; break;
-			case 136: s = "\"ratio_diagonal_spread\" expected"; break;
-			case 137: s = "\"straddle_diagonal_spread\" expected"; break;
-			case 138: s = "\"conversion_reversal\" expected"; break;
-			case 139: s = "\"covered_option\" expected"; break;
-			case 140: s = "\"reserved1\" expected"; break;
-			case 141: s = "\"reserved2\" expected"; break;
-			case 142: s = "\"currency_future_spread\" expected"; break;
-			case 143: s = "\"rate_future_spread\" expected"; break;
-			case 144: s = "\"index_future_spread\" expected"; break;
-			case 145: s = "\"future_butterfly\" expected"; break;
-			case 146: s = "\"future_condor\" expected"; break;
-			case 147: s = "\"strip\" expected"; break;
-			case 148: s = "\"pack\" expected"; break;
-			case 149: s = "\"bundle\" expected"; break;
-			case 150: s = "\"bond_deliverable_basket\" expected"; break;
-			case 151: s = "\"stock_basket\" expected"; break;
-			case 152: s = "\"price_spread_vs_option\" expected"; break;
-			case 153: s = "\"straddle_vs_option\" expected"; break;
-			case 154: s = "\"bond_spread\" expected"; break;
-			case 155: s = "\"exchange_spread\" expected"; break;
-			case 156: s = "\"future_pack_spread\" expected"; break;
-			case 157: s = "\"future_pack_butterfly\" expected"; break;
-			case 158: s = "\"whole_sale\" expected"; break;
-			case 159: s = "\"commodity_spread\" expected"; break;
-			case 160: s = "\"jelly_roll\" expected"; break;
-			case 161: s = "\"iron_condor\" expected"; break;
-			case 162: s = "\"options_strip\" expected"; break;
-			case 163: s = "\"contingent_orders\" expected"; break;
-			case 164: s = "\"interproduct_spread\" expected"; break;
-			case 165: s = "\"pseudo_straddle\" expected"; break;
-			case 166: s = "\"tailor_made\" expected"; break;
-			case 167: s = "\"futures_generic\" expected"; break;
-			case 168: s = "\"options_generic\" expected"; break;
-			case 169: s = "\"basis_trade\" expected"; break;
-			case 170: s = "\"futuretime_spread_reduced_tick_size\" expected"; break;
-			case 171: s = "\"generic_vola_strategy_vs\" expected"; break;
-			case 172: s = "\"straddle_vola_strategy_vs\" expected"; break;
-			case 173: s = "\"strangle_vs\" expected"; break;
-			case 174: s = "\"option_time_spread_vs\" expected"; break;
-			case 175: s = "\"price_spread_vs\" expected"; break;
-			case 176: s = "\"ratio_spread_vs\" expected"; break;
-			case 177: s = "\"put_call_spreadvs\" expected"; break;
-			case 178: s = "\"ladder_vs\" expected"; break;
-			case 179: s = "\"price_spread_vs_option_vs\" expected"; break;
-			case 180: s = "\"collar\" expected"; break;
-			case 181: s = "\"combo\" expected"; break;
-			case 182: s = "\"protective_put\" expected"; break;
-			case 183: s = "\"spread\" expected"; break;
-			case 184: s = "\"electronic\" expected"; break;
-			case 185: s = "\"pit\" expected"; break;
-			case 186: s = "\"future\" expected"; break;
-			case 187: s = "\"option\" expected"; break;
-			case 188: s = "\"forex\" expected"; break;
-			case 189: s = "\"future_compound\" expected"; break;
-			case 190: s = "\"options_compound\" expected"; break;
-			case 191: s = "\"any_inclusion\" expected"; break;
-			case 192: s = "\"symbol_starts_with\" expected"; break;
-			case 193: s = "\"description_starts_with\" expected"; break;
-			case 194: s = "\"any_starts_with\" expected"; break;
-			case 195: s = "\"exact_match\" expected"; break;
-			case 196: s = "\"seqnum\" expected"; break;
-			case 197: s = "\"for\" expected"; break;
-			case 198: s = "\"*\" expected"; break;
-			case 199: s = "\":\" expected"; break;
-			case 200: s = "\"::\" expected"; break;
-			case 201: s = "\"low_acct_low_price\" expected"; break;
-			case 202: s = "\"low_acct_high_price\" expected"; break;
-			case 203: s = "\"high_acct_low_price\" expected"; break;
-			case 204: s = "\"high_acct_high_price\" expected"; break;
-			case 205: s = "\"aps\" expected"; break;
-			case 206: s = "\"ts\" expected"; break;
-			case 207: s = "\"pre\" expected"; break;
-			case 208: s = "\"main\" expected"; break;
-			case 209: s = "\"after\" expected"; break;
-			case 210: s = "\"p1\" expected"; break;
-			case 211: s = "\"p2\" expected"; break;
-			case 212: s = "\"p3\" expected"; break;
-			case 213: s = "\"day\" expected"; break;
-			case 214: s = "\"gtc\" expected"; break;
-			case 215: s = "\"gtd\" expected"; break;
-			case 216: s = "\"fok\" expected"; break;
-			case 217: s = "\"ioc\" expected"; break;
-			case 218: s = "\"mkt\" expected"; break;
-			case 219: s = "\"moo\" expected"; break;
-			case 220: s = "\"moc\" expected"; break;
-			case 221: s = "\"lmt\" expected"; break;
-			case 222: s = "\"stp\" expected"; break;
-			case 223: s = "\"ice\" expected"; break;
-			case 224: s = "\"mit\" expected"; break;
-			case 225: s = "\"trailing\" expected"; break;
-			case 226: s = "\"last\" expected"; break;
-			case 227: s = "\"bid\" expected"; break;
-			case 228: s = "\"ask\" expected"; break;
-			case 229: s = "\"%\" expected"; break;
-			case 230: s = "\"full\" expected"; break;
-			case 231: s = "\"from\" expected"; break;
-			case 232: s = "\"to\" expected"; break;
-			case 233: s = "??? expected"; break;
-			case 234: s = "invalid Command"; break;
-			case 235: s = "invalid SimpleCommand"; break;
-			case 236: s = "invalid MsgProducingCommand"; break;
-			case 237: s = "invalid SetPropCommand"; break;
-			case 238: s = "invalid QuitCommand"; break;
-			case 239: s = "invalid ContractCommand"; break;
-			case 240: s = "invalid PostAllocationCommand"; break;
-			case 241: s = "invalid LoadTicksCommand"; break;
-			case 242: s = "invalid MessageFieldAssignments"; break;
-			case 243: s = "invalid MessageFieldAssignments"; break;
-			case 244: s = "invalid RValue"; break;
-			case 245: s = "invalid IdentOrString"; break;
-			case 246: s = "invalid Account"; break;
-			case 247: s = "invalid ContractRequest"; break;
-			case 248: s = "invalid ContractRequest"; break;
-			case 249: s = "invalid ContractLookup"; break;
-			case 250: s = "invalid BaseContractRequest"; break;
-			case 251: s = "invalid SubscriptionType"; break;
-			case 252: s = "invalid BaseContractParam"; break;
-			case 253: s = "invalid ContractLookupMode"; break;
-			case 254: s = "invalid ContractLookupParam"; break;
-			case 255: s = "invalid ContractKindList"; break;
-			case 256: s = "invalid ContractType"; break;
-			case 257: s = "invalid OptionType"; break;
-			case 258: s = "invalid BoolOptional"; break;
-			case 259: s = "invalid CompoundType"; break;
-			case 260: s = "invalid DoubleOptional"; break;
-			case 261: s = "invalid ContractKind"; break;
-			case 262: s = "invalid OrderSide"; break;
-			case 263: s = "invalid FormatArg"; break;
-			case 264: s = "invalid IntegerOrDefault"; break;
-			case 265: s = "invalid Literal"; break;
-			case 266: s = "invalid OrderType"; break;
-			case 267: s = "invalid TimeInForce"; break;
-			case 268: s = "invalid TimeInForce"; break;
-			case 269: s = "invalid TradingSession"; break;
-			case 270: s = "invalid AllocationRule"; break;
-			case 271: s = "invalid PostAllocationRule"; break;
-			case 272: s = "invalid Double"; break;
-			case 273: s = "invalid EqlExpr"; break;
-			case 274: s = "invalid EqlExpr"; break;
-			case 275: s = "invalid RelExprArg"; break;
-			case 276: s = "invalid MsgCtxRelExprArg"; break;
-			case 277: s = "invalid Price"; break;
-			case 278: s = "invalid TrailingStop"; break;
-			case 279: s = "invalid TrailingStop"; break;
-			case 280: s = "invalid Symbol"; break;
-			case 281: s = "invalid StrikeSide"; break;
-			case 282: s = "invalid FASTContract"; break;
-			case 283: s = "invalid FASTSymbolBasedContract"; break;
-			case 284: s = "invalid FASTStrikeSide"; break;
+			case 46: s = "actionBracket expected"; break;
+			case 47: s = "actionHeartbeat expected"; break;
+			case 48: s = "actionConnectFast expected"; break;
+			case 49: s = "actionDisconnectFast expected"; break;
+			case 50: s = "actionCancelSubscribe expected"; break;
+			case 51: s = "actionSubscribeQuotes expected"; break;
+			case 52: s = "actionSubscribeDOM expected"; break;
+			case 53: s = "actionSubscribeHistogram expected"; break;
+			case 54: s = "actionSubscribeTicks expected"; break;
+			case 55: s = "actionLoadTicks expected"; break;
+			case 56: s = "assignOp expected"; break;
+			case 57: s = "equalOp expected"; break;
+			case 58: s = "notEqualOp expected"; break;
+			case 59: s = "lessOp expected"; break;
+			case 60: s = "lessOrEqualOp expected"; break;
+			case 61: s = "greaterOp expected"; break;
+			case 62: s = "greaterOrEqualOp expected"; break;
+			case 63: s = "orOp expected"; break;
+			case 64: s = "andOp expected"; break;
+			case 65: s = "integer expected"; break;
+			case 66: s = "float expected"; break;
+			case 67: s = "string expected"; break;
+			case 68: s = "true expected"; break;
+			case 69: s = "false expected"; break;
+			case 70: s = "on expected"; break;
+			case 71: s = "off expected"; break;
+			case 72: s = "null expected"; break;
+			case 73: s = "timespan expected"; break;
+			case 74: s = "timestamp expected"; break;
+			case 75: s = "date expected"; break;
+			case 76: s = "uuid expected"; break;
+			case 77: s = "buy expected"; break;
+			case 78: s = "sell expected"; break;
+			case 79: s = "put expected"; break;
+			case 80: s = "call expected"; break;
+			case 81: s = "open expected"; break;
+			case 82: s = "close expected"; break;
+			case 83: s = "\"if\" expected"; break;
+			case 84: s = "\"(\" expected"; break;
+			case 85: s = "\")\" expected"; break;
+			case 86: s = "\"{\" expected"; break;
+			case 87: s = "\"}\" expected"; break;
+			case 88: s = "\"else\" expected"; break;
+			case 89: s = "\"msg\" expected"; break;
+			case 90: s = "\"uuid\" expected"; break;
+			case 91: s = "\"request\" expected"; break;
+			case 92: s = "\"req\" expected"; break;
+			case 93: s = "\"r\" expected"; break;
+			case 94: s = "\"base\" expected"; break;
+			case 95: s = "\"b\" expected"; break;
+			case 96: s = "\"lookup\" expected"; break;
+			case 97: s = "\"lkp\" expected"; break;
+			case 98: s = "\"l\" expected"; break;
+			case 99: s = "\"mode\" expected"; break;
+			case 100: s = "\"max_records\" expected"; break;
+			case 101: s = "\"snapshot\" expected"; break;
+			case 102: s = "\"subscribe\" expected"; break;
+			case 103: s = "\"unsubscribe\" expected"; break;
+			case 104: s = "\"updates_only\" expected"; break;
+			case 105: s = "\"kind\" expected"; break;
+			case 106: s = "\"type\" expected"; break;
+			case 107: s = "\"opt_type\" expected"; break;
+			case 108: s = "\"by_base_contract\" expected"; break;
+			case 109: s = "\"opt_required\" expected"; break;
+			case 110: s = "\"base_contract\" expected"; break;
+			case 111: s = "\"underlying\" expected"; break;
+			case 112: s = "\"exch\" expected"; break;
+			case 113: s = "\"cgroup\" expected"; break;
+			case 114: s = "\"compound_type\" expected"; break;
+			case 115: s = "\"unknown\" expected"; break;
+			case 116: s = "\"generic\" expected"; break;
+			case 117: s = "\"performance_index_basket\" expected"; break;
+			case 118: s = "\"non_performance_index_basket\" expected"; break;
+			case 119: s = "\"straddle\" expected"; break;
+			case 120: s = "\"strangle\" expected"; break;
+			case 121: s = "\"future_time_spread\" expected"; break;
+			case 122: s = "\"option_time_spread\" expected"; break;
+			case 123: s = "\"price_spread\" expected"; break;
+			case 124: s = "\"synthetic_underlying\" expected"; break;
+			case 125: s = "\"straddle_time_spread\" expected"; break;
+			case 126: s = "\"ratio_spread\" expected"; break;
+			case 127: s = "\"ratio_future_time_spread\" expected"; break;
+			case 128: s = "\"ratio_option_time_spread\" expected"; break;
+			case 129: s = "\"put_call_spread\" expected"; break;
+			case 130: s = "\"ratio_put_call_spread\" expected"; break;
+			case 131: s = "\"ladder\" expected"; break;
+			case 132: s = "\"box\" expected"; break;
+			case 133: s = "\"butterfly\" expected"; break;
+			case 134: s = "\"condor\" expected"; break;
+			case 135: s = "\"iron_butterfly\" expected"; break;
+			case 136: s = "\"diagonal_spread\" expected"; break;
+			case 137: s = "\"ratio_diagonal_spread\" expected"; break;
+			case 138: s = "\"straddle_diagonal_spread\" expected"; break;
+			case 139: s = "\"conversion_reversal\" expected"; break;
+			case 140: s = "\"covered_option\" expected"; break;
+			case 141: s = "\"reserved1\" expected"; break;
+			case 142: s = "\"reserved2\" expected"; break;
+			case 143: s = "\"currency_future_spread\" expected"; break;
+			case 144: s = "\"rate_future_spread\" expected"; break;
+			case 145: s = "\"index_future_spread\" expected"; break;
+			case 146: s = "\"future_butterfly\" expected"; break;
+			case 147: s = "\"future_condor\" expected"; break;
+			case 148: s = "\"strip\" expected"; break;
+			case 149: s = "\"pack\" expected"; break;
+			case 150: s = "\"bundle\" expected"; break;
+			case 151: s = "\"bond_deliverable_basket\" expected"; break;
+			case 152: s = "\"stock_basket\" expected"; break;
+			case 153: s = "\"price_spread_vs_option\" expected"; break;
+			case 154: s = "\"straddle_vs_option\" expected"; break;
+			case 155: s = "\"bond_spread\" expected"; break;
+			case 156: s = "\"exchange_spread\" expected"; break;
+			case 157: s = "\"future_pack_spread\" expected"; break;
+			case 158: s = "\"future_pack_butterfly\" expected"; break;
+			case 159: s = "\"whole_sale\" expected"; break;
+			case 160: s = "\"commodity_spread\" expected"; break;
+			case 161: s = "\"jelly_roll\" expected"; break;
+			case 162: s = "\"iron_condor\" expected"; break;
+			case 163: s = "\"options_strip\" expected"; break;
+			case 164: s = "\"contingent_orders\" expected"; break;
+			case 165: s = "\"interproduct_spread\" expected"; break;
+			case 166: s = "\"pseudo_straddle\" expected"; break;
+			case 167: s = "\"tailor_made\" expected"; break;
+			case 168: s = "\"futures_generic\" expected"; break;
+			case 169: s = "\"options_generic\" expected"; break;
+			case 170: s = "\"basis_trade\" expected"; break;
+			case 171: s = "\"futuretime_spread_reduced_tick_size\" expected"; break;
+			case 172: s = "\"generic_vola_strategy_vs\" expected"; break;
+			case 173: s = "\"straddle_vola_strategy_vs\" expected"; break;
+			case 174: s = "\"strangle_vs\" expected"; break;
+			case 175: s = "\"option_time_spread_vs\" expected"; break;
+			case 176: s = "\"price_spread_vs\" expected"; break;
+			case 177: s = "\"ratio_spread_vs\" expected"; break;
+			case 178: s = "\"put_call_spreadvs\" expected"; break;
+			case 179: s = "\"ladder_vs\" expected"; break;
+			case 180: s = "\"price_spread_vs_option_vs\" expected"; break;
+			case 181: s = "\"collar\" expected"; break;
+			case 182: s = "\"combo\" expected"; break;
+			case 183: s = "\"protective_put\" expected"; break;
+			case 184: s = "\"spread\" expected"; break;
+			case 185: s = "\"electronic\" expected"; break;
+			case 186: s = "\"pit\" expected"; break;
+			case 187: s = "\"future\" expected"; break;
+			case 188: s = "\"option\" expected"; break;
+			case 189: s = "\"forex\" expected"; break;
+			case 190: s = "\"future_compound\" expected"; break;
+			case 191: s = "\"options_compound\" expected"; break;
+			case 192: s = "\"any_inclusion\" expected"; break;
+			case 193: s = "\"symbol_starts_with\" expected"; break;
+			case 194: s = "\"description_starts_with\" expected"; break;
+			case 195: s = "\"any_starts_with\" expected"; break;
+			case 196: s = "\"exact_match\" expected"; break;
+			case 197: s = "\"seqnum\" expected"; break;
+			case 198: s = "\"[\" expected"; break;
+			case 199: s = "\"]\" expected"; break;
+			case 200: s = "\"for\" expected"; break;
+			case 201: s = "\"*\" expected"; break;
+			case 202: s = "\":\" expected"; break;
+			case 203: s = "\"::\" expected"; break;
+			case 204: s = "\"low_acct_low_price\" expected"; break;
+			case 205: s = "\"low_acct_high_price\" expected"; break;
+			case 206: s = "\"high_acct_low_price\" expected"; break;
+			case 207: s = "\"high_acct_high_price\" expected"; break;
+			case 208: s = "\"aps\" expected"; break;
+			case 209: s = "\"ts\" expected"; break;
+			case 210: s = "\"pre\" expected"; break;
+			case 211: s = "\"main\" expected"; break;
+			case 212: s = "\"after\" expected"; break;
+			case 213: s = "\"p1\" expected"; break;
+			case 214: s = "\"p2\" expected"; break;
+			case 215: s = "\"p3\" expected"; break;
+			case 216: s = "\"day\" expected"; break;
+			case 217: s = "\"gtc\" expected"; break;
+			case 218: s = "\"gtd\" expected"; break;
+			case 219: s = "\"fok\" expected"; break;
+			case 220: s = "\"ioc\" expected"; break;
+			case 221: s = "\"mkt\" expected"; break;
+			case 222: s = "\"moo\" expected"; break;
+			case 223: s = "\"moc\" expected"; break;
+			case 224: s = "\"lmt\" expected"; break;
+			case 225: s = "\"stp\" expected"; break;
+			case 226: s = "\"ice\" expected"; break;
+			case 227: s = "\"mit\" expected"; break;
+			case 228: s = "\"trailing\" expected"; break;
+			case 229: s = "\"last\" expected"; break;
+			case 230: s = "\"bid\" expected"; break;
+			case 231: s = "\"ask\" expected"; break;
+			case 232: s = "\"%\" expected"; break;
+			case 233: s = "\"oco\" expected"; break;
+			case 234: s = "\"oso\" expected"; break;
+			case 235: s = "\"full\" expected"; break;
+			case 236: s = "\"mdentries:\" expected"; break;
+			case 237: s = "\"offer\" expected"; break;
+			case 238: s = "\"trade\" expected"; break;
+			case 239: s = "\"opening_price\" expected"; break;
+			case 240: s = "\"settlement_price\" expected"; break;
+			case 241: s = "\"trade_volume\" expected"; break;
+			case 242: s = "\"open_interest\" expected"; break;
+			case 243: s = "\"workup_trade\" expected"; break;
+			case 244: s = "\"empty_book\" expected"; break;
+			case 245: s = "\"from\" expected"; break;
+			case 246: s = "\"to\" expected"; break;
+			case 247: s = "??? expected"; break;
+			case 248: s = "invalid Command"; break;
+			case 249: s = "invalid SimpleCommand"; break;
+			case 250: s = "invalid MsgProducingCommand"; break;
+			case 251: s = "invalid SetPropCommand"; break;
+			case 252: s = "invalid QuitCommand"; break;
+			case 253: s = "invalid ContractCommand"; break;
+			case 254: s = "invalid PostAllocationCommand"; break;
+			case 255: s = "invalid LoadTicksCommand"; break;
+			case 256: s = "invalid MessageFieldAssignments"; break;
+			case 257: s = "invalid MessageFieldAssignments"; break;
+			case 258: s = "invalid RValue"; break;
+			case 259: s = "invalid IdentOrString"; break;
+			case 260: s = "invalid Account"; break;
+			case 261: s = "invalid ContractRequest"; break;
+			case 262: s = "invalid ContractRequest"; break;
+			case 263: s = "invalid ContractLookup"; break;
+			case 264: s = "invalid BaseContractRequest"; break;
+			case 265: s = "invalid SubscriptionType"; break;
+			case 266: s = "invalid BaseContractParam"; break;
+			case 267: s = "invalid ContractLookupMode"; break;
+			case 268: s = "invalid ContractLookupParam"; break;
+			case 269: s = "invalid ContractKindList"; break;
+			case 270: s = "invalid ContractType"; break;
+			case 271: s = "invalid OptionType"; break;
+			case 272: s = "invalid BoolOptional"; break;
+			case 273: s = "invalid CompoundType"; break;
+			case 274: s = "invalid DoubleOptional"; break;
+			case 275: s = "invalid ContractKind"; break;
+			case 276: s = "invalid BracketType"; break;
+			case 277: s = "invalid OrderSide"; break;
+			case 278: s = "invalid FormatArg"; break;
+			case 279: s = "invalid IntegerOrDefault"; break;
+			case 280: s = "invalid Literal"; break;
+			case 281: s = "invalid OrderType"; break;
+			case 282: s = "invalid TimeInForce"; break;
+			case 283: s = "invalid TimeInForce"; break;
+			case 284: s = "invalid TradingSession"; break;
+			case 285: s = "invalid AllocationRule"; break;
+			case 286: s = "invalid PostAllocationRule"; break;
+			case 287: s = "invalid Double"; break;
+			case 288: s = "invalid EqlExpr"; break;
+			case 289: s = "invalid EqlExpr"; break;
+			case 290: s = "invalid RelExprArg"; break;
+			case 291: s = "invalid MsgCtxRelExprArg"; break;
+			case 292: s = "invalid Price"; break;
+			case 293: s = "invalid TrailingStop"; break;
+			case 294: s = "invalid TrailingStop"; break;
+			case 295: s = "invalid Symbol"; break;
+			case 296: s = "invalid StrikeSide"; break;
+			case 297: s = "invalid FASTMDEntryType"; break;
+			case 298: s = "invalid FASTContract"; break;
+			case 299: s = "invalid FASTSymbolBasedContract"; break;
+			case 300: s = "invalid FASTStrikeSide"; break;
 
 			default: s = "error " + n; break;
 		}

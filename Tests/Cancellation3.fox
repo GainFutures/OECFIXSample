@@ -1,0 +1,15 @@
+//
+//	Sends EquityOptions orders and cancels them. 
+//
+
+order1 = New BUY OPEN 10 MSFT MAY11 PUT 15 LMT 1;
+Exec 'Tests/Cancellation.Order1.fox';
+
+order1 = New BUY CLOSE 10 MSFT MAY11 PUT 15 LMT 1;
+Exec 'Tests/Cancellation.Order1.fox';
+
+order1 = New SELL OPEN 10 MSFT MAY11 PUT 15 LMT 3000;
+Exec 'Tests/Cancellation.Order1.fox';
+
+order1 = New SELL CLOSE 10 MSFT MAY11 PUT 15 LMT 3000;
+Exec 'Tests/Cancellation.Order1.fox';

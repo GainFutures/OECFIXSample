@@ -1,0 +1,36 @@
+//
+//	Sends FuturesMultileg order, modifies the order, then the order gets filled. 
+//
+
+order1 = New BUY 10 'ES FTS -H1,+H2' LMT -10000;
+
+	pending1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure pending1 != null, 'ExecReport not received';
+	EnsureOrderStatus pending1 FIX.OrdStatus.PENDING_NEW;
+
+	accepted1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure accepted1 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted1 FIX.OrdStatus.NEW;
+
+order2 = Modify order1 BUY 1 'ES FTS -H1,+H2' MKT;
+
+	pending2 = Wait ExecutionReport, ClOrdID == order2.ClOrdID;
+	Ensure pending2 != null, 'ExecReport not received';
+	EnsureOrderStatus pending2 FIX.OrdStatus.PENDING_REPLACE;
+
+	accepted2 = Wait ExecutionReport, ClOrdID == order2.ClOrdID;
+	Ensure accepted2 != null, 'ExecReport not received';
+	EnsureModifyAccepted accepted2 FIX.OrdStatus.NEW;
+
+
+	trade21 = Wait ExecutionReport, ClOrdID == order2.ClOrdID;
+	Ensure trade21 != null, 'ExecReport not received';
+	EnsureTrade trade21 FIX.OrdStatus.NEW;
+
+	trade22 = Wait ExecutionReport, ClOrdID == order2.ClOrdID;
+	Ensure trade22 != null, 'ExecReport not received';
+	EnsureTrade trade22 FIX.OrdStatus.FILLED;
+
+	calculated2 = Wait ExecutionReport, ClOrdID == order2.ClOrdID;
+	Ensure calculated2 != null, 'ExecReport not received';
+	EnsureOrderStatus calculated2 FIX.OrdStatus.CALCULATED;

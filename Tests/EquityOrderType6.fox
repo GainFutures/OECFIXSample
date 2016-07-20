@@ -1,0 +1,7 @@
+//
+//	Sends Equity MKT order and cancels it. 
+//
+
+order1 = New BUY 1 MSFT MKT;
+
+Exec 'Tests/Cancellation.Order1.fox';

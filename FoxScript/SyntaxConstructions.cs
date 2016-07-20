@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using OEC.FIX.Sample.FAST;
 using OEC.FIX.Sample.FoxScript.AllocationBlocks;
 
 namespace OEC.FIX.Sample.FoxScript
@@ -69,6 +70,12 @@ namespace OEC.FIX.Sample.FoxScript
 		Future,
 		Forex
 	}
+
+    internal enum BracketType
+    {
+        OCO,
+        OSO
+    }
 
 	internal class OrderContract
 	{
@@ -146,7 +153,15 @@ namespace OEC.FIX.Sample.FoxScript
 		public TimeSpan? Timeout;
 	}
 
-	internal abstract class OrderCommand : OutgoingMsgCommand
+    abstract class OrderRequestCommand : OutgoingMsgCommand
+    {
+        public string Account;
+        public OrderSide OrderSide;
+        public OrderContract OrderContract;
+        public AllocationBlock<PreAllocationBlockItem> AllocationBlock;
+    }
+
+    internal abstract class OrderCommand : OrderRequestCommand
 	{
 		public string Account;
 		public AllocationBlock<PreAllocationBlockItem> AllocationBlock;
@@ -162,6 +177,18 @@ namespace OEC.FIX.Sample.FoxScript
 	{
 	}
 
+    internal class BracketCommandItem : NewOrderCommand
+    {
+        public string MsgVarName;
+    }
+
+    internal class BracketOrderCommand : OutgoingMsgCommand
+    {
+        public BracketType Type;
+
+        public List<BracketCommandItem> BracketCommands;
+    }
+
 	internal class OrderRefOutgoingMsgCommand : OutgoingMsgCommand
 	{
 		public string OrigMsgVarName;
@@ -172,15 +199,15 @@ namespace OEC.FIX.Sample.FoxScript
 		public string OrigMsgVarName;
 	}
 
-    class CancelOrderCommand : OrderRefOutgoingMsgCommand
+	internal class CancelOrderCommand : OrderRefOutgoingMsgCommand
 	{
 	}
 
-	class OrderStatusCommand : OrderRefOutgoingMsgCommand
+	internal class OrderStatusCommand : OrderRefOutgoingMsgCommand
 	{
 	}
 
-    class OrderMassStatusCommand : OrderCommand
+    class OrderMassStatusCommand : OrderRequestCommand
 	{
 	}
 
@@ -375,63 +402,59 @@ namespace OEC.FIX.Sample.FoxScript
 
 	internal abstract class MDMessageCommand : OutgoingMsgCommand, IOutputFile
 	{
+	    protected List<FAST.MDEntryType> _entries;
+        
 		public string BaseSymbol;
-		public int ExpirationMonth;
+		public int? ExpirationMonth;
+
+	    public int UpdateType { get; set; }
+
         public ContractKind ContractKind;
 
-		public int UpdateType = 1;
-
-        public string OutputFileName
-        {
-            get;
-            set;
-        }
-
-        public FASTStrikeSide StrikeSide
-        {
-            get;
-            set;
-        }
+		public FASTStrikeSide StrikeSide { get; set; }
 
 		public bool Option
 		{
 			get { return StrikeSide != null; }
 		}
 
-        public abstract int MarketDepth
+		public abstract int MarketDepth { get; }
+
+		public abstract int SubscriptionType { get; }
+
+        public virtual int SubscriptionRequestType
         {
-            get;
+            get { return 1; }
         }
 
-        public abstract int SubscriptionType
+        public MDEntryType[] MDEntries 
         {
-            get;
+            get { return _entries.ToArray(); }
         }
 
-		public virtual int SubscriptionRequestType
-		{
-			get
+		public abstract DateTime? StartTime { get; }
+
+        public virtual DateTime? EndTime 
 			{
-				return 1;
-			}
+            get { return null; }
 		}
 
-        public abstract string[] MDEntries
+		public string OutputFileName { get; set; }
+
+	    protected MDMessageCommand()
         {
-            get;
+	        UpdateType = 1;
+            _entries = new List<MDEntryType>();
         }
 
-        public abstract DateTime? StartTime
+	    public void Add(MDEntryType type)
         {
-            get;
+	        _entries.Add(type);
         }
 
-		public virtual DateTime? EndTime
-		{
-			get
+	    public void ResetMDEntries()
 			{
-				return null;
-			}
+	        _entries.Clear();
 		}
 	}
 
@@ -448,14 +471,25 @@ namespace OEC.FIX.Sample.FoxScript
 			get { return 0; }
 		}
 
-		public override string[] MDEntries
-		{
-			get { return new[] {"0", "1", "2", "4", "6", "7", "8", "B", "C"}; }
-		}
-
 		public override DateTime? StartTime
 		{
 			get { return null; }
+		}
+
+	    public SubscribeQuotesCommand()
+		{
+	        _entries = new List<MDEntryType>(
+	            new[]
+	            {
+	                MDEntryType.BID,
+	                MDEntryType.OFFER, 
+                    MDEntryType.TRADE, 
+                    MDEntryType.OPENING_PRICE, 
+                    MDEntryType.SETTLEMENT_PRICE, 
+                    MDEntryType.TRADE_VOLUME, 
+                    MDEntryType.OPEN_INTEREST
+	            }
+	        );
 		}
 	}
 
@@ -472,14 +506,14 @@ namespace OEC.FIX.Sample.FoxScript
 			get { return 1; }
 		}
 
-		public override string[] MDEntries
-		{
-			get { return new[] {"0", "1"}; }
-		}
-
 		public override DateTime? StartTime
 		{
 			get { return null; }
+		}
+
+	    public SubscribeDOMCommand()
+		{
+            _entries = new List<MDEntryType>(new[] { MDEntryType.BID, MDEntryType.OFFER });
 		}
 	}
 
@@ -495,14 +529,14 @@ namespace OEC.FIX.Sample.FoxScript
 			get { return 4; }
 		}
 
-		public override string[] MDEntries
-		{
-			get { return new[] {"2"}; }
-		}
-
 		public override DateTime? StartTime
 		{
 			get { return null; }
+		}
+
+	    public SubscribeHistogramCommand()
+		{
+            _entries = new List<MDEntryType>(new[] { MDEntryType.TRADE });
 		}
 	}
 
@@ -519,11 +553,6 @@ namespace OEC.FIX.Sample.FoxScript
 		public override int SubscriptionType
 		{
 			get { return 2; }
-		}
-
-		public override string[] MDEntries
-		{
-			get { return new[] {"0", "1", "2"}; }
 		}
 
 		public override DateTime? StartTime
@@ -552,6 +581,11 @@ namespace OEC.FIX.Sample.FoxScript
 		{
 			_startTimeSpan = startTimeSpan;
 		}
+
+	    public SubscribeTicksCommand()
+	    {
+            _entries = new List<MDEntryType>(new[] { MDEntryType.BID, MDEntryType.OFFER, MDEntryType.TRADE });   
+	    }
 	}
 
 	internal class CancelSubscribeCommand : OutgoingMsgCommand
@@ -559,10 +593,10 @@ namespace OEC.FIX.Sample.FoxScript
 		public string MDMessageVar;
 	}
 
-	class LoadTicksCommand : SubscribeTicksCommand
+    internal class LoadTicksCommand : SubscribeTicksCommand
 	{
-		private DateTime? _EndTime = null;
-		private TimeSpan? _EndTimeSpan = null;
+        private DateTime? _endTime = null;
+        private TimeSpan? _endTimeSpan = null;
 
 		public override int SubscriptionRequestType
 		{
@@ -573,41 +607,30 @@ namespace OEC.FIX.Sample.FoxScript
 		{
 			get
 			{
-				if (_EndTime.HasValue)
-				{
-					return _EndTime;
-				}
-				else
-				{
+                if (_endTime.HasValue)
+                    return _endTime;
+
 					DateTime now = DateTime.UtcNow;
-					if (_EndTimeSpan.HasValue)
-					{
-						return now - _EndTimeSpan.Value;
-					}
-					else
+                if (_endTimeSpan.HasValue)
+                    return now - _endTimeSpan.Value;
 						return now;
 				}
 			}
-		}
 
 		public void SetEndTime(DateTime endTime)
 		{
-			_EndTime = endTime;
+            _endTime = endTime;
 		}
 
 		public void SetEndTime(TimeSpan endTimeSpan)
 		{
-			_EndTimeSpan = endTimeSpan;
+            _endTimeSpan = endTimeSpan;
 		}
 	}
 
-    interface IOutputFile
+    internal interface IOutputFile
 	{
-        string OutputFileName
-        {
-            get;
-            set;
-        }
+		string OutputFileName { get; set; }
 	}
 
 	#endregion

@@ -2,14 +2,20 @@
 
 namespace OEC.FIX.Sample.FIX
 {
-	public sealed class MessageStoreFactory<TMessageStore> : MessageStoreFactory
-		where TMessageStore : MessageStoreBase, new()
+    sealed class MessageStoreFactory : QuickFix.MessageStoreFactory
 	{
+	    private readonly Props _properties;
+
+	    public MessageStoreFactory(Props properties)
+	    {
+	        _properties = properties;
+	    }
+
 		#region MessageStoreFactory Members
 
 		public QuickFix.MessageStore create(SessionID sessionID)
 		{
-			var store = new TMessageStore();
+            var store = new MessageStore(_properties);
 			store.Init(sessionID);
 			return store;
 		}

@@ -1,0 +1,13 @@
+//
+//	Sends Equity orders and cancels them. 
+//
+
+order1 = New BUY 10 'MSFT' LMT 1;
+Exec 'Tests/Cancellation.Order1.fox';
+
+order1 = New SELL 10 'MSFT' LMT 3000;
+Exec 'Tests/Cancellation.Order1.fox';
+
+order1 = New SELL 10 'MSFT' LMT 3000, 
+	Side = FIX.Side.SELL_SHORT;
+Exec 'Tests/Cancellation.Order1.fox';

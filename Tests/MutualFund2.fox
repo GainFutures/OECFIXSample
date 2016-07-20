@@ -1,0 +1,31 @@
+//
+//	Sends MutualFund order, modifies the order, then cancels the order. 
+//
+
+order1 = New BUY 2 'MF:BACSX' MKT GTC;
+
+	pending1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure pending1 != null, 'ExecReport not received';
+	EnsureOrderStatus pending1 FIX.OrdStatus.PENDING_NEW;
+
+	accepted1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure accepted1 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted1 FIX.OrdStatus.NEW;
+
+
+order2 = Modify order1 BUY 5 'MF:BACSX' MKT GTC;
+
+	rejected2 = Wait OrderCancelReject, ClOrdID == order2.ClOrdID;
+	Ensure rejected2 != null, 'OrderCancelReject not received';
+	Ensure rejected2.OrdStatus == FIX.OrdStatus.NEW, 'OrdStatus must be NEW';
+
+
+cancel1 = Cancel order1;
+
+	pending3 = Wait ExecutionReport, ClOrdID == cancel1.ClOrdID;
+	Ensure pending3 != null, 'ExecReport not received';
+	EnsureOrderStatus pending3 FIX.OrdStatus.PENDING_CANCEL;
+
+	accepted3 = Wait ExecutionReport, ClOrdID == cancel1.ClOrdID;
+	Ensure accepted3 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted3 FIX.OrdStatus.CANCELED;

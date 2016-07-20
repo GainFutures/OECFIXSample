@@ -1,0 +1,18 @@
+//A new day started. Need to reset seq numbers.
+auth vitalyTM; 
+reset seqnum;
+connect vitalyTM_password;
+//do something
+disconnect;
+
+//switch to another user
+auth vitaly;
+reset seqnum;
+connect vitaly_password;
+//do something
+disconnect;
+
+//switch back to vitalyTM
+connect vitalyTM, vitalyTM_password;
+//do something
+disconnect;

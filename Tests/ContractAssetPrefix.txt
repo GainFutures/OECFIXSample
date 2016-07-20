@@ -1,0 +1,8 @@
+Contract asset prefixes:
+
+Future (default) - 'FUT:'
+Equity - 'EQ:'
+Forex - 'FX:'
+MutualFund - 'MF:'
+
+If prefix is not specified then contract treated as Future contract.

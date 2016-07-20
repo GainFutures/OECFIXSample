@@ -16,31 +16,32 @@ namespace OEC.FIX.Sample.FIX
 		public static readonly string FIX42 = "FIX.4.2";
 		public static readonly string FIX44 = "FIX.4.4";
 
-		public static string Current
+	    public static FixProtocol Create(Props properties)
 		{
-			get { return (string) Program.Props[Prop.BeginString].Value; }
+            var current = (string)properties[Prop.BeginString].Value;
+            if (current == FIX44)
+                return new FixProtocol44(properties);
+            if (current == FIX42)
+                return new FixProtocol42(properties);
+
+            throw new ExecutionException("Unsupported FIX version '{0}'", current ?? "NULL");
+        }
+
+	    public static string Current(Props properties)
+	    {
+	        return (string) properties[Prop.BeginString].Value;
 		}
 	}
 
 	internal abstract class FixProtocol
 	{
-		public static readonly FixProtocol42 FixProtocol42 = new FixProtocol42();
-		public static readonly FixProtocol44 FixProtocol44 = new FixProtocol44();
+        private readonly Props _properties;
 
-		public static FixProtocol Current
-		{
-			get
-			{
-				if (FixVersion.Current == FixVersion.FIX44)
+        public abstract string BeginString { get; }
+
+        protected FixProtocol(Props properties)
 				{
-					return FixProtocol44;
-				}
-				if (FixVersion.Current == FixVersion.FIX42)
-				{
-					return FixProtocol42;
-				}
-				throw new ExecutionException("Unsupported FIX version '{0}'", FixVersion.Current ?? "NULL");
-			}
+            _properties = properties;
 		}
 
 		public virtual void EnsureTrade(Message msg, char orderStatus, int? qty, double? price)
@@ -278,6 +279,33 @@ namespace OEC.FIX.Sample.FIX
 			return msg;
 		}
 
+        internal Message OrderMassStatusRequest(OrderMassStatusCommand command)
+        {
+            var request = new OrderMassStatusRequest();
+            request.setField(new MassStatusReqID(Tools.GenerateUniqueID()));
+
+            if (command.OrderSide != null)
+            {
+                request.setField(new Side(command.OrderSide.Side));
+                if (command.OrderSide.Open.HasValue)
+                    request.setField(new PositionEffect(command.OrderSide.Open.Value ? PositionEffect.OPEN : PositionEffect.CLOSE));
+            }
+
+            if (command.OrderContract != null)
+                AssignOrderContract(request, command.OrderContract);
+
+            if (command.AllocationBlock != null)
+                AssignPreAllocationBlock(request, command.AllocationBlock, group => request.addGroup(group));
+
+            var account = string.IsNullOrEmpty(command.Account) && command.OrderContract != null
+                ? GetAccountFor(command.OrderContract.Symbol.Asset)
+                : command.Account;
+            if (account != null)
+                request.setField(new Account(account));
+
+            return request;
+        }
+        
 		private void CopyImmutableOrderFields(Message orig, Message msg)
 		{
 			CopyFields(orig, msg,
@@ -308,7 +336,7 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new OrderCancelReplaceRequest();
 
-			AssignOrderBody(command, msg);
+            AssignOrderBody(command, msg, group => msg.addGroup(group));
 
 			if (orig.isSetField(ClOrdID.FIELD))
 			{
@@ -344,12 +372,43 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new NewOrderSingle();
 
-			AssignOrderBody(command, msg);
+            AssignOrderBody(command, msg, group => msg.addGroup(group));
 
 			return msg;
 		}
 
-		protected void AssignOrderBody(OrderCommand source, Message target)
+        public Message NewOrderList(BracketOrderCommand command, Action<string, Message> AddMsgVar)
+        {
+            var cnt = command.BracketCommands.Count;
+            if (cnt < 2)
+                throw new ExecutionException("Count of groups is wrong ({0}).", cnt);
+
+            var msg = new NewOrderList();
+            msg.set(new TotNoOrders(cnt));
+            msg.set(new ListExecInst(command.Type.ToString()));
+            msg.set(new ListID(Tools.GenerateUniqueID()));
+            msg.set(new BidType(BidType.NO_BIDDING_PROCESS));
+            
+           
+            int lsq = 1;
+            foreach (var cmd in command.BracketCommands)
+            {
+                var order = new NewOrderList.NoOrders();
+                AssignOrderBody(cmd, order, group => order.addGroup(group));
+                order.set(new ListSeqNo(lsq++));
+                msg.addGroup(order);
+
+                if (!String.IsNullOrWhiteSpace(cmd.MsgVarName))
+                {
+                    var neworder = NewOrderSingle(cmd);
+                    neworder.setField(new ClOrdID(order.getString(ClOrdID.FIELD)));
+                    AddMsgVar(cmd.MsgVarName, neworder);
+                }
+            }
+			return msg;
+		}
+
+        protected void AssignOrderBody(OrderCommand source, FieldMap target, Action<Group> addGroup)
 		{
 			target.setField(new ClOrdID(Tools.GenerateUniqueID()));
 			target.setField(new Side(source.OrderSide.Side));
@@ -383,7 +442,7 @@ namespace OEC.FIX.Sample.FIX
 			string account = source.Account;
 			if (string.IsNullOrEmpty(account))
 			{
-				account = Tools.GetAccountFor(source.OrderContract.Symbol.Asset);
+				account = GetAccountFor(source.OrderContract.Symbol.Asset);
 			}
 
 			target.setField(new Account(account));
@@ -425,11 +484,11 @@ namespace OEC.FIX.Sample.FIX
 			{
 				var session = new Group(NoTradingSessions.FIELD, TradingSessionID.FIELD);
 				session.setField(new TradingSessionID(source.TradingSession));
-				target.addGroup(session);
+                addGroup(session);
 			}
 
 			if (source.AllocationBlock != null)
-				AssignPreAllocationBlock(target, source.AllocationBlock);
+				AssignPreAllocationBlock(target, source.AllocationBlock, addGroup);
 
 			if (source.OrderType.TrailingStop != null)
 			{
@@ -465,7 +524,7 @@ namespace OEC.FIX.Sample.FIX
 				message.setField(new StrikePrice(contract.Strike.Value));
 		}
 
-		private void AssignPreAllocationBlock(Message message, AllocationBlock<PreAllocationBlockItem> block)
+        private void AssignPreAllocationBlock(FieldMap message, AllocationBlock<PreAllocationBlockItem> block, Action<Group> addGroup)
 		{
 			message.setField(new AllocText(block.Name));
 			message.setField(new AllocType((int) block.Rule));
@@ -475,7 +534,7 @@ namespace OEC.FIX.Sample.FIX
 				var group = new NewOrderSingle.NoAllocs();
 				group.set(new AllocAccount(item.Account));
 				group.set(new AllocQty(item.Weight));
-				message.addGroup(group);
+				addGroup(group);
 			}
 		}
 
@@ -550,6 +609,21 @@ namespace OEC.FIX.Sample.FIX
 			}
 		}
 
+        public string GetAccountFor(ContractAsset asset)
+        {
+            switch (asset)
+            {
+                case ContractAsset.Forex:
+                    return (string) _properties[Prop.ForexAccount].Value;
+
+                case ContractAsset.Future:
+                    return (string) _properties[Prop.FutureAccount].Value;
+
+                default:
+                    throw new ExecutionException("Invalid ContractAsset.");
+            }
+        }
+        
 		private struct FixContract
 		{
 			public string CFICode;
@@ -561,6 +635,16 @@ namespace OEC.FIX.Sample.FIX
 
 	internal class FixProtocol44 : FixProtocol
 	{
+	    public override string BeginString
+	    {
+	        get { return FixVersion.FIX44; }
+	    }
+
+	    public FixProtocol44(Props properties) 
+            : base(properties)
+	    {
+	    }
+
 		public override void EnsureTrade(Message msg, char orderStatus, int? qty, double? price)
 		{
 			base.EnsureTrade(msg, orderStatus, qty, price);
@@ -575,6 +659,16 @@ namespace OEC.FIX.Sample.FIX
 
 	internal class FixProtocol42 : FixProtocol
 	{
+        public override string BeginString
+        {
+            get { return FixVersion.FIX42; }
+        }
+        
+        public FixProtocol42(Props properties) 
+            : base(properties)
+	    {
+	    }
+
 		public override void EnsureTrade(Message msg, char orderStatus, int? qty, double? price)
 		{
 			base.EnsureTrade(msg, orderStatus, qty, price);

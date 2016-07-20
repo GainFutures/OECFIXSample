@@ -3,8 +3,7 @@ using QuickFix;
 
 namespace OEC.FIX.Sample.FIX
 {
-	public abstract class ConnectionBase<TMessageStore> : Application
-		where TMessageStore : MessageStoreBase, new()
+	abstract class ConnectionBase : Application
 	{
 		public delegate void MessageHandler(SessionID sessionID, Message msg);
 
@@ -14,13 +13,13 @@ namespace OEC.FIX.Sample.FIX
 		private LogFactory _logFactory;
 		private MessageStoreFactory _messageStoreFactory;
 		private string _password;
-		private const string UUID = "9e61a8bc-0a31-4542-ad85-33ebab0e4e86";
+		private string _uuid = "9e61a8bc-0a31-4542-ad85-33ebab0e4e86";
 
 		public SessionID SessionID { get; private set; }
 
-		public void Create()
+		public void Create(Props properties)
 		{
-			_messageStoreFactory = new MessageStoreFactory<TMessageStore>();
+			_messageStoreFactory = new MessageStoreFactory(properties);
 			var messageFactory = new DefaultMessageFactory();
 
 			SessionSettings sessionSettings = GetSessionSettings();
@@ -41,9 +40,10 @@ namespace OEC.FIX.Sample.FIX
 			_logFactory = null;
 		}
 
-		public virtual void Open(string username, string password)
+		public virtual void Open(string password, string uuid)
 		{
 			_password = password;
+            _uuid = uuid;
 
 			_initiator.start();
 		}
@@ -120,9 +120,9 @@ namespace OEC.FIX.Sample.FIX
 					msg.setField(new Password(_password));
 				}
 
-				if (!string.IsNullOrEmpty(UUID))
+                if (!string.IsNullOrEmpty(_uuid))
 				{
-					msg.setField(new UUIDField(UUID));
+                    msg.setField(new UUIDField(_uuid));
 				}
 			}
 

@@ -1,0 +1,23 @@
+//
+//	Performs ensuring new order and cancels the order. 
+//	Shared argument: order1
+//
+
+	pending1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure pending1 != null, 'ExecReport not received';
+	EnsureOrderStatus pending1 FIX.OrdStatus.PENDING_NEW;
+
+	accepted1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure accepted1 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted1 FIX.OrdStatus.NEW;
+
+
+cancel1 = Cancel order1;
+
+	pending2 = Wait ExecutionReport, ClOrdID == cancel1.ClOrdID;
+	Ensure pending2 != null, 'ExecReport not received';
+	EnsureOrderStatus pending2 FIX.OrdStatus.PENDING_CANCEL;
+
+	accepted2 = Wait ExecutionReport, ClOrdID == cancel1.ClOrdID;
+	Ensure accepted2 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted2 FIX.OrdStatus.CANCELED;

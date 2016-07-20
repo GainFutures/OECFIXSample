@@ -1,0 +1,31 @@
+//
+//	Sends Futures order with Start time, waits the order gets Working, then cancels the order. 
+//
+
+order1 = New BUY 10 'ESM1' LMT 666,
+	EffectiveTime = [UTCNOW+00:01:00];	//	Release order in 1 minute 
+
+	pending1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure pending1 != null, 'ExecReport not received';
+	EnsureOrderStatus pending1 FIX.OrdStatus.PENDING_NEW;
+
+	suspended1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure suspended1 != null, 'ExecReport not received';
+	EnsureOrderStatus suspended1 FIX.OrdStatus.SUSPENDED;
+
+Sleep [00:01:20];
+
+	accepted1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure accepted1 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted1 FIX.OrdStatus.NEW;
+
+
+cancel1 = Cancel order1;
+
+	pending3 = Wait ExecutionReport, ClOrdID == cancel1.ClOrdID;
+	Ensure pending3 != null, 'ExecReport not received';
+	EnsureOrderStatus pending3 FIX.OrdStatus.PENDING_CANCEL;
+
+	accepted3 = Wait ExecutionReport, ClOrdID == cancel1.ClOrdID;
+	Ensure accepted3 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted3 FIX.OrdStatus.CANCELED;

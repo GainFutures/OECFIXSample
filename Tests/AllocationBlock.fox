@@ -1,0 +1,4 @@
+//order1 = new buy 1 ESM3 MKT FOR VIT0002;
+sell_order = new sell 2 YMM3 MKT 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { VIT0002 1, VIT0004 1 } FOR VIT0003;
+//buy_order = new sell 2 YMM3 MKT 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { VIT0002 1, VIT0004 1 } FOR VIT0003;
+//buy_order = new buy 1 YMM3 MKT 'Allocation Block FIX' LOW_ACCT_LOW_PRICE { VIT0002 1 } FOR VIT0003;

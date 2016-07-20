@@ -40,7 +40,7 @@ namespace OEC.FIX.Sample.FAST
 				symbolStr += String.Format("{0}{1}", (cmd.StrikeSide.Put ? "P" : "C"), cmd.StrikeSide.Strike);
 			}
 			message.SetString("MDReqID", string.Format("{0}_{1}_{2}", symbolStr, cmd.SubscriptionType, ++_counter));
-			message.SetInteger("SubscriptionRequestType", 1);
+            message.SetInteger("SubscriptionRequestType", cmd.SubscriptionRequestType);
 			message.SetInteger("MarketDepth", cmd.MarketDepth);
 			message.SetInteger("MDUpdateType", cmd.UpdateType);
 
@@ -53,13 +53,20 @@ namespace OEC.FIX.Sample.FAST
 				message.SetLong("StartTime", st);
 			}
 
+            DateTime? endTime = cmd.EndTime;
+            if (endTime.HasValue)
+            {
+                long st = OFReflector.ToFastDateTime(endTime.Value);
+                message.SetLong("EndTime", st);
+            }
+            
 			Sequence templateMDEntries = template.GetSequence("MDEntries");
 			var mdEntries = new SequenceValue(templateMDEntries);
 
-			foreach (string mdentryType in cmd.MDEntries)
+			foreach (MDEntryType mdentryType in cmd.MDEntries)
 			{
 				var mdEntry = new GroupValue(templateMDEntries.Group);
-				mdEntry.SetString("MDEntryType", mdentryType);
+				mdEntry.SetString("MDEntryType", ((char)mdentryType).ToString());
 				mdEntries.Add(mdEntry);
 			}
 
@@ -70,14 +77,27 @@ namespace OEC.FIX.Sample.FAST
 			groupInstrument.SetString("Symbol", cmd.BaseSymbol);
 
 			string cfiCode = "FXXXXS";
-			if (cmd.Option)
+            switch (cmd.ContractKind)
 			{
+                case ContractKind.OPTION:
 				cfiCode = cmd.StrikeSide.Put ? "OPXFXS" : "OCXFXS";
 				groupInstrument.SetDecimal("StrikePrice", (decimal) cmd.StrikeSide.Strike);
+                    break;
+                case ContractKind.FOREX:
+                    cfiCode = "ERXXXN";
+                    break;
+                case ContractKind.FUTURE_COMPOUND:
+                    cfiCode = "FMXXXN";
+                    break;
+                case ContractKind.OPTIONS_COMPOUND:
+                    cfiCode = "OMXFXN";
+                    break;
 			}
 			groupInstrument.SetString("CFICode", cfiCode);
 
-			groupInstrument.SetInteger("MaturityMonthYear", cmd.ExpirationMonth);
+            if (cmd.ExpirationMonth.HasValue)
+			    groupInstrument.SetInteger("MaturityMonthYear", cmd.ExpirationMonth.Value);
+
 			var mdInstruments = new SequenceValue(templateInstrument);
 			mdInstruments.Add(groupInstrument);
 			message.SetFieldValue("Instruments", mdInstruments);

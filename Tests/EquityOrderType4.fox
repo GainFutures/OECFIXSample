@@ -1,0 +1,7 @@
+//
+//	Sends Equity TRAIL STP order and cancels it. 
+//
+
+order1 = New BUY 1 MSFT STP 1 TRAILING LAST 10;
+
+Exec 'Tests/Cancellation.Order1.fox';

@@ -1,0 +1,35 @@
+//
+//	Sends Equity order, modifies the order, then cancels the order. 
+//
+
+order1 = New BUY 1 MSFT LMT 1;
+
+	pending1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure pending1 != null, 'ExecReport not received';
+	EnsureOrderStatus pending1 FIX.OrdStatus.PENDING_NEW;
+
+	accepted1 = Wait ExecutionReport, ClOrdID == order1.ClOrdID;
+	Ensure accepted1 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted1 FIX.OrdStatus.NEW;
+
+
+order2 = Modify order1 BUY 1 MSFT LMT 2;
+
+	pending2 = Wait ExecutionReport, ClOrdID == order2.ClOrdID;
+	Ensure pending2 != null, 'ExecReport not received';
+	EnsureOrderStatus pending2 FIX.OrdStatus.PENDING_REPLACE;
+
+	accepted2 = Wait ExecutionReport, ClOrdID == order2.ClOrdID;
+	Ensure accepted2 != null, 'ExecReport not received';
+	EnsureModifyAccepted accepted2 FIX.OrdStatus.NEW;
+
+
+cancel1 = Cancel order2;
+
+	pending3 = Wait ExecutionReport, ClOrdID == cancel1.ClOrdID;
+	Ensure pending3 != null, 'ExecReport not received';
+	EnsureOrderStatus pending3 FIX.OrdStatus.PENDING_CANCEL;
+
+	accepted3 = Wait ExecutionReport, ClOrdID == cancel1.ClOrdID;
+	Ensure accepted3 != null, 'ExecReport not received';
+	EnsureOrderStatus accepted3 FIX.OrdStatus.CANCELED;

@@ -1,0 +1,38 @@
+connect vitalyTM, another;
+sleep [00:00:03];
+
+buy_limit = new buy 2 ESU3 LMT 10000 for VIT0003;
+buy_limit = new buy 2 ESU3 MKT for VIT0003;
+buy_limit1 = new buy 2 ESU3 LMT 1 for VIT0003;
+	er_pending_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_pending_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_pending_new FIX.OrdStatus.PENDING_NEW;
+
+	er_new = wait ExecutionReport, ClOrdID == buy_limit.ClOrdID;
+	Ensure er_new != null, 'ExecReport not received';
+	EnsureOrderStatus er_new FIX.OrdStatus.NEW;
+
+postallocation buy_limit POST { VIT0002 1653.25 1, VIT0004 1653.25 1};
+postallocation buy_limit1 POST { VIT0002 1607.00 1, VIT0004 1607.00 1};
+postallocation disconnectbuy_limit POST { VIT0002 1649.00 1, VIT0004 1649.00 1};
+
+buy_limit = new buy 2 ESU3 MKT for VIT0003;
+postallocation buy_limit POST { VIT0002 1678.75 2, VIT0004 1678.75 1};
+
+postallocation buy_limit1 POST { VIT0002:Roga 1607.00 1, VIT0004 1607.00 1};
+postallocation buy_limit1 POST { VIT0002::Copita 1607.00 1, VIT0004 1607.00 1};
+
+
+//er_cancel = cancel buy_limit;
+//	er_pending_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+//	Ensure er_pending_cancel != null, 'ExecReport not received';
+//	EnsureOrderStatus er_pending_cancel FIX.OrdStatus.PENDING_CANCEL;
+//
+//	er_cancel = wait ExecutionReport, ClOrdID == er_cancel.ClOrdID;
+//	Ensure er_cancel != null, 'ExecReport not received';
+//	EnsureOrderStatus er_cancel FIX.OrdStatus.CANCELED;
+
+// disconnect;
+
+
+postallocation buy_limit POST { VIT0002 1678.75 1, VIT0004 1678.75 1};

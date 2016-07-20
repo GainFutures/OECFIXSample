@@ -1,0 +1,7 @@
+//
+//	Sends balance request for Future account and waits for balance reports. 
+//
+
+balance1 = Balance prop:FutureAccount;
+
+Exec 'Tests/BalanceReports.Balance1.fox';

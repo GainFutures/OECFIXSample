@@ -1,0 +1,15 @@
+zspm5 = subscribequotes ZSPM5
+cancelsubscribe zspm5
+
+a = subscribequotes FULL MDEntries:[] ZSPM5;
+b = subscribequotes FULL MDEntries:[] ZSPJ5;
+c = subscribequotes FULL MDEntries:[] ZSPG5;
+
+a = subscribequotes FULL MDEntries:[] ZDJH5;
+
+a = subscribequotes FULL MDEntries:[] ZSPU5;
+
+cancelsubscribe a;
+cancelsubscribe b;
+cancelsubscribe c;
+

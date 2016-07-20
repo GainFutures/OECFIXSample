@@ -66,6 +66,7 @@
       <HintPath>ThirdParty\QuickFIX\quickfix_net_messages.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -80,6 +81,7 @@
     <Compile Include="CFI\Equities.cs" />
     <Compile Include="CFI\Futures.cs" />
     <Compile Include="CFI\Options.cs" />
+    <Compile Include="Configuration.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FAST\ClientMessageHandler.cs" />

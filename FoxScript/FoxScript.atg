@@ -181,7 +181,7 @@ TOKENS
 	actionPAlloc = "PALLOC".
 	actionUserRequest = "UserRequest".
 	actionMarginCalc = "MarginCalc".
-
+	actionBracket = "BRACKET".
 // FAST ACTIONS
 	actionHeartbeat = "Heartbeat".
 	actionConnectFast = "ConnectFast".
@@ -339,6 +339,7 @@ PRODUCTIONS
 			| PostAllocationCommand<ref command>
 			| UserRequestCommand<ref command>
 			| MarginCalcCommand<ref command>
+			| BracketOrderCommand<ref command>
 		//Fast Commands
 			| CancelSubscribeCommand<ref command>
 			| SubscribeQuotesCommand<ref command>
@@ -639,6 +640,32 @@ PRODUCTIONS
 		]		(. command = cmd; .)
 	.
 
+	BracketOrderCommand<ref MsgCommand command>	(. var cmd = new BracketOrderCommand(); cmd.BracketCommands = new List<BracketCommandItem>(); .) = 
+		actionBracket
+		BracketType<ref cmd.Type>
+		"{"
+			(. var item = new BracketCommandItem(); .) 
+			[
+				"["
+					OrigMsgVarName<ref item.MsgVarName>
+				"]"
+			]
+			OrderBody<item> 
+			(. cmd.BracketCommands.Add(item); .)
+			{
+				"," (. item = new BracketCommandItem(); .)
+					[
+						"["
+							OrigMsgVarName<ref item.MsgVarName>
+						"]"
+					]
+					OrderBody<item> 
+					(. cmd.BracketCommands.Add(item); .)
+			}
+		"}"
+		(. command = cmd; .)
+	.
+
 	ModifyOrderCommand<ref MsgCommand command>	(. var cmd = new ModifyOrderCommand(); .) = 
 		actionModify
 		OrigMsgVarName<ref cmd.OrigMsgVarName>
@@ -719,7 +746,9 @@ PRODUCTIONS
 		[
 			IF (IsSenderCompID()) IdentOrString<ref senderCompID> ","
 		]
+		[
 		IdentOrString<ref password>	
+		]
 		[
 			uuid (. uuid = t.val; .)
 		]
@@ -1228,6 +1257,11 @@ PRODUCTIONS
 		integer		(. value = LiteralParser.ParseFloat(t.val); .)
 		| float		(. value = LiteralParser.ParseFloat(t.val); .)
 	.
+	
+	BracketType<ref BracketType btype> = 
+		"OCO" (. btype = Sample.FoxScript.BracketType.OCO; .)
+		| "OSO" (. btype = Sample.FoxScript.BracketType.OSO; .)
+	.
 	//FAST Commands
 
 	ConnectFastCommand (. string username = null; .) = 
@@ -1254,6 +1288,29 @@ PRODUCTIONS
 		]
 	.
 
+	FASTMDEntries<MDMessageCommand command> (. command.ResetMDEntries(); .) =
+		"MDEntries:"
+		"["
+			[
+				(. FAST.MDEntryType type; .)
+				FASTMDEntryType<out type> (. command.Add(type); .)
+				{ "," FASTMDEntryType<out type> (. command.Add(type); .) }
+			]
+		"]"
+	.
+
+	FASTMDEntryType<out FAST.MDEntryType type> (. type = FAST.MDEntryType.BID; .) =
+        "BID" (. type = FAST.MDEntryType.BID; .)
+        | "OFFER" (. type = FAST.MDEntryType.OFFER; .)
+        | "TRADE" (. type = FAST.MDEntryType.TRADE; .)
+        | "OPENING_PRICE" (. type = FAST.MDEntryType.OPENING_PRICE; .)
+        | "SETTLEMENT_PRICE" (. type = FAST.MDEntryType.SETTLEMENT_PRICE; .)
+        | "TRADE_VOLUME" (. type = FAST.MDEntryType.TRADE_VOLUME; .)
+        | "OPEN_INTEREST" (. type = FAST.MDEntryType.OPEN_INTEREST; .)
+        | "WORKUP_TRADE" (. type = FAST.MDEntryType.WORKUP_TRADE; .)
+        | "EMPTY_BOOK" (. type = FAST.MDEntryType.EMPTY_BOOK; .)
+	.
+
 	FASTContract<MDMessageCommand command> =
 		(
 			FASTSymbolBasedContract<command>
@@ -1274,7 +1331,9 @@ PRODUCTIONS
 
 	FASTFuturesBasedContract<MDMessageCommand command> (. command.ContractKind = Sample.FoxScript.ContractKind.FUTURE; .) =
 		IdentOrString<ref command.BaseSymbol>   
+		[
 		integer 	(. command.ExpirationMonth = LiteralParser.ParseInteger(t.val);   .)
+		]
 		[
 			FASTStrikeSide<command> (. command.ContractKind = Sample.FoxScript.ContractKind.OPTION; .)
 		]
@@ -1298,6 +1357,9 @@ PRODUCTIONS
 	SubscribeQuotesCommand<ref MsgCommand command> (. var cmd = new SubscribeQuotesCommand(); var mdCmd = cmd as MDMessageCommand; .) = 
 		actionSubscribeQuotes
 		FASTUpdateType<mdCmd>
+		[ 
+			FASTMDEntries<mdCmd> 
+		]
 		FASTContract<mdCmd>
 		SubscribeMarketDataToFile<ref mdCmd>
 		(. command = cmd; .)

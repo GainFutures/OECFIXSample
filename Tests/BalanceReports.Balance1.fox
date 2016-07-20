@@ -1,0 +1,20 @@
+//
+//	Waits for banance reports. 
+//	Shared argument: balance1
+//
+
+report = Wait CollateralReport, CollInquiryID == balance1.CollInquiryID;
+Ensure report != null, 'CollateralReport not received';
+Ensure report.TotNumReports > 0, 'TotNumReports must be greater 0';
+
+/*	TODO:	Loops and arithmetical expressions required 
+
+Repeat (report.TotNumReports - 1)
+{
+	report = Wait CollateralReport, CollInquiryID == balance1.CollInquiryID;
+	Ensure report != null, 'CollateralReport not received';
+}
+
+Ensure report.LastRptRequested, 'Last report must be LastRptRequested';
+
+*/

@@ -4,7 +4,7 @@ using QuickFix;
 
 namespace OEC.FIX.Sample.FIX
 {
-	public abstract class MessageStoreBase : QuickFix.MessageStore
+	abstract class MessageStoreBase : QuickFix.MessageStore
 	{
 		public delegate void SeqNumEventHandler(SessionID sessionID, int seqnum);
 
@@ -12,7 +12,14 @@ namespace OEC.FIX.Sample.FIX
 		private DateTime _creationTimeUtc;
 		private SessionID _sessionID;
 		private TimeSpan _sessionStartUtc;
+	    protected Props Properties { get; set; }
+
 		protected abstract TimeSpan SessionStartLocal { get; }
+
+	    protected MessageStoreBase(Props properties)
+	    {
+	        Properties = properties;
+	    }
 
 		public void Init(SessionID sessionID)
 		{

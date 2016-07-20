@@ -1,0 +1,24 @@
+//Search by base contract
+contract request ES;
+contract request ES SUBSCRIBE;
+contract request ES UNSUBSCRIBE;
+
+//Contract lookups
+contract lookup ESM3, mode = EXACT_MATCH, max_records = 10;
+contract lookup ES, mode = ANY_STARTS_WITH, max_records = 10;
+contract lookup ES, mode=ANY_STARTS_WITH, max_records=10, KIND=FUTURE;
+contract lookup ES, mode=ANY_STARTS_WITH, max_records=10, KIND=(FUTURE, FOREX);
+contract lookup ES, mode=ANY_STARTS_WITH, max_records=10, Exch=CME, CGroup = Meats;
+contract lookup ES, mode=ANY_STARTS_WITH, max_records=10, underlying=(FXXXXS, ES, '201306');
+
+//base contract
+contract request base EXCH=CME;
+contract request base CGROUP=Meats;
+contract request base EXCH=CME, CGROUP=Meats;
+contract request base EXCH=CME, CGROUP=Meats, COMPOUND_TYPE = PUT_CALL_SPREAD;
+
+//reject expected
+contract request base SUBSCRIBE, EXCH=CME, CGROUP=Meats;
+//reject expected
+contract request base UNSUBSCRIBE, EXCH=CME, CGROUP=Meats;
+

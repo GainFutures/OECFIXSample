@@ -1,0 +1,7 @@
+//
+//	Sends balance request for Equity account and waits for balance reports. 
+//
+
+balance1 = Balance prop:EquityAccount;
+
+Exec 'Tests/BalanceReports.Balance1.fox';

@@ -1,0 +1,6 @@
+//
+//	Sends Equity STP/LMT order and cancels it. 
+//
+
+order1 = New BUY 1 MSFT STP 1 LMT 1;
+Exec 'Tests/Cancellation.Order1.fox';

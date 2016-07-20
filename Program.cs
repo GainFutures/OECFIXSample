@@ -1,72 +1,120 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Security.Authentication.ExtendedProtection;
+using System.Threading;
 using OEC.FIX.Sample.FIX;
 using OEC.FIX.Sample.FoxScript;
 using OEC.FIX.Sample.FAST;
+using System.Collections.Generic;
+using QuickFix;
 
 namespace OEC.FIX.Sample
 {
 	internal class Program
 	{
-		public static readonly Props Props = new Props();
-
 		private static void Main(string[] args)
 		{
 			Console.WriteLine("FIX Sample Client, ver. {0}", Assembly.GetExecutingAssembly().GetName().Version);
 			Console.WriteLine("FOXScript ver. {0}", ExecEngine.FOXScriptVersion);
 			PrintAuthUsage();
 
-			var fixEngine = new FixEngine();
-			var fastClient = new FastClient();
-			var execEngine = new ExecEngine(fixEngine, fastClient);
+            var app = new Program();
 
-			CreatePredefinedProps();
-			execEngine.LoadSeqNumbers();
+            //VP: Here are many examples how to run the app with different parameters
 
-			execEngine.Run();
-			execEngine.StoreSeqNumbers();
+            //Ordinary way to start. FIX and FAST enabled; console available
+            app.Start(ExecEngine.MakeFixFast(Configurations.PredefinedConfiguration), app.StartConsoleRoutine);
+
+            // Connects multiple fixengines simultaneously; no command console 
+            //app.Start(
+            //    Configurations.MultipleTestSessions(100).Select(ExecEngine.MakeFixOnly),
+            //    app.TestMultimpleConnectionsRoutine);
+            
+            // Settings from config file; console 
+            //app.Start(
+            //    ExecEngine.MakeFixFast(Configurations.AppSettingsConfiguration),
+            //    app.StartConsoleRoutine);
+            
+            //// predefined TEST1 user; command console
+            //app.Start(
+            //    ExecEngine.MakeFixFast(Configurations.Test1OnLocalhost),
+            //    app.StartConsoleRoutine);
+
+            //app.Start(
+            //    ExecEngine.MakeFixFast(Configurations.VitalyLocalHostConfiguration),
+            //    app.StartConsoleRoutine);
+          
+            // predefined TEST1 user connects to FIX and then to FAST two times simulating 
+            // drop of an old connection; no command console
+            //var configuration = Configurations.Test1OnLocalhost;
+            //var fixFast = ExecEngine.MakeFixFast(configuration);
+            //var execEngines = new[]
+            //{
+            //    fixFast, 
+            //    ExecEngine.MakeFastOnly(fixFast.Properties)
+            //};
+            //app.Start(execEngines, app.MultipleFastConnection);
 		}
 
-		private static void CreatePredefinedProps()
-		{
-			CreatePropsBase("api.gainfutures.com", "MY_SENDER_COMPID", "OEC_TEST", "API000001", "APIFX0001", false);
-		}
+        private void Start(IEnumerable<ExecEngine> engines, Action<int, ExecEngine> routine)
+        {
+            var threads = engines.Select((engine, i) =>
+            {
+                Action<ExecEngine> threadRoutine = e => routine(i, e);
+                return new Thread(() => Start(engine, threadRoutine));
+            }).ToArray();
+            
+            foreach (var thread in threads)
+                thread.Start();
+            foreach (var thread in threads)
+                thread.Join();
+        }
 
-		private static void CreatePropsBase(
-			string host,
-			string senderCompID,
-			string tragetCompID,
-			string futureAccount,
-			string forexAccount,
-			bool isSSL)
-		{
-			Props.AddProp(Prop.Host, host);
-			Props.AddProp(Prop.Port, 9300);
-			Props.AddProp(Prop.FastPort, 9301);
-			Props.AddProp(Prop.FastHashCode, "");
+        private void Start(ExecEngine execEngine, Action<ExecEngine> routine)
+        {
+            execEngine.LoadSeqNumbers();
+            routine(execEngine);
+            execEngine.StoreSeqNumbers();
+        }
 
-			Props.AddProp(Prop.ReconnectInterval, 30);
-			Props.AddProp(Prop.HeartbeatInterval, 30);
-			Props.AddProp(Prop.MillisecondsInTimestamp, false);
+	    private void TestMultimpleConnectionsRoutine(int no, ExecEngine engine)
+	    {
+            const string source = "COMMAND";
+            engine.Execute(string.Format("connect '{0}';", no + 1), source);
+            engine.Execute("sleep [00:03:00];", source);
+            engine.Execute("disconnect;", source);
+        }
 
-			Props.AddProp(Prop.BeginString, FixVersion.FIX44);
-			Props.AddProp(Prop.SenderCompID, senderCompID);
-			Props.AddProp(Prop.TargetCompID, tragetCompID);
+	    private void MultipleFastConnection(int no, ExecEngine engine)
+	    {
+            const string source = "COMMAND";
+            if (engine.IsFixAvailable)
+                engine.Execute(string.Format("connect '{0}';", no + 1), source);
 
-			Props.AddProp(Prop.SessionStart, new TimeSpan(1, 0, 0));
-			Props.AddProp(Prop.SessionEnd, new TimeSpan(23, 0, 0));
+            const int fixDelay = 5;
+	        const int orderDelay = 3;
+            TimeSpan delay = TimeSpan.FromSeconds(fixDelay + orderDelay * no);
+	        var sleepString = string.Format("sleep [{0}];", delay);
 
-			Props.AddProp(Prop.SenderSeqNum, 1);
-			Props.AddProp(Prop.TargetSeqNum, 1);
-			Props.AddProp(Prop.ResponseTimeout, TimeSpan.FromSeconds(15));
-			Props.AddProp(Prop.ConnectTimeout, TimeSpan.FromSeconds(15));
+            if (engine.IsFixAvailable)
+                engine.Execute("disconnect;", source);
 
-			Props.AddProp(Prop.FutureAccount, futureAccount);
-			Props.AddProp(Prop.ForexAccount, forexAccount);
+            engine.Execute(sleepString, source);
+            engine.Execute("ConnectFast;", source);
+        }
 
-			Props.AddProp(Prop.SSL, isSSL);
-		}
+	    private void ExecuteFileRoutine(ExecEngine engine, string fileName)
+	    {
+	        string command = string.Format("exec '{0}'", fileName);
+	        engine.Execute(command, "COMMAND");
+	    }
+
+	    private void StartConsoleRoutine(ExecEngine engine)
+	    {
+	        engine.Run();
+	    }
 
 		private static void PrintAuthUsage()
 		{

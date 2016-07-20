@@ -22,9 +22,12 @@ namespace OEC.FIX.Sample.FAST
 		public FastMessageFactory MessageFactory;
 		private OpenFAST.Sessions.FastClient _fc;
 		private Session _ses;
+        private readonly Props _properties;
 
-		public FastClient()
+		public FastClient(Props properties)
 		{
+		    _properties = properties;
+
 			var templateLoader = new XmlMessageTemplateLoader {LoadTemplateIdFromAuxId = true};
 
 			TryDownload();
@@ -66,16 +69,16 @@ namespace OEC.FIX.Sample.FAST
 
 		public void Connect(string username, string password)
 		{
-			string host = Program.Props[Prop.Host].Value.ToString();
+			string host = _properties[Prop.Host].Value.ToString();
 
 			int port;
 			try
 			{
-				port = (int) Program.Props[Prop.FastPort].Value;
+			    port = (int) _properties[Prop.FastPort].Value;
 			}
 			catch
 			{
-				port = (int) Program.Props[Prop.Port].Value;
+			    port = (int) _properties[Prop.Port].Value;
 			}
 
 

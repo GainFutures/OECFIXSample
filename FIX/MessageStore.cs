@@ -8,7 +8,12 @@ namespace OEC.FIX.Sample.FIX
 	{
 		protected override TimeSpan SessionStartLocal
 		{
-			get { return (TimeSpan) Program.Props[Prop.SessionStart].Value; }
+            get { return (TimeSpan)Properties[Prop.SessionStart].Value; }
+		}
+
+	    public MessageStore(Props properties)
+            : base(properties)
+	    {
 		}
 
 		protected override SessionParams LoadSessionParams(SessionID sessionID)

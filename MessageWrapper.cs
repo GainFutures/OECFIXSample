@@ -16,9 +16,9 @@ namespace OEC.FIX.Sample
 			OFMessage = message;
 		}
 
-		public Message QFMessage { get; private set; }
+        public readonly Message QFMessage;
 
-		public OpenFAST.Message OFMessage { get; private set; }
+        public readonly OpenFAST.Message OFMessage;
 
 		public bool IsQuickFix
 		{
