@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using QuickFix;
 
 namespace OEC.FIX.Sample.FIX
 {
-	abstract class MessageStoreBase : QuickFix.MessageStore
+	abstract class MessageStoreBase : IMessageStore
 	{
 		public delegate void SeqNumEventHandler(SessionID sessionID, int seqnum);
 
@@ -68,8 +69,8 @@ namespace OEC.FIX.Sample.FIX
 			SessionParams sessionParams = LoadSessionParams(_sessionID);
 			if (sessionParams != null)
 			{
-				_cache.setNextSenderMsgSeqNum(sessionParams.SenderSeqNum);
-				_cache.setNextTargetMsgSeqNum(sessionParams.TargetSeqNum);
+				_cache.SetNextSenderMsgSeqNum(sessionParams.SenderSeqNum);
+				_cache.SetNextTargetMsgSeqNum(sessionParams.TargetSeqNum);
 				_creationTimeUtc = sessionParams.CreationTime;
 			}
 			else
@@ -87,84 +88,87 @@ namespace OEC.FIX.Sample.FIX
 			var sessionParams = new SessionParams
 			{
 				CreationTime = _creationTimeUtc,
-				SenderSeqNum = _cache.getNextSenderMsgSeqNum(),
-				TargetSeqNum = _cache.getNextTargetMsgSeqNum()
+				SenderSeqNum = _cache.GetNextSenderMsgSeqNum(),
+				TargetSeqNum = _cache.GetNextTargetMsgSeqNum()
 			};
 			return SaveSessionParams(_sessionID, sessionParams);
 		}
 
 		#region MessageStore Members
-
-		public void get(int begin, int end, ArrayList messages)
+		public void Get(int begin, int end, List<string> messages)
 		{
-			_cache.get(begin, end, messages);
+			_cache.Get(begin, end, messages);
 		}
 
-		public DateTime getCreationTime()
+	    public DateTime? CreationTime
+	    {
+	        get { return GetCreationTime(); }
+	    }
+
+        public DateTime GetCreationTime()
 		{
 			return _creationTimeUtc;
 		}
 
-		public int getNextSenderMsgSeqNum()
+		public int GetNextSenderMsgSeqNum()
 		{
-			return _cache.getNextSenderMsgSeqNum();
+			return _cache.GetNextSenderMsgSeqNum();
 		}
 
-		public int getNextTargetMsgSeqNum()
+		public int GetNextTargetMsgSeqNum()
 		{
-			return _cache.getNextTargetMsgSeqNum();
+			return _cache.GetNextTargetMsgSeqNum();
 		}
 
-		public void incrNextSenderMsgSeqNum()
+		public void IncrNextSenderMsgSeqNum()
 		{
-			_cache.incrNextSenderMsgSeqNum();
-			setNextSenderMsgSeqNum(_cache.getNextSenderMsgSeqNum());
+			_cache.IncrNextSenderMsgSeqNum();
+			SetNextSenderMsgSeqNum(_cache.GetNextSenderMsgSeqNum());
 		}
 
-		public void incrNextTargetMsgSeqNum()
+		public void IncrNextTargetMsgSeqNum()
 		{
-			_cache.incrNextTargetMsgSeqNum();
-			setNextTargetMsgSeqNum(_cache.getNextTargetMsgSeqNum());
+			_cache.IncrNextTargetMsgSeqNum();
+			SetNextTargetMsgSeqNum(_cache.GetNextTargetMsgSeqNum());
 		}
 
-		public void refresh()
+		public void Refresh()
 		{
-			_cache.reset();
-			RaiseSenderSeqNumChanged(_cache.getNextSenderMsgSeqNum());
-			RaiseTargetSeqNumChanged(_cache.getNextTargetMsgSeqNum());
+			_cache.Reset();
+			RaiseSenderSeqNumChanged(_cache.GetNextSenderMsgSeqNum());
+			RaiseTargetSeqNumChanged(_cache.GetNextTargetMsgSeqNum());
 
 			PopulateCache();
 		}
 
-		public void reset()
+		public void Reset()
 		{
-			_cache.reset();
-			RaiseSenderSeqNumChanged(_cache.getNextSenderMsgSeqNum());
-			RaiseTargetSeqNumChanged(_cache.getNextTargetMsgSeqNum());
+			_cache.Reset();
+			RaiseSenderSeqNumChanged(_cache.GetNextSenderMsgSeqNum());
+			RaiseTargetSeqNumChanged(_cache.GetNextTargetMsgSeqNum());
 
 			_creationTimeUtc = CalculateCreationTime(DateTime.UtcNow.AddSeconds(1), _sessionStartUtc);
 			SaveSessionParams();
 		}
 
-		public bool set(int sequence, string msg)
+		public bool Set(int sequence, string msg)
 		{
-			return _cache.set(sequence, msg);
+			return _cache.Set(sequence, msg);
 		}
 
-		public void setNextSenderMsgSeqNum(int next)
+		public void SetNextSenderMsgSeqNum(int next)
 		{
-			_cache.setNextSenderMsgSeqNum(next);
+			_cache.SetNextSenderMsgSeqNum(next);
 			SaveSessionParams();
-			RaiseSenderSeqNumChanged(_cache.getNextSenderMsgSeqNum());
+			RaiseSenderSeqNumChanged(_cache.GetNextSenderMsgSeqNum());
 		}
 
-		public void setNextTargetMsgSeqNum(int next)
+		public void SetNextTargetMsgSeqNum(int next)
 		{
-			_cache.setNextTargetMsgSeqNum(next);
+			_cache.SetNextTargetMsgSeqNum(next);
 			SaveSessionParams();
-			RaiseTargetSeqNumChanged(_cache.getNextTargetMsgSeqNum());
+			RaiseTargetSeqNumChanged(_cache.GetNextTargetMsgSeqNum());
 		}
-
 		#endregion
 
 		protected class SessionParams
@@ -173,5 +177,10 @@ namespace OEC.FIX.Sample.FIX
 			public int SenderSeqNum;
 			public int TargetSeqNum;
 		}
+
+	    public void Dispose()
+	    {
+            _cache.Dispose();
+        }
 	}
 }

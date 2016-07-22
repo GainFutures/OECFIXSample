@@ -2,13 +2,9 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Authentication.ExtendedProtection;
 using System.Threading;
-using OEC.FIX.Sample.FIX;
 using OEC.FIX.Sample.FoxScript;
-using OEC.FIX.Sample.FAST;
 using System.Collections.Generic;
-using QuickFix;
 
 namespace OEC.FIX.Sample
 {

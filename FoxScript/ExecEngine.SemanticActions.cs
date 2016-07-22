@@ -5,6 +5,7 @@ using System.Threading;
 using OEC.FIX.Sample.FIX;
 using OpenFAST.Sessions;
 using QuickFix;
+using QuickFix.Fields;
 
 namespace OEC.FIX.Sample.FoxScript
 {

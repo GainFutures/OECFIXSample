@@ -19,9 +19,9 @@ namespace OEC.FIX.Sample.FIX
 		{
 			Create(_properties);
 
-			Session = Session.lookupSession(SessionID);
-			Session.setNextSenderMsgSeqNum(senderSeqNum);
-			Session.setNextTargetMsgSeqNum(targetSeqNum);
+			Session = Session.LookupSession(SessionID);
+			Session.NextSenderMsgSeqNum = senderSeqNum;
+			Session.NextTargetMsgSeqNum = targetSeqNum;
 
 			var ssl = (bool) _properties[Prop.SSL].Value;
             _sslTunnel = ssl
@@ -78,7 +78,7 @@ namespace OEC.FIX.Sample.FIX
 
 			writer.Flush();
 			stream.Seek(0, SeekOrigin.Begin);
-			return new SessionSettings(stream);
+			return new SessionSettings(new StreamReader(stream));
 		}
 	}
 }

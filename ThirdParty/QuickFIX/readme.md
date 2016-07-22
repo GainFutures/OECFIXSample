@@ -1,6 +1,8 @@
 ## QuickFIX
 
 Wiki: [http://en.wikipedia.org/wiki/QuickFIX](http://en.wikipedia.org/wiki/QuickFIX)<br />
-Home page: [http://www.quickfixengine.org/](http://www.quickfixengine.org/)<br />
-Intallation: [http://www.quickfixengine.org/quickfix/doc/html/install.html](http://www.quickfixengine.org/quickfix/doc/html/install.html)<br />
-Place quickfix_net.dll and quickfix_net_messages.dll wrappers into ThirdParty\QuickFix folder
+Home page: [http://quickfixn.org/](http://quickfixn.org/)<br />
+
+Current version [1.7.0](http://quickfixn.s3.amazonaws.com/quickfixn-v1.7.0.zip)
+Place quickfix.dll to ThirdParty\QuickFix folder
+

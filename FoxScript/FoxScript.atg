@@ -1127,21 +1127,21 @@ PRODUCTIONS
 	.
 
 	TimeInForce<ref TimeInForce tif> (. tif = new TimeInForce(); .) = 
-		"DAY"		(. tif.Type = QuickFix.TimeInForce.DAY; .)
-		| "GTC"		(. tif.Type = QuickFix.TimeInForce.GOOD_TILL_CANCEL; .)
-		| "GTD"		(. tif.Type = QuickFix.TimeInForce.GOOD_TILL_DATE; .)
+		"DAY"		(. tif.Type = QuickFix.Fields.TimeInForce.DAY; .)
+		| "GTC"		(. tif.Type = QuickFix.Fields.TimeInForce.GOOD_TILL_CANCEL; .)
+		| "GTD"		(. tif.Type = QuickFix.Fields.TimeInForce.GOOD_TILL_DATE; .)
 			(
 				timestamp	(. tif.Expiration = LiteralParser.ParseTimestamp(t.val); .)
 				| date		(. tif.Expiration = LiteralParser.ParseDate(t.val); .)
 			)
-		| "FOK"		(. tif.Type = QuickFix.TimeInForce.FILL_OR_KILL; .)
-		| "IOC"		(. tif.Type = QuickFix.TimeInForce.IMMEDIATE_OR_CANCEL; .)
+		| "FOK"		(. tif.Type = QuickFix.Fields.TimeInForce.FILL_OR_KILL; .)
+		| "IOC"		(. tif.Type = QuickFix.Fields.TimeInForce.IMMEDIATE_OR_CANCEL; .)
 	.
 	
 	OrderSide<ref OrderSide orderSide> (. orderSide = new OrderSide(); .) = 
 		(
-			buy			(. orderSide.Side = QuickFix.Side.BUY; .)
-			| sell		(. orderSide.Side = QuickFix.Side.SELL; .)
+			buy			(. orderSide.Side = QuickFix.Fields.Side.BUY; .)
+			| sell		(. orderSide.Side = QuickFix.Fields.Side.SELL; .)
 		)
 		[
 			open	(. orderSide.Open = true; .)
@@ -1154,20 +1154,20 @@ PRODUCTIONS
 	. 
 
 	OrderType<ref OrderType orderType> (. double stop = 0, limit = 0; orderType = new OrderType(); .) = 
-		"MKT"		(. orderType.Type = QuickFix.OrdType.MARKET; .)
+		"MKT"		(. orderType.Type = QuickFix.Fields.OrdType.MARKET; .)
 		| "MOO"		(. orderType.Type = Sample.FoxScript.OrderType.MARKET_ON_OPEN; .)
 		| "MOC"		(. orderType.Type = Sample.FoxScript.OrderType.MARKET_ON_CLOSE; .)
 		| 
 			(
-				"LMT"				(. orderType.Type = QuickFix.OrdType.LIMIT; .)
+				"LMT"				(. orderType.Type = QuickFix.Fields.OrdType.LIMIT; .)
 				Price<ref limit>	(. orderType.Limit = limit; .)
 			)
 		| 
 			(
-				"STP"		(. orderType.Type = QuickFix.OrdType.STOP; .)
+				"STP"		(. orderType.Type = QuickFix.Fields.OrdType.STOP; .)
 				Price<ref stop>		(. orderType.Stop = stop; .)
 				[
-					"LMT"	(. orderType.Type = QuickFix.OrdType.STOP_LIMIT; .)
+					"LMT"	(. orderType.Type = QuickFix.Fields.OrdType.STOP_LIMIT; .)
 					Price<ref limit>	(. orderType.Limit = limit; .)
 				]
 				[
@@ -1183,7 +1183,7 @@ PRODUCTIONS
 			)
 		| 
 			(
-				"MIT"				(. orderType.Type = QuickFix.OrdType.MARKET_IF_TOUCHED; .)
+				"MIT"				(. orderType.Type = QuickFix.Fields.OrdType	.MARKET_IF_TOUCHED; .)
 				Price<ref limit>	(. orderType.Limit = limit; .)
 			)
 	.

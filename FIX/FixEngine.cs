@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Threading;
 using OEC.FIX.Sample;
 using QuickFix;
-using QuickFix44;
+using QuickFix.Fields;
+using QuickFix.FIX44;
 using Message = QuickFix.Message;
 
 namespace OEC.FIX.Sample.FIX
@@ -37,7 +38,7 @@ namespace OEC.FIX.Sample.FIX
 			var msg = new TestRequest(testReqID);
 			_connection.SendMessage(msg);
 
-			WriteLine("Ping: {0} SN={1}", testReqID.getValue(), msg.getHeader().getInt(MsgSeqNum.FIELD));
+			WriteLine("Ping: {0} SN={1}", testReqID.getValue(), msg.Header.GetInt(Tags.MsgSeqNum));
 		}
 
 		public void Connect(string password, string uuid)
@@ -57,10 +58,10 @@ namespace OEC.FIX.Sample.FIX
 				}
 
 				_connection = new Connection(_properties);
-				_connection.Logon += Connection_Logon;
-				_connection.Logout += Connection_Logout;
-				_connection.FromAdmin += Connection_FromAdmin;
-				_connection.FromApp += Connection_FromApp;
+				_connection.Logon += ConnectionOnLogon;
+				_connection.Logout += ConnectionLogout;
+				_connection.OnFromAdmin += ConnectionOnFromAdmin;
+				_connection.OnFromApp += ConnectionOnFromApp;
 
 			    _connection.Create((int) _properties[Prop.SenderSeqNum].Value, (int) _properties[Prop.TargetSeqNum].Value);
 
@@ -96,14 +97,13 @@ namespace OEC.FIX.Sample.FIX
 			Console.WriteLine("<inc>" + msg);
 		}
 
-
 		public void Disconnect()
 		{
 			lock (_connectionLock)
 			{
 				if (_connection != null)
 				{
-					if (_connection.Session.isLoggedOn())
+					if (_connection.Session.IsLoggedOn)
 					{
 						_logoutEvent = new ManualResetEvent(false);
 					}
@@ -187,7 +187,7 @@ namespace OEC.FIX.Sample.FIX
 			for (int i = 0; i < _messages.Count; ++i)
 			{
 				Message msg = _messages[i];
-				if (msgType == (msg.getHeader().isSetField(MsgType.FIELD) ? msg.getHeader().getString(MsgType.FIELD) : null))
+				if (msgType == (msg.Header.IsSetField(Tags.MsgType) ? msg.Header.GetString(Tags.MsgType) : null))
 				{
 					if (predicate != null)
 					{
@@ -228,10 +228,10 @@ namespace OEC.FIX.Sample.FIX
 
 			_connection.Destroy();
 
-			_connection.Logon -= Connection_Logon;
-			_connection.Logout -= Connection_Logout;
-			_connection.FromAdmin -= Connection_FromAdmin;
-			_connection.FromApp -= Connection_FromApp;
+			_connection.Logon -= ConnectionOnLogon;
+			_connection.Logout -= ConnectionLogout;
+			_connection.OnFromAdmin -= ConnectionOnFromAdmin;
+			_connection.OnFromApp -= ConnectionOnFromApp;
 			_connection = null;
 
 			WriteLine("Disconnected.");
@@ -252,7 +252,7 @@ namespace OEC.FIX.Sample.FIX
 			WriteLine(text);
 		}
 
-		private void Connection_FromApp(SessionID sessionID, Message msg)
+		private void ConnectionOnFromApp(SessionID sessionID, Message msg)
 		{
 			lock (_messages)
 			{
@@ -261,32 +261,31 @@ namespace OEC.FIX.Sample.FIX
 			}
 		}
 
-		private void Connection_FromAdmin(SessionID sessionID, Message msg)
+		private void ConnectionOnFromAdmin(SessionID sessionID, Message msg)
 		{
 			string msgType = msg.MsgType();
-			if (msgType == MsgType.Logout || msgType == MsgType.Logon)
+			if (msgType == MsgType.LOGOUT || msgType == MsgType.LOGON)
 			{
 				string text = msg.Get<Text>(null);
 				if (!string.IsNullOrEmpty(text))
 				{
 					WriteLine("From server: {0}", text);
 				}
-				if (msgType == MsgType.Logon)
-			{
-                    _properties[Prop.FastHashCode].Value = msg.getString(12004);
+				if (msgType == MsgType.LOGON)
+    			{
+                    _properties[Prop.FastHashCode].Value = msg.GetString(12004);
+			    }
 			}
-			}
-			else if (msgType == MsgType.Heartbeat)
+			else if (msgType == MsgType.HEARTBEAT)
 			{
-				if (msg.isSetField(TestReqID.FIELD))
+				if (msg.IsSetField(Tags.TestReqID))
 				{
-					WriteLine("Ping response: {0} {1} SN={2}", msg.Get<TestReqID>(null), msg.Get<Text>(null),
-						msg.getHeader().getInt(MsgSeqNum.FIELD));
+					WriteLine("Ping response: {0} {1} SN={2}", msg.Get<TestReqID>(null), msg.Get<Text>(null), msg.Header.GetInt(Tags.MsgSeqNum));
 				}
 			}
 		}
 
-		private void Connection_Logout(SessionID sessionID)
+		private void ConnectionLogout(SessionID sessionID)
 		{
 			WriteLine("Logged out: {0}", sessionID);
 
@@ -305,7 +304,7 @@ namespace OEC.FIX.Sample.FIX
 */
 		}
 
-		private void Connection_Logon(SessionID sessionID)
+		private void ConnectionOnLogon(SessionID sessionID)
 		{
 			WriteLine("Logged on: {0}", sessionID);
 

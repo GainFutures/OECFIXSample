@@ -2,7 +2,7 @@
 
 namespace OEC.FIX.Sample.FIX
 {
-	public sealed class MessageLog : Log
+	public sealed class MessageLog : ILog
 	{
 		public delegate void MessageHandler(SessionID sessionID, string msg);
 
@@ -22,15 +22,11 @@ namespace OEC.FIX.Sample.FIX
 
 		#region Log Members
 
-		public void clear()
+		public void Clear()
 		{
 		}
 
-		public void backup()
-		{
-		}
-
-		public void onEvent(string text)
+		public void OnEvent(string text)
 		{
 			SessionEventHandler handler = SessionEvent;
 			if (handler != null)
@@ -39,7 +35,7 @@ namespace OEC.FIX.Sample.FIX
 			}
 		}
 
-		public void onIncoming(string msg)
+		public void OnIncoming(string msg)
 		{
 			MessageHandler handler = OnIncomingMessage;
 			if (handler != null)
@@ -48,7 +44,7 @@ namespace OEC.FIX.Sample.FIX
 			}
 		}
 
-		public void onOutgoing(string msg)
+		public void OnOutgoing(string msg)
 		{
 			MessageHandler handler = OnOutgoingMessage;
 			if (handler != null)
@@ -58,5 +54,9 @@ namespace OEC.FIX.Sample.FIX
 		}
 
 		#endregion
+
+	    public void Dispose()
+	    {
+	    }
 	}
 }

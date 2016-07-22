@@ -1,7 +1,9 @@
-﻿using OEC.FIX;
+﻿using System;
+using OEC.FIX;
 using OEC.FIX.Sample.FIX.Fields;
 using QuickFix;
-using Message = QuickFix44.Message;
+using QuickFix.Fields;
+using Message = QuickFix.FIX44.Message;
 
 namespace OEC.FIX.Sample.FIX
 {
@@ -10,25 +12,24 @@ namespace OEC.FIX.Sample.FIX
 		public const string MsgType = "UR";
 
 		public MarginCalcRequest()
-			: base(new MsgType(MsgType))
 		{
+		    Header.SetField(new MsgType(MsgType));
 		}
 
 		public MarginCalcRequest(MarginCalcReqID reqID, Account account) : this()
 		{
-			setField(reqID);
-			setField(account);
+			SetField(reqID);
+			SetField(account);
 		}
 
 		public class NoPositions : Group
 		{
 			private static readonly int[] message_order =
 			{
-				Symbol.FIELD, CFICode.FIELD, QuickFix.MaturityMonthYear.FIELD,
-				StrikePrice.FIELD, MinQty.FIELD, MaxQty.FIELD, 0
+				Tags.Symbol, Tags.CFICode, Tags.MaturityMonthYear, Tags.StrikePrice, Tags.MinQty, MaxQty.FIELD, 0
 			};
 
-			public NoPositions() : base(QuickFix.NoPositions.FIELD, Symbol.FIELD, message_order)
+			public NoPositions() : base(Tags.NoPositions, Tags.Symbol, message_order)
 			{
 			}
 		}
@@ -39,20 +40,21 @@ namespace OEC.FIX.Sample.FIX
 		private const string MsgType = "UM";
 
 		public MarginCalcReportMessage(MarginCalcReqID reqID, Account account, MarginCalcReqResult marginCalcReqResult)
-			: base(new MsgType(MsgType))
 		{
-			setField(reqID);
-			setField(account);
-			setField(marginCalcReqResult);
+		    Header.SetField(new MsgType(MsgType));
+			SetField(reqID);
+			SetField(account);
+			SetField(marginCalcReqResult);
 			if (marginCalcReqResult.getValue() != 0)
-				setField(new Text(((MarginCalcReqResult.Enum) marginCalcReqResult.getValue()).ToString()));
+				SetField(new Text(((MarginCalcReqResult.Enum) marginCalcReqResult.getValue()).ToString()));
 		}
 
 		internal void setMarginValue(int field, double value)
 		{
 			if (double.IsNaN(value) || double.IsInfinity(value))
 				return;
-			setField(field, value.ToString("f2"));
+
+			SetField(new DecimalField(field, Convert.ToDecimal(value)));
 		}
 	}
 
@@ -71,12 +73,12 @@ namespace OEC.FIX.Sample.FIX
 		}
 	}
 
-	public sealed class InitialMargin : DoubleField
+	public sealed class InitialMargin : DecimalField
 	{
 		public const int FIELD = 12067;
 
 		public InitialMargin(double value)
-			: base(FIELD, value)
+			: base(FIELD, Convert.ToDecimal(value))
 		{
 		}
 
@@ -86,12 +88,12 @@ namespace OEC.FIX.Sample.FIX
 		}
 	}
 
-	public sealed class MaintenanceMargin : DoubleField
+	public sealed class MaintenanceMargin : DecimalField
 	{
 		public const int FIELD = 12068;
 
 		public MaintenanceMargin(double value)
-			: base(FIELD, value)
+			: base(FIELD, Convert.ToDecimal(value))
 		{
 		}
 
@@ -101,12 +103,12 @@ namespace OEC.FIX.Sample.FIX
 		}
 	}
 
-	public sealed class NetOptionValue : DoubleField
+	public sealed class NetOptionValue : DecimalField
 	{
 		public const int FIELD = 12069;
 
 		public NetOptionValue(double value)
-			: base(FIELD, value)
+			: base(FIELD, Convert.ToDecimal(value))
 		{
 		}
 
@@ -116,12 +118,12 @@ namespace OEC.FIX.Sample.FIX
 		}
 	}
 
-	public sealed class RiskValue : DoubleField
+	public sealed class RiskValue : DecimalField
 	{
 		public const int FIELD = 12070;
 
 		public RiskValue(double value)
-			: base(FIELD, value)
+			: base(FIELD, Convert.ToDecimal(value))
 		{
 		}
 

@@ -1,4 +1,4 @@
-﻿using QuickFix;
+﻿using QuickFix.Fields;
 
 namespace OEC.FIX.Sample.FIX.Fields
 {

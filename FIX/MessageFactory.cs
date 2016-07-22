@@ -5,9 +5,10 @@ using OEC.FIX.Sample.FIX.Fields;
 using OEC.FIX.Sample.FoxScript;
 using OEC.FIX.Sample.FoxScript.AllocationBlocks;
 using QuickFix;
-using QuickFix44;
+using QuickFix.FIX44;
+using QuickFix.Fields;
 using Message = QuickFix.Message;
-using TimeInForce = QuickFix.TimeInForce;
+using TimeInForce = QuickFix.Fields.TimeInForce;
 
 namespace OEC.FIX.Sample.FIX
 {
@@ -107,10 +108,10 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new CollateralInquiry();
 
-			msg.set(new Account(command.Account));
-			msg.set(new CollInquiryID(Tools.GenerateUniqueID()));
-			msg.set(new ResponseTransportType(ResponseTransportType.INBAND));
-			msg.set(new SubscriptionRequestType(SubscriptionRequestType.SNAPSHOT));
+		    msg.Account = new Account(command.Account);
+			msg.CollInquiryID = new CollInquiryID(Tools.GenerateUniqueID());
+			msg.ResponseTransportType = new ResponseTransportType(ResponseTransportType.INBAND);
+			msg.SubscriptionRequestType = new SubscriptionRequestType(SubscriptionRequestType.SNAPSHOT);
 
 			return msg;
 		}
@@ -119,14 +120,14 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new RequestForPositions();
 
-			msg.set(new Account(command.Account));
-			msg.set(new AccountType(AccountType.ACCOUNT_IS_CARRIED_ON_CUSTOMER_SIDE_OF_BOOKS));
-			msg.set(new PosReqID(Tools.GenerateUniqueID()));
-			msg.set(new PosReqType(PosReqType.POSITIONS));
-			msg.set(new ResponseTransportType(ResponseTransportType.INBAND));
-			msg.set(new SubscriptionRequestType(SubscriptionRequestType.SNAPSHOT));
-			msg.set(new TransactTime(DateTime.UtcNow));
-			msg.set(new ClearingBusinessDate(DateTime.Today.ToString("yyyyMMdd")));
+			msg.Account = new Account(command.Account);
+			msg.AccountType = new AccountType(AccountType.ACCOUNT_IS_CARRIED_ON_CUSTOMER_SIDE_OF_BOOKS);
+			msg.PosReqID = new PosReqID(Tools.GenerateUniqueID());
+			msg.PosReqType = new PosReqType(PosReqType.POSITIONS);
+			msg.ResponseTransportType = new ResponseTransportType(ResponseTransportType.INBAND);
+			msg.SubscriptionRequestType = new SubscriptionRequestType(SubscriptionRequestType.SNAPSHOT);
+		    msg.TransactTime = new TransactTime(DateTime.UtcNow);
+			msg.ClearingBusinessDate = new ClearingBusinessDate(DateTime.Today.ToString("yyyyMMdd"));
 
 			return msg;
 		}
@@ -138,7 +139,7 @@ namespace OEC.FIX.Sample.FIX
 				new UserRequestType(userRequestCommand.UserRequestType),
 				new Username(userRequestCommand.Name));
 			if (userRequestCommand.UUID != null)
-				msg.setField(new UUIDField(userRequestCommand.UUID));
+				msg.SetField(new UUIDField(userRequestCommand.UUID));
 			return msg;
 		}
 
@@ -154,10 +155,10 @@ namespace OEC.FIX.Sample.FIX
 
 				AssignOrderContract(group, pos.Contract);
 
-				group.setField(new MinQty(pos.MinQty));
-				group.setField(new MaxQty(pos.MaxQty));
+				group.SetField(new MinQty(pos.MinQty));
+				group.SetField(new MaxQty(pos.MaxQty));
 
-				msg.addGroup(group);
+				msg.AddGroup(group);
 			}
 			return msg;
 		}
@@ -166,15 +167,15 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new SecurityListRequest();
 
-			msg.set(new SecurityReqID(Tools.GenerateUniqueID()));
+			msg.SecurityReqID = new SecurityReqID(Tools.GenerateUniqueID());
 
-			msg.set(new SecurityListRequestType(SecurityListRequestType.PRODUCT));
+			msg.SecurityListRequestType = new SecurityListRequestType(SecurityListRequestType.PRODUCT);
 			if (command.SubscriptionRequestType != ContractRequestCommand.DEFAULT_SUBSCRIBTION_TYPE)
-				msg.set(new SubscriptionRequestType(command.SubscriptionRequestType));
-			msg.set(new Symbol(command.Name));
+				msg.SubscriptionRequestType = new SubscriptionRequestType(command.SubscriptionRequestType);
+			msg.Symbol = new Symbol(command.Name);
 
 			if (command.UpdatesSinceTimestamp.HasValue)
-				msg.setField(new UpdatesSinceTimestamp(command.UpdatesSinceTimestamp.Value));
+				msg.SetField(new UpdatesSinceTimestamp(command.UpdatesSinceTimestamp.Value));
 
 			return msg;
 		}
@@ -183,18 +184,18 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new SecurityListRequest();
 
-			msg.set(new SecurityReqID(Tools.GenerateUniqueID()));
-			msg.set(new SecurityListRequestType(SecurityListRequestType.ALLSECURITIES));
+			msg.SecurityReqID = new SecurityReqID(Tools.GenerateUniqueID());
+			msg.SecurityListRequestType = new SecurityListRequestType(SecurityListRequestType.ALL_SECURITIES);
 
 			if (command.SubscriptionRequestType != ContractRequestCommand.DEFAULT_SUBSCRIBTION_TYPE)
-				msg.set(new SubscriptionRequestType(command.SubscriptionRequestType));
+				msg.SubscriptionRequestType = new SubscriptionRequestType(command.SubscriptionRequestType);
 
 			if (!string.IsNullOrEmpty(command.Exchange))
-				msg.set(new SecurityExchange(command.Exchange));
+				msg.SecurityExchange = new SecurityExchange(command.Exchange);
 			if (!string.IsNullOrEmpty(command.ContractGroup))
-				msg.setField(new ContractGroupField(command.ContractGroup));
+				msg.SetField(new ContractGroupField(command.ContractGroup));
 			if (command.CompoundType != CompoundType.UNKNOWN)
-				msg.set(new SecuritySubType(command.CompoundTypeString));
+				msg.SecuritySubType = new SecuritySubType(command.CompoundTypeString);
 
 			return msg;
 		}
@@ -203,52 +204,52 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new SecurityListRequest();
 
-			msg.set(new SecurityReqID(Tools.GenerateUniqueID()));
+			msg.SecurityReqID = new SecurityReqID(Tools.GenerateUniqueID());
 
-			msg.set(new SecurityListRequestType(SecurityListRequestType.SYMBOL));
-			msg.set(new Text(command.Name));
+			msg.SecurityListRequestType = new SecurityListRequestType(SecurityListRequestType.SYMBOL);
+			msg.Text = new Text(command.Name);
 
-			msg.setField(new SymbolLookupModeField(command.Mode));
-			msg.setField(new MaxRecordsField(command.MaxRecords));
+			msg.SetField(new SymbolLookupModeField(command.Mode));
+			msg.SetField(new MaxRecordsField(command.MaxRecords));
 
 			if (command.ContractKinds.Count > 0)
 			{
-				var group = new SecurityTypes.NoSecurityTypes();
+				var group = new SecurityTypes.NoSecurityTypesGroup();
 				foreach (Code code in command.ContractKinds
 					.Select(k => Code.Create(k, command.OptionType))
 					.Where(c => c != null))
 				{
-					group.set(new CFICode(code.ToFix()));
-					msg.addGroup(group);
+					group.CFICode = new CFICode(code.ToFix());
+					msg.AddGroup(group);
 				}
 			}
 
 			if (!string.IsNullOrEmpty(command.Exchange))
-				msg.set(new SecurityExchange(command.Exchange));
+				msg.SecurityExchange = new SecurityExchange(command.Exchange);
 			if (!string.IsNullOrEmpty(command.ContractGroup))
-				msg.setField(new ContractGroupField(command.ContractGroup));
+				msg.SetField(new ContractGroupField(command.ContractGroup));
 			if (command.ContractType.HasValue)
-				msg.setField(new ContractTypeField((int) command.ContractType.Value));
+				msg.SetField(new ContractTypeField((int) command.ContractType.Value));
 			if (command.ByBaseContractsOnly.HasValue)
-				msg.setField(new ByBaseContractsOnlyField(command.ByBaseContractsOnly.Value));
+				msg.SetField(new ByBaseContractsOnlyField(command.ByBaseContractsOnly.Value));
 			if (command.OptionsRequired.HasValue)
-				msg.setField(new OptionsRequiredField(command.OptionsRequired.Value));
+				msg.SetField(new OptionsRequiredField(command.OptionsRequired.Value));
 
 			if (command.ParentContract != null)
 			{
 				Contract parentContract = command.ParentContract;
-				msg.setField(new UnderlyingCFICode(parentContract.Code.ToFix()));
-				msg.setField(new UnderlyingSymbol(parentContract.Symbol));
-				msg.setField(new UnderlyingMaturityMonthYear(parentContract.MaturityMonthYear.ToFix()));
+				msg.SetField(new UnderlyingCFICode(parentContract.Code.ToFix()));
+				msg.SetField(new UnderlyingSymbol(parentContract.Symbol));
+				msg.SetField(new UnderlyingMaturityMonthYear(parentContract.MaturityMonthYear.ToFix()));
 				if (parentContract.Strike != null)
-					msg.setField(new UnderlyingStrikePrice(parentContract.Strike.Value));
+					msg.SetField(new UnderlyingStrikePrice(Convert.ToDecimal(parentContract.Strike.Value)));
 			}
 
 			if (!string.IsNullOrEmpty(command.BaseContract))
-				msg.setField(new Symbol(command.BaseContract));
+				msg.Symbol = new Symbol(command.BaseContract);
 
 			if (command.CompoundType != CompoundType.UNKNOWN)
-				msg.set(new SecuritySubType(command.CompoundTypeString));
+				msg.SecuritySubType = new SecuritySubType(command.CompoundTypeString);
 
 			return msg;
 		}
@@ -257,16 +258,16 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new OrderCancelRequest();
 
-			msg.set(new ClOrdID(Tools.GenerateUniqueID()));
-			msg.set(new TransactTime(DateTime.UtcNow));
+			msg.ClOrdID = new ClOrdID(Tools.GenerateUniqueID());
+		    msg.TransactTime = new TransactTime(DateTime.UtcNow);
 
-			if (orig.isSetField(ClOrdID.FIELD))
+			if (orig.IsSetField(Tags.ClOrdID))
 			{
-				msg.setField(new OrigClOrdID(orig.getString(ClOrdID.FIELD)));
+				msg.OrigClOrdID = new OrigClOrdID(orig.GetString(Tags.ClOrdID));
 			}
 
 			CopyImmutableOrderFields(orig, msg);
-			CopyFields(orig, msg, OrderQty.FIELD);
+			CopyFields(orig, msg, Tags.OrderQty);
 
 			return msg;
 		}
@@ -274,7 +275,7 @@ namespace OEC.FIX.Sample.FIX
 		internal Message OrderStatusRequest(OrderStatusCommand orderStatusCommand, Message orig)
 		{
 			var msg = new OrderStatusRequest();
-			msg.setField(new ClOrdID(orig.getString(ClOrdID.FIELD)));
+			msg.ClOrdID = new ClOrdID(orig.GetString(Tags.ClOrdID));
 			CopyImmutableOrderFields(orig, msg);
 			return msg;
 		}
@@ -282,26 +283,26 @@ namespace OEC.FIX.Sample.FIX
         internal Message OrderMassStatusRequest(OrderMassStatusCommand command)
         {
             var request = new OrderMassStatusRequest();
-            request.setField(new MassStatusReqID(Tools.GenerateUniqueID()));
+            request.MassStatusReqID = new MassStatusReqID(Tools.GenerateUniqueID());
 
             if (command.OrderSide != null)
             {
-                request.setField(new Side(command.OrderSide.Side));
+                request.Side = new Side(command.OrderSide.Side);
                 if (command.OrderSide.Open.HasValue)
-                    request.setField(new PositionEffect(command.OrderSide.Open.Value ? PositionEffect.OPEN : PositionEffect.CLOSE));
+                    request.SetField(new PositionEffect(command.OrderSide.Open.Value ? PositionEffect.OPEN : PositionEffect.CLOSE));
             }
 
             if (command.OrderContract != null)
                 AssignOrderContract(request, command.OrderContract);
 
             if (command.AllocationBlock != null)
-                AssignPreAllocationBlock(request, command.AllocationBlock, group => request.addGroup(group));
+                AssignPreAllocationBlock(request, command.AllocationBlock, group => request.AddGroup(group));
 
             var account = string.IsNullOrEmpty(command.Account) && command.OrderContract != null
                 ? GetAccountFor(command.OrderContract.Symbol.Asset)
                 : command.Account;
             if (account != null)
-                request.setField(new Account(account));
+                request.Account = new Account(account);
 
             return request;
         }
@@ -309,26 +310,26 @@ namespace OEC.FIX.Sample.FIX
 		private void CopyImmutableOrderFields(Message orig, Message msg)
 		{
 			CopyFields(orig, msg,
-				Side.FIELD,
-				Account.FIELD,
-				AllocText.FIELD,
-				AllocType.FIELD,
-				Symbol.FIELD,
-				SecurityType.FIELD,
-				CFICode.FIELD,
-				QuickFix.MaturityMonthYear.FIELD,
-				StrikePrice.FIELD,
-				PutOrCall.FIELD);
+				Tags.Side,
+				Tags.Account,
+				Tags.AllocText,
+				Tags.AllocType,
+				Tags.Symbol,
+				Tags.SecurityType,
+				Tags.CFICode,
+				Tags.MaturityMonthYear,
+				Tags.StrikePrice,
+				Tags.PutOrCall);
 
-			if (orig.hasGroup(NoAllocs.FIELD))
-				for (uint i = 0; i < orig.groupCount(NoAllocs.FIELD); ++i)
+			if (orig.GroupCount(Tags.NoAllocs) > 0)
+				for (int i = 0; i < orig.GroupCount(Tags.NoAllocs); ++i)
 				{
-					var origGroup = new NewOrderSingle.NoAllocs();
-					var group = new NewOrderSingle.NoAllocs();
-					orig.getGroup(i + 1, NoAllocs.FIELD, origGroup);
+					var origGroup = new NewOrderSingle.NoAllocsGroup();
+					var group = new NewOrderSingle.NoAllocsGroup();
+                    orig.GetGroup(i + 1, origGroup);
 
-					CopyFields(origGroup, group, AllocAccount.FIELD, AllocQty.FIELD);
-					msg.addGroup(group);
+					CopyFields(origGroup, group, Tags.AllocAccount, Tags.AllocQty);
+					msg.AddGroup(group);
 				}
 		}
 
@@ -336,11 +337,11 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new OrderCancelReplaceRequest();
 
-            AssignOrderBody(command, msg, group => msg.addGroup(group));
+            AssignOrderBody(command, msg, group => msg.AddGroup(group));
 
-			if (orig.isSetField(ClOrdID.FIELD))
+			if (orig.IsSetField(Tags.ClOrdID))
 			{
-				msg.setField(new OrigClOrdID(orig.getString(ClOrdID.FIELD)));
+				msg.OrigClOrdID = new OrigClOrdID(orig.GetString(Tags.ClOrdID));
 			}
 
 			return msg;
@@ -350,16 +351,16 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new AllocationInstruction();
 
-			msg.set(new AllocID(Tools.GenerateUniqueID()));
+			msg.AllocID = new AllocID(Tools.GenerateUniqueID());
 
 			if (command.Contract != null)
 				AssignOrderContract(msg, command.Contract);
 
-			if (orig.isSetField(ClOrdID.FIELD))
+			if (orig.IsSetField(Tags.ClOrdID))
 			{
-				var group = new AllocationInstruction.NoOrders();
-				group.set(new ClOrdID(orig.getString(ClOrdID.FIELD)));
-				msg.addGroup(group);
+				var group = new AllocationInstruction.NoOrdersGroup();
+			    group.ClOrdID = new ClOrdID(orig.GetString(Tags.ClOrdID));
+				msg.AddGroup(group);
 			}
 
 			AssignPostAllocationBlock(msg, command.AllocationBlock);
@@ -372,7 +373,7 @@ namespace OEC.FIX.Sample.FIX
 		{
 			var msg = new NewOrderSingle();
 
-            AssignOrderBody(command, msg, group => msg.addGroup(group));
+            AssignOrderBody(command, msg, group => msg.AddGroup(group));
 
 			return msg;
 		}
@@ -384,24 +385,24 @@ namespace OEC.FIX.Sample.FIX
                 throw new ExecutionException("Count of groups is wrong ({0}).", cnt);
 
             var msg = new NewOrderList();
-            msg.set(new TotNoOrders(cnt));
-            msg.set(new ListExecInst(command.Type.ToString()));
-            msg.set(new ListID(Tools.GenerateUniqueID()));
-            msg.set(new BidType(BidType.NO_BIDDING_PROCESS));
+            msg.TotNoOrders = new TotNoOrders(cnt);
+            msg.ListExecInst = new ListExecInst(command.Type.ToString());
+            msg.ListID = new ListID(Tools.GenerateUniqueID());
+            msg.BidType = new BidType(BidType.NO_BIDDING_PROCESS);
             
            
             int lsq = 1;
             foreach (var cmd in command.BracketCommands)
             {
-                var order = new NewOrderList.NoOrders();
-                AssignOrderBody(cmd, order, group => order.addGroup(group));
-                order.set(new ListSeqNo(lsq++));
-                msg.addGroup(order);
+                var order = new NewOrderList.NoOrdersGroup();
+                AssignOrderBody(cmd, order, group => order.AddGroup(group));
+                order.ListSeqNo = new ListSeqNo(lsq++);
+                msg.AddGroup(order);
 
                 if (!String.IsNullOrWhiteSpace(cmd.MsgVarName))
                 {
                     var neworder = NewOrderSingle(cmd);
-                    neworder.setField(new ClOrdID(order.getString(ClOrdID.FIELD)));
+                    neworder.SetField(new ClOrdID(order.ClOrdID.getValue()));
                     AddMsgVar(cmd.MsgVarName, neworder);
                 }
             }
@@ -410,32 +411,32 @@ namespace OEC.FIX.Sample.FIX
 
         protected void AssignOrderBody(OrderCommand source, FieldMap target, Action<Group> addGroup)
 		{
-			target.setField(new ClOrdID(Tools.GenerateUniqueID()));
-			target.setField(new Side(source.OrderSide.Side));
-			target.setField(new TransactTime(DateTime.UtcNow));
+			target.SetField(new ClOrdID(Tools.GenerateUniqueID()));
+			target.SetField(new Side(source.OrderSide.Side));
+			target.SetField(new TransactTime(DateTime.UtcNow));
 
 			switch (source.OrderType.Type)
 			{
 				case OrderType.ICEBERG:
-					target.setField(new OrdType(OrdType.LIMIT));
+					target.SetField(new OrdType(OrdType.LIMIT));
 					if (source.OrderType.MaxFloor.HasValue)
 					{
-						target.setField(new MaxFloor(source.OrderType.MaxFloor.Value));
+						target.SetField(new MaxFloor(source.OrderType.MaxFloor.Value));
 					}
 					break;
 
 				case OrderType.MARKET_ON_OPEN:
-					target.setField(new OrdType(OrdType.MARKET));
-					target.setField(new TimeInForce(TimeInForce.AT_THE_OPENING));
+					target.SetField(new OrdType(OrdType.MARKET));
+					target.SetField(new TimeInForce(TimeInForce.AT_THE_OPENING));
 					break;
 
 				case OrderType.MARKET_ON_CLOSE:
-					target.setField(new OrdType(OrdType.MARKET));
-					target.setField(new TimeInForce(TimeInForce.AT_THE_CLOSE));
+					target.SetField(new OrdType(OrdType.MARKET));
+					target.SetField(new TimeInForce(TimeInForce.AT_THE_CLOSE));
 					break;
 
 				default:
-					target.setField(new OrdType(source.OrderType.Type));
+					target.SetField(new OrdType(source.OrderType.Type));
 					break;
 			}
 
@@ -445,35 +446,35 @@ namespace OEC.FIX.Sample.FIX
 				account = GetAccountFor(source.OrderContract.Symbol.Asset);
 			}
 
-			target.setField(new Account(account));
-			target.setField(new OrderQty(source.OrderQty));
+			target.SetField(new Account(account));
+			target.SetField(new OrderQty(source.OrderQty));
 
 			if (source.OrderSide.Open.HasValue)
 			{
-				target.setField(new PositionEffect(source.OrderSide.Open.Value ? PositionEffect.OPEN : PositionEffect.CLOSE));
+				target.SetField(new PositionEffect(source.OrderSide.Open.Value ? PositionEffect.OPEN : PositionEffect.CLOSE));
 			}
 
 			if (source.OrderType.Limit.HasValue)
 			{
-				target.setField(new Price(source.OrderType.Limit.Value));
+				target.SetField(new Price(Convert.ToDecimal(source.OrderType.Limit.Value)));
 			}
 			if (source.OrderType.Stop.HasValue)
 			{
-				target.setField(new StopPx(source.OrderType.Stop.Value));
+				target.SetField(new StopPx(Convert.ToDecimal(source.OrderType.Stop.Value)));
 			}
 
 			if (source.TimeInForce != null)
 			{
-				target.setField(new TimeInForce(source.TimeInForce.Type));
+				target.SetField(new TimeInForce(source.TimeInForce.Type));
 				if (source.TimeInForce.Expiration.HasValue)
 				{
 					if (source.TimeInForce.Expiration.Value.Kind == DateTimeKind.Unspecified)
 					{
-						target.setField(new ExpireDate(Tools.FormatLocalMktDate(source.TimeInForce.Expiration.Value)));
+						target.SetField(new ExpireDate(Tools.FormatLocalMktDate(source.TimeInForce.Expiration.Value)));
 					}
 					else
 					{
-						target.setField(new ExpireTime(source.TimeInForce.Expiration.Value));
+						target.SetField(new ExpireTime(source.TimeInForce.Expiration.Value));
 					}
 				}
 			}
@@ -482,8 +483,8 @@ namespace OEC.FIX.Sample.FIX
 
 			if (!string.IsNullOrEmpty(source.TradingSession))
 			{
-				var session = new Group(NoTradingSessions.FIELD, TradingSessionID.FIELD);
-				session.setField(new TradingSessionID(source.TradingSession));
+				var session = new Group(Tags.NoTradingSessions, Tags.TradingSessionID);
+				session.SetField(new TradingSessionID(source.TradingSession));
                 addGroup(session);
 			}
 
@@ -492,17 +493,17 @@ namespace OEC.FIX.Sample.FIX
 
 			if (source.OrderType.TrailingStop != null)
 			{
-				target.setField(new ExecInst(ExecInst.TRAILING_STOP_PEG.ToString()));
+				target.SetField(new ExecInst(ExecInst.TRAILING_STOP_PEG));
 
 				if (source.OrderType.TrailingStop.Amount.HasValue)
 				{
-					target.setField(new PegOffsetValue(source.OrderType.TrailingStop.Amount.Value));
+					target.SetField(new PegOffsetValue(Convert.ToDecimal(source.OrderType.TrailingStop.Amount.Value)));
 				}
 
 				if (source.OrderType.TrailingStop.TriggerType.HasValue)
 				{
-					target.setField(new TrailingTriggerType(source.OrderType.TrailingStop.TriggerType.Value));
-					target.setField(new TrailingAmountInPercents(source.OrderType.TrailingStop.AmountInPercents));
+					target.SetField(new TrailingTriggerType(source.OrderType.TrailingStop.TriggerType.Value));
+					target.SetField(new TrailingAmountInPercents(source.OrderType.TrailingStop.AmountInPercents));
 				}
 			}
 		}
@@ -512,51 +513,51 @@ namespace OEC.FIX.Sample.FIX
 			FixContract contract = GetFixContract(orderContract);
 
 			if (!string.IsNullOrEmpty(contract.Symbol))
-				message.setField(new Symbol(contract.Symbol));
+				message.SetField(new Symbol(contract.Symbol));
 
 			if (!string.IsNullOrEmpty(contract.CFICode))
-				message.setField(new CFICode(contract.CFICode));
+				message.SetField(new CFICode(contract.CFICode));
 
 			if (contract.MonthYear.HasValue)
-				message.setField(new QuickFix.MaturityMonthYear(Tools.FormatMonthYear(contract.MonthYear.Value)));
+				message.SetField(new QuickFix.Fields.MaturityMonthYear(Tools.FormatMonthYear(contract.MonthYear.Value)));
 
 			if (contract.Strike.HasValue)
-				message.setField(new StrikePrice(contract.Strike.Value));
+				message.SetField(new StrikePrice(Convert.ToDecimal(contract.Strike.Value)));
 		}
 
         private void AssignPreAllocationBlock(FieldMap message, AllocationBlock<PreAllocationBlockItem> block, Action<Group> addGroup)
 		{
-			message.setField(new AllocText(block.Name));
-			message.setField(new AllocType((int) block.Rule));
+			message.SetField(new AllocText(block.Name));
+			message.SetField(new AllocType((int) block.Rule));
 
 			foreach (PreAllocationBlockItem item in block.Items)
 			{
-				var group = new NewOrderSingle.NoAllocs();
-				group.set(new AllocAccount(item.Account));
-				group.set(new AllocQty(item.Weight));
+				var group = new NewOrderSingle.NoAllocsGroup();
+			    group.AllocAccount = new AllocAccount(item.Account);
+				group.AllocQty = new AllocQty(Convert.ToDecimal(item.Weight));
 				addGroup(group);
 			}
 		}
 
 		private void AssignPostAllocationBlock(Message message, AllocationBlock<PostAllocationBlockItem> block)
 		{
-			message.setField(new AllocType((int) block.Rule));
+			message.SetField(new AllocType((int) block.Rule));
 
 			foreach (PostAllocationBlockItem item in block.Items)
 			{
-				var group = new AllocationInstruction.NoAllocs();
+				var group = new AllocationInstruction.NoAllocsGroup();
 
-				group.set(new AllocAccount(item.Account.Spec));
+			    group.AllocAccount = new AllocAccount(item.Account.Spec);
 
 				if (!string.IsNullOrEmpty(item.Account.Firm))
-					group.setField(new ClearingFirmID(item.Account.Firm));
+					group.SetField(new ClearingFirmID(item.Account.Firm));
 				else if (!string.IsNullOrEmpty(item.Account.ClearingHouse))
-					group.setField(new ClearingFirm(item.Account.ClearingHouse));
+					group.SetField(new ClearingFirm(item.Account.ClearingHouse));
 
-				group.set(new AllocPrice(item.Price));
-				group.set(new AllocQty(item.Weight));
+				group.AllocPrice = new AllocPrice(Convert.ToDecimal(item.Price));
+				group.AllocQty = new AllocQty(Convert.ToDecimal(item.Weight));
 
-				message.addGroup(group);
+				message.AddGroup(group);
 			}
 		}
 
@@ -600,13 +601,9 @@ namespace OEC.FIX.Sample.FIX
 
 		private static void CopyFields(FieldMap source, FieldMap target, params int[] fields)
 		{
-			foreach (int field in fields)
-			{
-				if (source.isSetField(field))
-				{
-					target.setString(field, source.getString(field));
-				}
-			}
+            //TODO: VP it is not good solution
+            foreach (var tag in fields.Where(source.IsSetField)) 
+                target.SetField(new StringField(tag, source.GetField(tag)));
 		}
 
         public string GetAccountFor(ContractAsset asset)
@@ -706,27 +703,27 @@ namespace OEC.FIX.Sample.FIX
 		{
 			base.AssignOrderContract(target, orderContract);
 
-			if (target.isSetField(CFICode.FIELD))
+			if (target.IsSetField(Tags.CFICode))
 			{
-				string cfiCode = target.getString(CFICode.FIELD);
-				target.removeField(CFICode.FIELD);
+				string cfiCode = target.GetString(Tags.CFICode);
+				target.RemoveField(Tags.CFICode);
 
 				if (cfiCode == Code.Futures)
-					target.setField(new SecurityType(SecurityType.FUTURE));
+					target.SetField(new SecurityType(SecurityType.FUTURE));
 				else if (cfiCode == Code.FuturesMultileg || cfiCode == Code.FutureOptionsMultileg)
-					target.setField(new SecurityType(SecurityType.MULTI_LEG_INSTRUMENT));
+					target.SetField(new SecurityType(SecurityType.MULTI_LEG_INSTRUMENT));
 				else if (cfiCode == Code.FutureOptionsCall)
 				{
-					target.setField(new SecurityType(SecurityType.OPTIONS_ON_FUTURES));
-					target.setField(new PutOrCall(PutOrCall.CALL));
+					target.SetField(new SecurityType(SecurityType.OPTIONS_ON_FUTURES));
+					target.SetField(new PutOrCall(PutOrCall.CALL));
 				}
 				else if (cfiCode == Code.FutureOptionsPut)
 				{
-					target.setField(new SecurityType(SecurityType.OPTIONS_ON_FUTURES));
-					target.setField(new PutOrCall(PutOrCall.PUT));
+					target.SetField(new SecurityType(SecurityType.OPTIONS_ON_FUTURES));
+					target.SetField(new PutOrCall(PutOrCall.PUT));
 				}
 				else if (cfiCode == Code.Forex)
-					target.setField(new SecurityType(SecurityType.FOREIGN_EXCHANGE_CONTRACT));
+					target.SetField(new SecurityType(SecurityType.FOREIGN_EXCHANGE_CONTRACT));
 				else
 					throw new ExecutionException("Unsupported CFICode '{0}'", cfiCode);
 			}

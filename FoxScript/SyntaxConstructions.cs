@@ -105,6 +105,7 @@ namespace OEC.FIX.Sample.FoxScript
 		public char? TriggerType;
 	}
 
+    //VP: WTF
 	internal class OrderType
 	{
 		public const char ICEBERG = '!';
@@ -244,7 +245,7 @@ namespace OEC.FIX.Sample.FoxScript
 	{
 		public string Name;
 		public string UUID;
-		public int UserRequestType = QuickFix.UserRequestType.REQUEST_INDIVIDUAL_USER_STATUS;
+		public int UserRequestType = QuickFix.Fields.UserRequestType.REQUEST_INDIVIDUAL_USER_STATUS;
 	}
 
 	internal enum ContractRequestType

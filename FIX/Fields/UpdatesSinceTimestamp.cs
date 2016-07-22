@@ -1,8 +1,9 @@
 ﻿using System;
+using QuickFix.Fields;
 
 namespace OEC.FIX.Sample.FIX.Fields
 {
-    public class UpdatesSinceTimestamp : QuickFix.UtcTimeStampField
+    public class UpdatesSinceTimestamp : DateTimeField
     {
         public const int FIELD = 12072;
 

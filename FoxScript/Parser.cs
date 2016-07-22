@@ -1770,10 +1770,10 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		orderSide = new OrderSide(); 
 		if (la.kind == 77) {
 			Get();
-			orderSide.Side = QuickFix.Side.BUY; 
+			orderSide.Side = QuickFix.Fields.Side.BUY; 
 		} else if (la.kind == 78) {
 			Get();
-			orderSide.Side = QuickFix.Side.SELL; 
+			orderSide.Side = QuickFix.Fields.Side.SELL; 
 		} else SynErr(277);
 		if (la.kind == 81 || la.kind == 82) {
 			if (la.kind == 81) {
@@ -1939,7 +1939,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		switch (la.kind) {
 		case 221: {
 			Get();
-			orderType.Type = QuickFix.OrdType.MARKET; 
+			orderType.Type = QuickFix.Fields.OrdType.MARKET; 
 			break;
 		}
 		case 222: {
@@ -1954,19 +1954,19 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		}
 		case 224: {
 			Get();
-			orderType.Type = QuickFix.OrdType.LIMIT; 
+			orderType.Type = QuickFix.Fields.OrdType.LIMIT; 
 			Price(ref limit);
 			orderType.Limit = limit; 
 			break;
 		}
 		case 225: {
 			Get();
-			orderType.Type = QuickFix.OrdType.STOP; 
+			orderType.Type = QuickFix.Fields.OrdType.STOP; 
 			Price(ref stop);
 			orderType.Stop = stop; 
 			if (la.kind == 224) {
 				Get();
-				orderType.Type = QuickFix.OrdType.STOP_LIMIT; 
+				orderType.Type = QuickFix.Fields.OrdType.STOP_LIMIT; 
 				Price(ref limit);
 				orderType.Limit = limit; 
 			}
@@ -1987,7 +1987,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		}
 		case 227: {
 			Get();
-			orderType.Type = QuickFix.OrdType.MARKET_IF_TOUCHED; 
+			orderType.Type = QuickFix.Fields.OrdType	.MARKET_IF_TOUCHED; 
 			Price(ref limit);
 			orderType.Limit = limit; 
 			break;
@@ -2000,13 +2000,13 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		tif = new TimeInForce(); 
 		if (la.kind == 216) {
 			Get();
-			tif.Type = QuickFix.TimeInForce.DAY; 
+			tif.Type = QuickFix.Fields.TimeInForce.DAY; 
 		} else if (la.kind == 217) {
 			Get();
-			tif.Type = QuickFix.TimeInForce.GOOD_TILL_CANCEL; 
+			tif.Type = QuickFix.Fields.TimeInForce.GOOD_TILL_CANCEL; 
 		} else if (la.kind == 218) {
 			Get();
-			tif.Type = QuickFix.TimeInForce.GOOD_TILL_DATE; 
+			tif.Type = QuickFix.Fields.TimeInForce.GOOD_TILL_DATE; 
 			if (la.kind == 74) {
 				Get();
 				tif.Expiration = LiteralParser.ParseTimestamp(t.val); 
@@ -2016,10 +2016,10 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			} else SynErr(282);
 		} else if (la.kind == 219) {
 			Get();
-			tif.Type = QuickFix.TimeInForce.FILL_OR_KILL; 
+			tif.Type = QuickFix.Fields.TimeInForce.FILL_OR_KILL; 
 		} else if (la.kind == 220) {
 			Get();
-			tif.Type = QuickFix.TimeInForce.IMMEDIATE_OR_CANCEL; 
+			tif.Type = QuickFix.Fields.TimeInForce.IMMEDIATE_OR_CANCEL; 
 		} else SynErr(283);
 	}
 

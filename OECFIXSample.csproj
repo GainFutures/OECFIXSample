@@ -59,11 +59,8 @@
     <Reference Include="openfast">
       <HintPath>ThirdParty\OpenFAST\openfast.dll</HintPath>
     </Reference>
-    <Reference Include="quickfix_net">
-      <HintPath>ThirdParty\QuickFIX\quickfix_net.dll</HintPath>
-    </Reference>
-    <Reference Include="quickfix_net_messages">
-      <HintPath>ThirdParty\QuickFIX\quickfix_net_messages.dll</HintPath>
+    <Reference Include="quickfix">
+      <HintPath>ThirdParty\QuickFIX\quickfix.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />

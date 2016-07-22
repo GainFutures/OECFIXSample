@@ -4,14 +4,14 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using QuickFix;
+using QuickFix.Fields;
 using Message = QuickFix.Message;
 
 namespace OEC.FIX.Sample.FIX
 {
 	internal static class QFReflector
 	{
-		public static readonly MethodInfo GetFieldValueMethodInfo = typeof (QFReflector).GetMethod("GetFieldValue",
-			new[] {typeof (Message), typeof (string)});
+		public static readonly MethodInfo GetFieldValueMethodInfo = typeof (QFReflector).GetMethod("GetFieldValue", new[] {typeof (Message), typeof (string)});
 
 		private static readonly Assembly QFAssembly = Assembly.GetAssembly(typeof (Side));
 		private static readonly Dictionary<int, Type> FieldTypes = new Dictionary<int, Type>();
@@ -41,7 +41,8 @@ namespace OEC.FIX.Sample.FIX
 				}
 				else
 				{
-					target.setString(tag, fieldValue.ToString());
+                    //TODO: Same as there FixProtocol.CopyFields
+                    target.SetField(new StringField(tag, fieldValue.ToString()));
 				}
 			}
 			else
@@ -61,16 +62,16 @@ namespace OEC.FIX.Sample.FIX
 			}
 
 			var s = new StringBuilder();
-			foreach (Field field in msg.Fields())
+			foreach (IField field in msg.Select(pair => pair.Value))
 			{
-				Type fieldType = GetFieldType(field.getField());
+				Type fieldType = GetFieldType(field.Tag);
 				if (fieldType != null)
 				{
 					s.Append(fieldType.Name);
 				}
 				else
 				{
-					s.Append(field.getField());
+					s.Append(field.Tag);
 				}
 
 				s.Append("=");
@@ -115,7 +116,7 @@ namespace OEC.FIX.Sample.FIX
 				{
 					return NormalizeFieldValue(msg.GetFieldValue(fieldType), fieldType);
 				}
-				return msg.FieldMapFor(tag).getString(tag);
+				return msg.FieldMapFor(tag).GetString(tag);
 			}
 			else
 			{
@@ -169,19 +170,13 @@ namespace OEC.FIX.Sample.FIX
 		public static object DenormalizeFieldValue(object value, Type fieldType)
 		{
 			if (value == null)
-			{
 				return null;
-			}
 
 			if (fieldType.BaseTypeIs<CharField>())
-			{
 				return value.ToString().First();
-			}
 
-			if (fieldType.BaseTypeIs<UtcTimeOnlyField>())
-			{
+            if (fieldType.BaseTypeIs<TimeOnlyField>())
 				return DateTime.Now.Date.Add((TimeSpan) value);
-			}
 
 			return value;
 		}
@@ -198,7 +193,7 @@ namespace OEC.FIX.Sample.FIX
 				return value.ToString();
 			}
 
-			if (fieldType.BaseTypeIs<UtcTimeOnlyField>())
+			if (fieldType.BaseTypeIs<TimeOnlyField>())
 			{
 				var time = (DateTime) value;
 				return time.TimeOfDay;

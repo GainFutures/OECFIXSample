@@ -2,20 +2,18 @@
 
 namespace OEC.FIX.Sample.FIX
 {
-	public sealed class MessageLogFactory : LogFactory
+	public sealed class MessageLogFactory : ILogFactory
 	{
 		#region LogFactory Members
-
-		public Log create()
+		public ILog Create()
 		{
 			return new MessageLog(null);
 		}
 
-		public Log create(SessionID sessionID)
+		public ILog Create(SessionID sessionID)
 		{
 			return new MessageLog(sessionID);
 		}
-
 		#endregion
 	}
 }

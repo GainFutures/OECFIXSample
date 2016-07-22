@@ -2,7 +2,7 @@
 
 namespace OEC.FIX.Sample.FIX
 {
-    sealed class MessageStoreFactory : QuickFix.MessageStoreFactory
+    sealed class MessageStoreFactory : IMessageStoreFactory
 	{
 	    private readonly Props _properties;
 
@@ -12,14 +12,12 @@ namespace OEC.FIX.Sample.FIX
 	    }
 
 		#region MessageStoreFactory Members
-
-		public QuickFix.MessageStore create(SessionID sessionID)
+		public IMessageStore Create(SessionID sessionID)
 		{
             var store = new MessageStore(_properties);
 			store.Init(sessionID);
 			return store;
 		}
-
 		#endregion
 	}
 }

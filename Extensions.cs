@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using OEC.FIX.Sample.FoxScript;
 using QuickFix;
+using QuickFix.Fields;
 using Object = OEC.FIX.Sample.FoxScript.Object;
 
 namespace OEC.FIX.Sample
@@ -16,35 +17,35 @@ namespace OEC.FIX.Sample
 
 			if (fieldType.BaseTypeIs<BooleanField>())
 			{
-				msg.FieldMapFor(tag).setBoolean(tag, (bool) value);
+			    msg.FieldMapFor(tag).SetField(new BooleanField(tag, (bool)value));
 			}
 			else if (fieldType.BaseTypeIs<CharField>())
 			{
-				msg.FieldMapFor(tag).setChar(tag, (char) value);
+			    msg.FieldMapFor(tag).SetField(new CharField(tag, (char)value));
 			}
-			else if (fieldType.BaseTypeIs<DoubleField>())
+			else if (fieldType.BaseTypeIs<DecimalField>())
 			{
-				msg.FieldMapFor(tag).setDouble(tag, (double) value);
+				msg.FieldMapFor(tag).SetField(new DecimalField(tag, (decimal)value));
 			}
 			else if (fieldType.BaseTypeIs<IntField>())
 			{
-				msg.FieldMapFor(tag).setInt(tag, (int) value);
+				msg.FieldMapFor(tag).SetField(new IntField(tag, (int)value));
 			}
 			else if (fieldType.BaseTypeIs<StringField>())
 			{
-				msg.FieldMapFor(tag).setString(tag, (string) value);
+			    msg.FieldMapFor(tag).SetField(new StringField(tag, (string)value));
 			}
-			else if (fieldType.BaseTypeIs<UtcDateOnlyField>())
+            else if (fieldType.BaseTypeIs<DateOnlyField>())
+            {
+                msg.FieldMapFor(tag).SetField(new DateOnlyField(tag, (DateTime)value));
+            }
+            else if (fieldType.BaseTypeIs<TimeOnlyField>())
+            {
+                msg.FieldMapFor(tag).SetField(new TimeOnlyField(tag, (DateTime)value));
+            }
+            else if (fieldType.BaseTypeIs<DateTimeField>())
 			{
-				msg.FieldMapFor(tag).setUtcDateOnly(tag, (DateTime) value);
-			}
-			else if (fieldType.BaseTypeIs<UtcTimeOnlyField>())
-			{
-				msg.FieldMapFor(tag).setUtcTimeOnly(tag, (DateTime) value);
-			}
-			else if (fieldType.BaseTypeIs<UtcTimeStampField>())
-			{
-				msg.FieldMapFor(tag).setUtcTimeStamp(tag, (DateTime) value);
+			    msg.FieldMapFor(tag).SetField(new DateTimeField(tag, (DateTime)value));
 			}
 			else
 			{
@@ -58,35 +59,35 @@ namespace OEC.FIX.Sample
 
 			if (fieldType.BaseTypeIs<BooleanField>())
 			{
-				return msg.FieldMapFor(tag).getBoolean(tag);
+				return msg.FieldMapFor(tag).GetBoolean(tag);
 			}
 			if (fieldType.BaseTypeIs<CharField>())
 			{
-				return msg.FieldMapFor(tag).getChar(tag);
+				return msg.FieldMapFor(tag).GetChar(tag);
 			}
-			if (fieldType.BaseTypeIs<DoubleField>())
+			if (fieldType.BaseTypeIs<DecimalField>())
 			{
-				return msg.FieldMapFor(tag).getDouble(tag);
+				return msg.FieldMapFor(tag).GetDecimal(tag);
 			}
 			if (fieldType.BaseTypeIs<IntField>())
 			{
-				return msg.FieldMapFor(tag).getInt(tag);
+				return msg.FieldMapFor(tag).GetInt(tag);
 			}
-			if (fieldType.BaseTypeIs<StringField>())
+            if (fieldType.BaseTypeIs<StringField>())
+            {
+                return msg.FieldMapFor(tag).GetString(tag);
+            }
+            if (fieldType.BaseTypeIs<DateOnlyField>())
+            {
+                return msg.FieldMapFor(tag).GetDateOnly(tag);
+            }
+            if (fieldType.BaseTypeIs<TimeOnlyField>())
+            {
+                return msg.FieldMapFor(tag).GetTimeOnly(tag);
+            }
+            if (fieldType.BaseTypeIs<DateTimeField>())
 			{
-				return msg.FieldMapFor(tag).getString(tag);
-			}
-			if (fieldType.BaseTypeIs<UtcDateOnlyField>())
-			{
-				return msg.FieldMapFor(tag).getUtcDateOnly(tag);
-			}
-			if (fieldType.BaseTypeIs<UtcTimeOnlyField>())
-			{
-				return msg.FieldMapFor(tag).getUtcTimeOnly(tag);
-			}
-			if (fieldType.BaseTypeIs<UtcTimeStampField>())
-			{
-				return msg.FieldMapFor(tag).getUtcTimeStamp(tag);
+				return msg.FieldMapFor(tag).GetDateTime(tag);
 			}
 			throw new ExecutionException("Unsupported FIX field type.");
 		}
@@ -101,33 +102,24 @@ namespace OEC.FIX.Sample
 			return (int) field.GetValue(null);
 		}
 
-		public static IEnumerable<FieldInfo> GetFieldConsts(this Type fieldType)
+        public static IEnumerable<FieldInfo> GetFieldConsts(this Type fieldType)
 		{
-			return fieldType
+#error "FIELD" is not working any more
+            return fieldType
 				.GetFields(BindingFlags.Public | BindingFlags.Static)
-				.Where(f => f.Name != "FIELD");
+                .Where(f => f.Name != "FIELD");
+        }
+
+        public static bool IsFieldType(this Type type)
+        {
+#error "FIELD" is not working any more
+            FieldInfo field = type.GetField("FIELD", BindingFlags.Public | BindingFlags.Static);
+			return type.BaseTypeIs<IField>() && field != null;
 		}
 
-		public static bool IsFieldType(this Type type)
+		public static IEnumerable<IField> Fields(this Message msg)
 		{
-			FieldInfo field = type.GetField("FIELD", BindingFlags.Public | BindingFlags.Static);
-			return type.BaseTypeIs<Field>() && field != null;
-		}
-
-		public static IEnumerable<Field> Fields(this Message msg)
-		{
-			foreach (object field in msg.getHeader())
-			{
-				yield return (Field) field;
-			}
-			foreach (object field in msg)
-			{
-				yield return (Field) field;
-			}
-			foreach (object field in msg.getTrailer())
-			{
-				yield return (Field) field;
-			}
+		    return msg.Header.Union(msg).Union(msg.Trailer).Select(pair => pair.Value);
 		}
 
 		public static bool BaseTypeIs<TBase>(this Type type)
@@ -153,12 +145,12 @@ namespace OEC.FIX.Sample
 		{
 			if (Tools.HeaderFields.Contains(field))
 			{
-				return source.getHeader();
+				return source.Header;
 			}
 
 			if (Tools.TrailerFields.Contains(field))
 			{
-				return source.getTrailer();
+				return source.Trailer;
 			}
 
 			return source;

@@ -1,14 +1,15 @@
 ﻿using System;
 using QuickFix;
+using QuickFix.Fields;
 
 namespace OEC.FIX.Sample.FIX
 {
 	public static class Extensions
 	{
-		public static TField CreateIfExists<TField>(this Message msg) where TField : Field, new()
+		public static TField CreateIfExists<TField>(this Message msg) where TField : IField, new()
 		{
 			var field = new TField();
-			if (msg.isSetField(field))
+			if (msg.IsSetField(field))
 				return field;
 			return null;
 		}
@@ -18,7 +19,7 @@ namespace OEC.FIX.Sample.FIX
 			var field = CreateIfExists<TField>(msg);
 			if (field != null)
 			{
-				msg.getField(field);
+				msg.GetField(field);
 				return field;
 			}
 			return null;
@@ -30,12 +31,12 @@ namespace OEC.FIX.Sample.FIX
 			return field != null ? field.getValue() : defaultValue;
 		}
 
-		public static TField GetDouble<TField>(this Message msg) where TField : DoubleField, new()
+		public static TField GetDouble<TField>(this Message msg) where TField : DecimalField, new()
 		{
 			var field = CreateIfExists<TField>(msg);
 			if (field != null)
 			{
-				msg.getField(field);
+				msg.GetField(field);
 				return field;
 			}
 			return null;
@@ -46,7 +47,7 @@ namespace OEC.FIX.Sample.FIX
 			var field = CreateIfExists<TField>(msg);
 			if (field != null)
 			{
-				msg.getField(field);
+				msg.GetField(field);
 				return field;
 			}
 			return null;
@@ -63,7 +64,7 @@ namespace OEC.FIX.Sample.FIX
 			var field = CreateIfExists<TField>(msg);
 			if (field != null)
 			{
-				msg.getField(field);
+				msg.GetField(field);
 				return field;
 			}
 			return null;
@@ -80,7 +81,7 @@ namespace OEC.FIX.Sample.FIX
 			var field = CreateIfExists<TField>(msg);
 			if (field != null)
 			{
-				msg.getField(field);
+				msg.GetField(field);
 				return field;
 			}
 			return null;
@@ -92,36 +93,34 @@ namespace OEC.FIX.Sample.FIX
 			return field != null ? field.getValue() : defaultValue;
 		}
 
-		public static TField GetDateTime<TField>(this Message msg) where TField : UtcTimeStampField, new()
+		public static TField GetDateTime<TField>(this Message msg) where TField : DateTimeField, new()
 		{
 			var field = CreateIfExists<TField>(msg);
 			if (field != null)
 			{
-				msg.getField(field);
+				msg.GetField(field);
 				return field;
 			}
 			return null;
 		}
 
-		public static DateTime Get<TField>(this Message msg, DateTime defaultValue) where TField : UtcTimeStampField, new()
+		public static DateTime Get<TField>(this Message msg, DateTime defaultValue) where TField : DateTimeField, new()
 		{
 			var field = msg.GetDateTime<TField>();
 			return field != null ? field.getValue() : defaultValue;
 		}
 
-		public static TValue GetValue<TField, TValue>(this Message msg, TValue defaultValue) where TField : Field, new()
+		public static TValue GetValue<TField, TValue>(this Message msg, TValue defaultValue) where TField : FieldBase<TValue>, new()
 		{
 			var field = CreateIfExists<TField>(msg);
 			if (field != null)
-				return (TValue) field.getObject();
+				return field.Obj;
 			return defaultValue;
 		}
 
 		public static string MsgType(this Message msg)
 		{
-			var msgType = new MsgType();
-			msg.getHeader().getField(msgType);
-			return msgType.getValue();
+			return msg.Header.GetField(Tags.MsgType);
 		}
 	}
 }

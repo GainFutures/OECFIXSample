@@ -1,16 +1,18 @@
 ﻿using OEC.FIX.Sample.FIX.Fields;
 using QuickFix;
+using QuickFix.Fields;
+using QuickFix.Transport;
 
 namespace OEC.FIX.Sample.FIX
 {
-	abstract class ConnectionBase : Application
-	{
+	abstract class ConnectionBase : IApplication
+    {
 		public delegate void MessageHandler(SessionID sessionID, Message msg);
 
 		public delegate void SessionEventHandler(SessionID sessionID);
 
 		private SocketInitiator _initiator;
-		private LogFactory _logFactory;
+		private ILogFactory _logFactory;
 		private MessageStoreFactory _messageStoreFactory;
 		private string _password;
 		private string _uuid = "9e61a8bc-0a31-4542-ad85-33ebab0e4e86";
@@ -31,7 +33,7 @@ namespace OEC.FIX.Sample.FIX
 		{
 			if (_initiator != null)
 			{
-				_initiator.stop();
+				_initiator.Stop();
 				_initiator.Dispose();
 				_initiator = null;
 			}
@@ -45,55 +47,55 @@ namespace OEC.FIX.Sample.FIX
 			_password = password;
             _uuid = uuid;
 
-			_initiator.start();
+			_initiator.Start();
 		}
 
 		public void Close()
 		{
-			_initiator.stop();
+			_initiator.Stop();
 		}
 
-		public event MessageHandler FromAdmin;
-		public event MessageHandler FromApp;
-		public event MessageHandler ToAdmin;
-		public event MessageHandler ToApp;
+		public event MessageHandler OnFromAdmin;
+		public event MessageHandler OnFromApp;
+		public event MessageHandler OnToAdmin;
+		public event MessageHandler OnToApp;
 
 		public event SessionEventHandler Logon;
 		public event SessionEventHandler Logout;
 
 		public void SendMessage(Message msg)
 		{
-			Session.sendToTarget(msg, SessionID);
+			Session.SendToTarget(msg, SessionID);
 		}
 
 		protected abstract SessionSettings GetSessionSettings();
 
 		#region Application Members
 
-		public void fromAdmin(Message msg, SessionID sessionID)
+		public void FromAdmin(Message msg, SessionID sessionID)
 		{
-			MessageHandler handler = FromAdmin;
+			MessageHandler handler = OnFromAdmin;
 			if (handler != null)
 			{
 				handler(sessionID, msg);
 			}
 		}
 
-		public void fromApp(Message msg, SessionID sessionID)
+		public void FromApp(Message msg, SessionID sessionID)
 		{
-			MessageHandler handler = FromApp;
+			MessageHandler handler = OnFromApp;
 			if (handler != null)
 			{
 				handler(sessionID, msg);
 			}
 		}
 
-		public void onCreate(SessionID sessionID)
+		public void OnCreate(SessionID sessionID)
 		{
 			SessionID = sessionID;
 		}
 
-		public void onLogon(SessionID sessionID)
+		public void OnLogon(SessionID sessionID)
 		{
 			SessionEventHandler handler = Logon;
 			if (handler != null)
@@ -102,7 +104,7 @@ namespace OEC.FIX.Sample.FIX
 			}
 		}
 
-		public void onLogout(SessionID sessionID)
+		public void OnLogout(SessionID sessionID)
 		{
 			SessionEventHandler handler = Logout;
 			if (handler != null)
@@ -111,31 +113,31 @@ namespace OEC.FIX.Sample.FIX
 			}
 		}
 
-		public void toAdmin(Message msg, SessionID sessionID)
+		public void ToAdmin(Message msg, SessionID sessionID)
 		{
-			if (msg.getHeader().getString(MsgType.FIELD) == MsgType.Logon)
+            if (msg.Header.GetString(Tags.MsgType) == MsgType.LOGON)
 			{
 				if (!string.IsNullOrEmpty(_password))
 				{
-					msg.setField(new Password(_password));
+					msg.SetField(new Password(_password));
 				}
 
                 if (!string.IsNullOrEmpty(_uuid))
 				{
-                    msg.setField(new UUIDField(_uuid));
+                    msg.SetField(new UUIDField(_uuid));
 				}
 			}
 
-			MessageHandler handler = ToAdmin;
+			MessageHandler handler = OnToAdmin;
 			if (handler != null)
 			{
 				handler(sessionID, msg);
 			}
 		}
 
-		public void toApp(Message msg, SessionID sessionID)
+		public void ToApp(Message msg, SessionID sessionID)
 		{
-			MessageHandler handler = ToApp;
+			MessageHandler handler = OnToApp;
 			if (handler != null)
 			{
 				handler(sessionID, msg);

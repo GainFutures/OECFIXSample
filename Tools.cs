@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using OEC.FIX.Sample.FoxScript;
 using QuickFix;
+using QuickFix.Fields;
 
 namespace OEC.FIX.Sample
 {
@@ -10,50 +11,46 @@ namespace OEC.FIX.Sample
 	{
 		public static readonly HashSet<int> TrailerFields = new HashSet<int>
 		{
-			SignatureLength.FIELD,
-			Signature.FIELD,
-			CheckSum.FIELD,
+			Tags.SignatureLength,
+            Tags.Signature,
+            Tags.CheckSum,
 		};
 
 		public static readonly HashSet<int> HeaderFields = new HashSet<int>
 		{
-			BeginString.FIELD,
-			BodyLength.FIELD,
-			MsgType.FIELD,
-			SenderCompID.FIELD,
-			TargetCompID.FIELD,
-			OnBehalfOfCompID.FIELD,
-			DeliverToCompID.FIELD,
-			SecureDataLen.FIELD,
-			SecureData.FIELD,
-			MsgSeqNum.FIELD,
-			SenderSubID.FIELD,
-			SenderLocationID.FIELD,
-			TargetSubID.FIELD,
-			TargetLocationID.FIELD,
-			OnBehalfOfSubID.FIELD,
-			OnBehalfOfLocationID.FIELD,
-			DeliverToSubID.FIELD,
-			DeliverToLocationID.FIELD,
-			PossDupFlag.FIELD,
-			PossResend.FIELD,
-			SendingTime.FIELD,
-			OrigSendingTime.FIELD,
-			XmlDataLen.FIELD,
-			XmlData.FIELD,
-			MessageEncoding.FIELD,
-			LastMsgSeqNumProcessed.FIELD,
-			NoHops.FIELD,
-			HopCompID.FIELD,
-			HopSendingTime.FIELD,
-			HopRefID.FIELD
-		};
+            Tags.BeginString,
+            Tags.BodyLength,
+            Tags.MsgType,
+            Tags.SenderCompID,
+            Tags.TargetCompID,
+            Tags.OnBehalfOfCompID,
+            Tags.DeliverToCompID,
+            Tags.SecureDataLen,
+            Tags.SecureData,
+            Tags.MsgSeqNum,
+            Tags.SenderSubID,
+            Tags.SenderLocationID,
+            Tags.TargetSubID,
+            Tags.TargetLocationID,
+            Tags.OnBehalfOfSubID,
+            Tags.OnBehalfOfLocationID,
+            Tags.DeliverToSubID,
+            Tags.DeliverToLocationID,
+            Tags.PossDupFlag,
+            Tags.PossResend,
+            Tags.SendingTime,
+            Tags.OrigSendingTime,
+            Tags.XmlDataLen,
+            Tags.XmlData,
+            Tags.MessageEncoding,
+            Tags.LastMsgSeqNumProcessed,
+            Tags.NoHops,
+            Tags.HopCompID,
+            Tags.HopSendingTime,
+            Tags.HopRefID
+        };
 
-		public static readonly string[] Months =
-		{
-			"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV",
-			"DEC"
-		};
+		public static readonly string[] Months = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC" };
 
 		public static readonly string ContractMonths = "FGHJKMNQUVXZ";
 
