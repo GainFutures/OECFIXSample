@@ -2,6 +2,7 @@
 using QuickFix;
 using QuickFix.Fields;
 using QuickFix.Transport;
+using Tags = QuickFix.Fields.Tags;
 
 namespace OEC.FIX.Sample.FIX
 {

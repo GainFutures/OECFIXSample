@@ -96,6 +96,7 @@
     <Compile Include="FIX\Fields\MaxRecordsField.cs" />
     <Compile Include="FIX\Fields\OptionsRequiredField.cs" />
     <Compile Include="FIX\Fields\SymbolLookupModeField.cs" />
+    <Compile Include="FIX\Fields\Tags.cs" />
     <Compile Include="FIX\Fields\UpdatesSinceTimestamp.cs" />
     <Compile Include="FIX\FIXException.cs" />
     <Compile Include="FIX\MarginCalcRequest.cs" />

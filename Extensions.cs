@@ -94,7 +94,8 @@ namespace OEC.FIX.Sample
 
 		public static int FieldTag(this Type fieldType)
 		{
-			FieldInfo field = fieldType.GetField("FIELD", BindingFlags.Public | BindingFlags.Static);
+#error "FIELD" does not work any more
+            FieldInfo field = fieldType.GetField("FIELD", BindingFlags.Public | BindingFlags.Static);
 			if (field == null)
 			{
 				throw new ExecutionException("FIELD field not found.");
@@ -104,17 +105,12 @@ namespace OEC.FIX.Sample
 
         public static IEnumerable<FieldInfo> GetFieldConsts(this Type fieldType)
 		{
-#error "FIELD" is not working any more
-            return fieldType
-				.GetFields(BindingFlags.Public | BindingFlags.Static)
-                .Where(f => f.Name != "FIELD");
+            return fieldType.GetFields(BindingFlags.Public | BindingFlags.Static);
         }
 
         public static bool IsFieldType(this Type type)
         {
-#error "FIELD" is not working any more
-            FieldInfo field = type.GetField("FIELD", BindingFlags.Public | BindingFlags.Static);
-			return type.BaseTypeIs<IField>() && field != null;
+            return type.BaseTypeIs<IField>();
 		}
 
 		public static IEnumerable<IField> Fields(this Message msg)

@@ -231,7 +231,7 @@ namespace OEC.FIX.Sample.FIX
 
 		private static Type GetFieldType(string fieldName)
 		{
-			Type type = QFAssembly.GetType("QuickFix." + fieldName, false, true);
+			Type type = QFAssembly.GetType("QuickFix.Fields." + fieldName, false, true);
 			if (type != null && !type.IsFieldType())
 			{
 				type = null;

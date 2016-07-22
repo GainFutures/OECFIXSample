@@ -5,15 +5,13 @@ namespace OEC.FIX.Sample.FIX.Fields
 {
     public class UpdatesSinceTimestamp : DateTimeField
     {
-        public const int FIELD = 12072;
-
         public UpdatesSinceTimestamp(DateTime data)
-            : base(FIELD, data)
+            : base(Tags.UpdatesSinceTimestamp, data)
         {
         }
 
         public UpdatesSinceTimestamp()
-            : base(FIELD)
+            : base(Tags.UpdatesSinceTimestamp)
         {
         }
     }

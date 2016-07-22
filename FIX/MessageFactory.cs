@@ -9,6 +9,7 @@ using QuickFix.FIX44;
 using QuickFix.Fields;
 using Message = QuickFix.Message;
 using TimeInForce = QuickFix.Fields.TimeInForce;
+using Tags = QuickFix.Fields.Tags;
 
 namespace OEC.FIX.Sample.FIX
 {

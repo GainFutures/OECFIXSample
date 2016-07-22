@@ -4,6 +4,7 @@ using OEC.FIX.Sample.FIX.Fields;
 using QuickFix;
 using QuickFix.Fields;
 using Message = QuickFix.FIX44.Message;
+using Tags = QuickFix.Fields.Tags;
 
 namespace OEC.FIX.Sample.FIX
 {
@@ -26,7 +27,7 @@ namespace OEC.FIX.Sample.FIX
 		{
 			private static readonly int[] message_order =
 			{
-				Tags.Symbol, Tags.CFICode, Tags.MaturityMonthYear, Tags.StrikePrice, Tags.MinQty, MaxQty.FIELD, 0
+				Tags.Symbol, Tags.CFICode, Tags.MaturityMonthYear, Tags.StrikePrice, Tags.MinQty, Fields.Tags.MaxQty, 0
 			};
 
 			public NoPositions() : base(Tags.NoPositions, Tags.Symbol, message_order)
