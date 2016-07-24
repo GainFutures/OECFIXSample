@@ -14,98 +14,89 @@ namespace OEC.FIX.Sample
 		public static void SetFieldValue(this Message msg, object value, Type fieldType)
 		{
 			int tag = fieldType.FieldTag();
-
-			if (fieldType.BaseTypeIs<BooleanField>())
-			{
-			    msg.FieldMapFor(tag).SetField(new BooleanField(tag, (bool)value));
-			}
-			else if (fieldType.BaseTypeIs<CharField>())
-			{
-			    msg.FieldMapFor(tag).SetField(new CharField(tag, (char)value));
-			}
-			else if (fieldType.BaseTypeIs<DecimalField>())
-			{
-				msg.FieldMapFor(tag).SetField(new DecimalField(tag, (decimal)value));
-			}
-			else if (fieldType.BaseTypeIs<IntField>())
-			{
-				msg.FieldMapFor(tag).SetField(new IntField(tag, (int)value));
-			}
-			else if (fieldType.BaseTypeIs<StringField>())
-			{
-			    msg.FieldMapFor(tag).SetField(new StringField(tag, (string)value));
-			}
-            else if (fieldType.BaseTypeIs<DateOnlyField>())
-            {
-                msg.FieldMapFor(tag).SetField(new DateOnlyField(tag, (DateTime)value));
-            }
-            else if (fieldType.BaseTypeIs<TimeOnlyField>())
-            {
-                msg.FieldMapFor(tag).SetField(new TimeOnlyField(tag, (DateTime)value));
-            }
-            else if (fieldType.BaseTypeIs<DateTimeField>())
-			{
-			    msg.FieldMapFor(tag).SetField(new DateTimeField(tag, (DateTime)value));
-			}
-			else
-			{
-				throw new ExecutionException("Unsupported FIX field type.");
-			}
+		    msg.FieldMapFor(tag).SetField(CreateField(fieldType, tag, value));
 		}
 
-		public static object GetFieldValue(this Message msg, Type fieldType)
+	    private static IField CreateField(Type fieldType, int tag, object value)
+	    {
+            if (fieldType.BaseTypeIs<BooleanField>())
+                return new BooleanField(tag, (bool)value);
+
+            if (fieldType.BaseTypeIs<CharField>())
+                return new CharField(tag, (char)value);
+
+	        if (fieldType.BaseTypeIs<DecimalField>())
+	            return new DecimalField(tag, (decimal)value);
+
+	        if (fieldType.BaseTypeIs<IntField>())
+	            return new IntField(tag, (int)value);
+
+	        if (fieldType.BaseTypeIs<StringField>())
+	            return new StringField(tag, (string)value);
+
+            if (fieldType.BaseTypeIs<DateOnlyField>())
+	            return new DateOnlyField(tag, (DateTime)value);
+
+            if (fieldType.BaseTypeIs<TimeOnlyField>())
+	            return new TimeOnlyField(tag, (DateTime)value);
+
+            if (fieldType.BaseTypeIs<DateTimeField>())
+	            return new DateTimeField(tag, (DateTime)value);
+
+            throw new ExecutionException("Unsupported FIX field type.");
+	    }
+
+        public static object GetFieldValue(this Message msg, Type fieldType)
 		{
 			int tag = fieldType.FieldTag();
+            return GetFieldValue(fieldType, msg.FieldMapFor(tag), tag);
+		}
 
-			if (fieldType.BaseTypeIs<BooleanField>())
-			{
-				return msg.FieldMapFor(tag).GetBoolean(tag);
-			}
-			if (fieldType.BaseTypeIs<CharField>())
-			{
-				return msg.FieldMapFor(tag).GetChar(tag);
-			}
-			if (fieldType.BaseTypeIs<DecimalField>())
-			{
-				return msg.FieldMapFor(tag).GetDecimal(tag);
-			}
-			if (fieldType.BaseTypeIs<IntField>())
-			{
-				return msg.FieldMapFor(tag).GetInt(tag);
-			}
+	    private static object GetFieldValue(Type fieldType, FieldMap map, int tag)
+	    {
+            if (fieldType.BaseTypeIs<BooleanField>())
+                return map.GetBoolean(tag);
+
+            if (fieldType.BaseTypeIs<CharField>())
+                return map.GetChar(tag);
+
+            if (fieldType.BaseTypeIs<DecimalField>())
+                return map.GetDecimal(tag);
+
+            if (fieldType.BaseTypeIs<IntField>())
+                return map.GetInt(tag);
+
             if (fieldType.BaseTypeIs<StringField>())
-            {
-                return msg.FieldMapFor(tag).GetString(tag);
-            }
-            if (fieldType.BaseTypeIs<DateOnlyField>())
-            {
-                return msg.FieldMapFor(tag).GetDateOnly(tag);
-            }
-            if (fieldType.BaseTypeIs<TimeOnlyField>())
-            {
-                return msg.FieldMapFor(tag).GetTimeOnly(tag);
-            }
-            if (fieldType.BaseTypeIs<DateTimeField>())
-			{
-				return msg.FieldMapFor(tag).GetDateTime(tag);
-			}
-			throw new ExecutionException("Unsupported FIX field type.");
-		}
+                return map.GetString(tag);
 
-		public static int FieldTag(this Type fieldType)
-		{
-#error "FIELD" does not work any more
-            FieldInfo field = fieldType.GetField("FIELD", BindingFlags.Public | BindingFlags.Static);
-			if (field == null)
-			{
-				throw new ExecutionException("FIELD field not found.");
-			}
-			return (int) field.GetValue(null);
-		}
+            if (fieldType.BaseTypeIs<DateOnlyField>())
+                return map.GetDateOnly(tag);
+
+            if (fieldType.BaseTypeIs<TimeOnlyField>())
+                return map.GetTimeOnly(tag);
+
+            if (fieldType.BaseTypeIs<DateTimeField>())
+                return map.GetDateTime(tag);
+
+            throw new ExecutionException("Unsupported FIX field type.");
+        }
+
+        public static int FieldTag(this Type fieldType)
+	    {
+	        var tagTypes = new[] { typeof (Tags), typeof (FIX.Fields.Tags) };
+	        var constFields = tagTypes
+	            .Select(type => type.GetField(fieldType.Name, BindingFlags.Public | BindingFlags.Static))
+	            .Where(info => info != null && info.IsLiteral && !info.IsInitOnly);
+	        foreach (var fieldInfo in constFields)
+                return (int)fieldInfo.GetValue(null);
+
+            throw new ExecutionException("Unknown tag: {0}", fieldType.Name);
+        }
 
         public static IEnumerable<FieldInfo> GetFieldConsts(this Type fieldType)
 		{
-            return fieldType.GetFields(BindingFlags.Public | BindingFlags.Static);
+            return fieldType.GetFields(BindingFlags.Public | BindingFlags.Static)
+                .Where(fieldInfo => fieldInfo.IsLiteral && !fieldInfo.IsInitOnly);
         }
 
         public static bool IsFieldType(this Type type)

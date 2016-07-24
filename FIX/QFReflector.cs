@@ -231,12 +231,13 @@ namespace OEC.FIX.Sample.FIX
 
 		private static Type GetFieldType(string fieldName)
 		{
-			Type type = QFAssembly.GetType("QuickFix.Fields." + fieldName, false, true);
-			if (type != null && !type.IsFieldType())
-			{
-				type = null;
-			}
-			return type;
+		    var types = new Func<Type>[]
+		    {
+		        () => QFAssembly.GetType("QuickFix.Fields." + fieldName, false, true),
+		        () => Assembly.GetAssembly(typeof (FIX.Fields.Tags)).GetType("OEC.FIX.Sample.FIX.Fields" + fieldName, false, true)
+		    };
+
+		    return types.Select(func => func()).FirstOrDefault(t => t != null && t.IsFieldType());
 		}
 	}
 }

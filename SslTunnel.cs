@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Threading;
@@ -26,7 +27,7 @@ namespace OEC.FIX.Sample
 			var stream = new SslStream(s);
 			stream.AuthenticateAsClient("gainfutures.com");
 
-			var listener = new TcpListener(LocalPort);
+			var listener = new TcpListener(IPAddress.Any, LocalPort);
 			listener.Start();
 
 			_thread = new Thread(x =>
