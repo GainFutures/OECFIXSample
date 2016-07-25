@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Linq;
-using System.Text;
 using OEC.FIX.Sample.FIX;
 
 namespace OEC.FIX.Sample
@@ -31,10 +30,7 @@ namespace OEC.FIX.Sample
             }
         }
 
-        public static IConfiguration AppSettingsConfiguration
-        {
-            get { return new AppSettingsConfiguration(ConfigurationManager.AppSettings); }
-        }
+        public static IConfiguration AppSettingsConfiguration => new AppSettingsConfiguration(ConfigurationManager.AppSettings);
 
         public static IEnumerable<IConfiguration> MultipleTestSessions(int count)
         {
@@ -43,7 +39,7 @@ namespace OEC.FIX.Sample
                 var parameters = new ConfigurationParameters
                 {
                     Host = "api.gainfutures.com",
-                    SenderCompID = string.Format("TEST{0}", no),
+                    SenderCompID = $"TEST{no}",
                     TargetCompID = "OEC",
                     FutureAccount = "API000001",
                     ForexAccount = "APIFX0001"
@@ -62,7 +58,7 @@ namespace OEC.FIX.Sample
         public string ForexAccount { get; set; }
 
         public bool IsSSL { get; set; }
-        
+
         ///default password
         public string Password { get; set; }
     }

@@ -9,7 +9,7 @@ namespace OEC.FIX.Sample.FIX.Fields
         public const int DESCRIPTION_STARTS_WITH = 2;
         public const int ANY_STARTS_WITH = 3;
         public const int EXACT_MATCH = 4;
-        
+
         public SymbolLookupModeField(int value)
             : base(Tags.SymbolLookupModeField, value)
         {

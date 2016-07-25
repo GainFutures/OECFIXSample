@@ -8,68 +8,68 @@ using OEC.FIX.Sample.FoxScript.AllocationBlocks;
 
 namespace OEC.FIX.Sample.FoxScript
 {
-	internal class OrderSide
-	{
-		public bool? Open;
-		public char Side;
-	}
+    internal class OrderSide
+    {
+        public bool? Open;
+        public char Side;
+    }
 
-	internal static class ContractAssetPrefix
-	{
-		public static readonly string Future = "FUT:";
-		public static readonly string Equity = "EQ:";
-		public static readonly string Forex = "FX:";
-		public static readonly string MutualFund = "MF:";
+    internal static class ContractAssetPrefix
+    {
+        public static readonly string Future = "FUT:";
+        public static readonly string Equity = "EQ:";
+        public static readonly string Forex = "FX:";
+        public static readonly string MutualFund = "MF:";
 
-		public static string ExtractFrom(ref string symbol)
-		{
-			var prefixes = new[] {Future, Equity, Forex, MutualFund};
+        public static string ExtractFrom(ref string symbol)
+        {
+            var prefixes = new[] { Future, Equity, Forex, MutualFund };
 
-			string s = symbol;
-			string prefix = prefixes.FirstOrDefault(s.StartsWith);
+            string s = symbol;
+            string prefix = prefixes.FirstOrDefault(s.StartsWith);
 
-			if (prefix != null)
-			{
-				symbol = symbol.Substring(prefix.Length);
-				return prefix;
-			}
-			return null;
-		}
+            if (prefix != null)
+            {
+                symbol = symbol.Substring(prefix.Length);
+                return prefix;
+            }
+            return null;
+        }
 
-		public static ContractAsset ToAsset(string prefix)
-		{
-			if (prefix == Future)
-			{
-				return ContractAsset.Future;
-			}
-			if (prefix == Forex)
-			{
-				return ContractAsset.Forex;
-			}
-			throw new ExecutionException("Invalid prefix '{0}'", prefix ?? "NULL");
-		}
+        public static ContractAsset ToAsset(string prefix)
+        {
+            if (prefix == Future)
+            {
+                return ContractAsset.Future;
+            }
+            if (prefix == Forex)
+            {
+                return ContractAsset.Forex;
+            }
+            throw new ExecutionException("Invalid prefix '{0}'", prefix ?? "NULL");
+        }
 
-		public static string FromAsset(ContractAsset asset)
-		{
-			switch (asset)
-			{
-				case ContractAsset.Future:
-					return Future;
+        public static string FromAsset(ContractAsset asset)
+        {
+            switch (asset)
+            {
+                case ContractAsset.Future:
+                    return Future;
 
-				case ContractAsset.Forex:
-					return Forex;
+                case ContractAsset.Forex:
+                    return Forex;
 
-				default:
-					throw new ExecutionException("Invalid ContractAsset.");
-			}
-		}
-	}
+                default:
+                    throw new ExecutionException("Invalid ContractAsset.");
+            }
+        }
+    }
 
-	internal enum ContractAsset
-	{
-		Future,
-		Forex
-	}
+    internal enum ContractAsset
+    {
+        Future,
+        Forex
+    }
 
     internal enum BracketType
     {
@@ -77,82 +77,79 @@ namespace OEC.FIX.Sample.FoxScript
         OSO
     }
 
-	internal class OrderContract
-	{
-		public bool? Put;
-		public double? Strike;
-		public OrderSymbol Symbol;
+    internal class OrderContract
+    {
+        public bool? Put;
+        public double? Strike;
+        public OrderSymbol Symbol;
 
-		public bool Option
-		{
-			get { return Put.HasValue || Strike.HasValue || Symbol.Option; }
-		}
-	}
+        public bool Option => Put.HasValue || Strike.HasValue || Symbol.Option;
+    }
 
-	internal class OrderSymbol
-	{
-		public ContractAsset Asset;
-		public DateTime? MonthYear;
-		public bool Multileg;
-		public string Name;
-		public bool Option;
-	}
+    internal class OrderSymbol
+    {
+        public ContractAsset Asset;
+        public DateTime? MonthYear;
+        public bool Multileg;
+        public string Name;
+        public bool Option;
+    }
 
-	internal class TrailingStop
-	{
-		public double? Amount;
-		public bool AmountInPercents;
-		public char? TriggerType;
-	}
+    internal class TrailingStop
+    {
+        public double? Amount;
+        public bool AmountInPercents;
+        public char? TriggerType;
+    }
 
     //VP: WTF
-	internal class OrderType
-	{
-		public const char ICEBERG = '!';
-		public const char MARKET_ON_OPEN = '@';
-		public const char MARKET_ON_CLOSE = '#';
+    internal class OrderType
+    {
+        public const char ICEBERG = '!';
+        public const char MARKET_ON_OPEN = '@';
+        public const char MARKET_ON_CLOSE = '#';
 
-		public double? Limit;
+        public double? Limit;
 
-		public int? MaxFloor;
-		public double? Stop;
-		public TrailingStop TrailingStop;
-		public char Type;
-	}
+        public int? MaxFloor;
+        public double? Stop;
+        public TrailingStop TrailingStop;
+        public char Type;
+    }
 
-	internal class TimeInForce
-	{
-		public DateTime? Expiration;
-		public char Type;
-	}
+    internal class TimeInForce
+    {
+        public DateTime? Expiration;
+        public char Type;
+    }
 
-	internal abstract class MsgCommand
-	{
-	}
+    internal abstract class MsgCommand
+    {
+    }
 
-	internal class FixFields : List<FixField>
-	{
-		public void Add(string name, Object value)
-		{
-			Add(new FixField(name, value));
-		}
-	}
+    internal class FixFields : List<FixField>
+    {
+        public void Add(string name, Object value)
+        {
+            Add(new FixField(name, value));
+        }
+    }
 
-	internal abstract class OutgoingMsgCommand : MsgCommand
-	{
-		public readonly FixFields Fields = new FixFields();
-	}
+    internal abstract class OutgoingMsgCommand : MsgCommand
+    {
+        public readonly FixFields Fields = new FixFields();
+    }
 
-	internal abstract class IncomingMsgCommand : MsgCommand
-	{
-	}
+    internal abstract class IncomingMsgCommand : MsgCommand
+    {
+    }
 
-	internal class WaitMessageCommand : IncomingMsgCommand
-	{
-		public object LogicalExpr;
-		public string MsgTypeName;
-		public TimeSpan? Timeout;
-	}
+    internal class WaitMessageCommand : IncomingMsgCommand
+    {
+        public object LogicalExpr;
+        public string MsgTypeName;
+        public TimeSpan? Timeout;
+    }
 
     abstract class OrderRequestCommand : OutgoingMsgCommand
     {
@@ -163,20 +160,20 @@ namespace OEC.FIX.Sample.FoxScript
     }
 
     internal abstract class OrderCommand : OrderRequestCommand
-	{
-		public string Account;
-		public AllocationBlock<PreAllocationBlockItem> AllocationBlock;
-		public OrderContract OrderContract;
-		public int OrderQty;
-		public OrderSide OrderSide;
-		public OrderType OrderType;
-		public TimeInForce TimeInForce;
-		public string TradingSession;
-	}
+    {
+        public string Account;
+        public AllocationBlock<PreAllocationBlockItem> AllocationBlock;
+        public OrderContract OrderContract;
+        public int OrderQty;
+        public OrderSide OrderSide;
+        public OrderType OrderType;
+        public TimeInForce TimeInForce;
+        public string TradingSession;
+    }
 
-	internal class NewOrderCommand : OrderCommand
-	{
-	}
+    internal class NewOrderCommand : OrderCommand
+    {
+    }
 
     internal class BracketCommandItem : NewOrderCommand
     {
@@ -190,449 +187,397 @@ namespace OEC.FIX.Sample.FoxScript
         public List<BracketCommandItem> BracketCommands;
     }
 
-	internal class OrderRefOutgoingMsgCommand : OutgoingMsgCommand
-	{
-		public string OrigMsgVarName;
-	}
+    internal class OrderRefOutgoingMsgCommand : OutgoingMsgCommand
+    {
+        public string OrigMsgVarName;
+    }
 
-	internal class ModifyOrderCommand : OrderCommand
-	{
-		public string OrigMsgVarName;
-	}
+    internal class ModifyOrderCommand : OrderCommand
+    {
+        public string OrigMsgVarName;
+    }
 
-	internal class CancelOrderCommand : OrderRefOutgoingMsgCommand
-	{
-	}
+    internal class CancelOrderCommand : OrderRefOutgoingMsgCommand
+    {
+    }
 
-	internal class OrderStatusCommand : OrderRefOutgoingMsgCommand
-	{
-	}
+    internal class OrderStatusCommand : OrderRefOutgoingMsgCommand
+    {
+    }
 
     class OrderMassStatusCommand : OrderRequestCommand
-	{
-	}
+    {
+    }
 
-	internal class PostAllocationCommand : OrderRefOutgoingMsgCommand
-	{
-		public AllocationBlock<PostAllocationBlockItem> AllocationBlock;
-		public OrderContract Contract;
-	}
+    internal class PostAllocationCommand : OrderRefOutgoingMsgCommand
+    {
+        public AllocationBlock<PostAllocationBlockItem> AllocationBlock;
+        public OrderContract Contract;
+    }
 
-	internal class BalanceCommand : OutgoingMsgCommand
-	{
-		public string Account;
-	}
+    internal class BalanceCommand : OutgoingMsgCommand
+    {
+        public string Account;
+    }
 
-	internal class PositionsCommand : OutgoingMsgCommand
-	{
-		public string Account;
-	}
+    internal class PositionsCommand : OutgoingMsgCommand
+    {
+        public string Account;
+    }
 
-	internal class MarginCalcCommand : OutgoingMsgCommand
-	{
-		public string Account;
-		public List<Position> Positions;
+    internal class MarginCalcCommand : OutgoingMsgCommand
+    {
+        public string Account;
+        public List<Position> Positions;
 
-		public class Position
-		{
-			public OrderContract Contract;
-			public int MaxQty;
-			public int MinQty;
-		}
-	}
+        public class Position
+        {
+            public OrderContract Contract;
+            public int MaxQty;
+            public int MinQty;
+        }
+    }
 
-	internal class UserRequestCommand : OutgoingMsgCommand
-	{
-		public string Name;
-		public string UUID;
-		public int UserRequestType = QuickFix.Fields.UserRequestType.REQUEST_INDIVIDUAL_USER_STATUS;
-	}
+    internal class UserRequestCommand : OutgoingMsgCommand
+    {
+        public string Name;
+        public string UUID;
+        public int UserRequestType = QuickFix.Fields.UserRequestType.REQUEST_INDIVIDUAL_USER_STATUS;
+    }
 
-	internal enum ContractRequestType
-	{
-		Request,
-		Lookup
-	}
+    internal enum ContractRequestType
+    {
+        Request,
+        Lookup
+    }
 
-	internal class ContractRequestCommand : OutgoingMsgCommand
-	{
-		public const char DEFAULT_SUBSCRIBTION_TYPE = '-';
-		public string Name;
-		public char SubscriptionRequestType = DEFAULT_SUBSCRIBTION_TYPE;
-		public DateTime? UpdatesSinceTimestamp;
-	}
+    internal class ContractRequestCommand : OutgoingMsgCommand
+    {
+        public const char DEFAULT_SUBSCRIBTION_TYPE = '-';
+        public string Name;
+        public char SubscriptionRequestType = DEFAULT_SUBSCRIBTION_TYPE;
+        public DateTime? UpdatesSinceTimestamp;
+    }
 
-	internal class BaseContractRequestCommand : ContractRequestCommand
-	{
-		public CompoundType CompoundType = CompoundType.UNKNOWN;
-		public string ContractGroup;
-		public string Exchange;
+    internal class BaseContractRequestCommand : ContractRequestCommand
+    {
+        public CompoundType CompoundType = CompoundType.UNKNOWN;
+        public string ContractGroup;
+        public string Exchange;
 
-		public string CompoundTypeString
-		{
-			get
-			{
-				Type type = typeof (CompoundType);
-				string fieldValue = CompoundType.ToString();
-				if (Enum.IsDefined(type, CompoundType))
-				{
-					FieldInfo fieldInfo = type.GetField(fieldValue);
-					var atts = (DescriptionAttribute[]) fieldInfo.GetCustomAttributes(typeof (DescriptionAttribute), false);
-					return atts.Length > 0 ? atts[0].Description : fieldValue;
-				}
-				return fieldValue;
-			}
-		}
-	}
+        public string CompoundTypeString
+        {
+            get
+            {
+                Type type = typeof(CompoundType);
+                string fieldValue = CompoundType.ToString();
+                if (Enum.IsDefined(type, CompoundType))
+                {
+                    FieldInfo fieldInfo = type.GetField(fieldValue);
+                    var atts = (DescriptionAttribute[])fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), false);
+                    return atts.Length > 0 ? atts[0].Description : fieldValue;
+                }
+                return fieldValue;
+            }
+        }
+    }
 
-	internal class SymbolLookupCommand : BaseContractRequestCommand
-	{
-		public string BaseContract;
-		public bool? ByBaseContractsOnly;
-		public List<ContractKind> ContractKinds = new List<ContractKind>();
+    internal class SymbolLookupCommand : BaseContractRequestCommand
+    {
+        public string BaseContract;
+        public bool? ByBaseContractsOnly;
+        public List<ContractKind> ContractKinds = new List<ContractKind>();
 
-		public ContractType? ContractType;
-		public int MaxRecords;
-		public int Mode;
-		public OptionType OptionType = OptionType.ALL;
-		public bool? OptionsRequired;
+        public ContractType? ContractType;
+        public int MaxRecords;
+        public int Mode;
+        public OptionType OptionType = OptionType.ALL;
+        public bool? OptionsRequired;
 
-		public Contract ParentContract;
-		public string SearchText;
-	}
+        public Contract ParentContract;
+        public string SearchText;
+    }
 
-	internal class FixField
-	{
-		public readonly string Name;
-		public readonly Object Value;
+    internal class FixField
+    {
+        public readonly string Name;
+        public readonly Object Value;
 
-		public FixField(string name, Object value)
-		{
-			Name = name;
-			Value = value;
-		}
-	}
+        public FixField(string name, Object value)
+        {
+            Name = name;
+            Value = value;
+        }
+    }
 
-	internal class Object
-	{
-		public readonly string Token;
-		public readonly ObjectType Type;
+    internal class Object
+    {
+        public readonly string Token;
+        public readonly ObjectType Type;
 
-		public Object(ObjectType type, string token)
-		{
-			Type = type;
-			Token = token;
-		}
+        public Object(ObjectType type, string token)
+        {
+            Type = type;
+            Token = token;
+        }
 
-		public override string ToString()
-		{
-			return string.Format("{0}: {1}", Type, Token ?? "NULL");
-		}
-	}
+        public override string ToString()
+        {
+            return $"{Type}: {Token ?? "NULL"}";
+        }
+    }
 
-	internal enum ObjectType
-	{
-		Null,
-		Integer,
-		Float,
-		String,
-		Bool,
-		Timestamp,
-		Date,
-		Timespan,
+    internal enum ObjectType
+    {
+        Null,
+        Integer,
+        Float,
+        String,
+        Bool,
+        Timestamp,
+        Date,
+        Timespan,
 
-		FixMsgVar,
-		FixMsgVarField,
-		FixField,
-		FixConst,
-		GlobalProp
-	}
+        FixMsgVar,
+        FixMsgVarField,
+        FixField,
+        FixConst,
+        GlobalProp
+    }
 
-	internal class FormatArgs
-	{
-		public readonly string Format;
-		private readonly List<object> _args = new List<object>();
+    internal class FormatArgs
+    {
+        public readonly string Format;
+        private readonly List<object> _args = new List<object>();
 
-		public FormatArgs(string format)
-		{
-			Format = format;
-		}
+        public FormatArgs(string format)
+        {
+            Format = format;
+        }
 
-		public IEnumerable<object> Args
-		{
-			get { return _args; }
-		}
+        public IEnumerable<object> Args => _args;
 
-		public void AddArg(object arg)
-		{
-			if (arg == null)
-			{
-				return;
-			}
-			_args.Add(arg);
-		}
-	}
+        public void AddArg(object arg)
+        {
+            if (arg == null)
+            {
+                return;
+            }
+            _args.Add(arg);
+        }
+    }
 
-	internal enum LogicalOp
-	{
-		Or,
-		And,
-		Equal,
-		NotEqual,
-		Less,
-		LessOrEqual,
-		Greater,
-		GreaterOrEqual
-	}
+    internal enum LogicalOp
+    {
+        Or,
+        And,
+        Equal,
+        NotEqual,
+        Less,
+        LessOrEqual,
+        Greater,
+        GreaterOrEqual
+    }
 
-	internal class LogicalExpr
-	{
-		public object Left;
-		public LogicalOp Operation;
-		public object Right;
-	}
+    internal class LogicalExpr
+    {
+        public object Left;
+        public LogicalOp Operation;
+        public object Right;
+    }
 
-	#region FAST
+    #region FAST
 
-	internal class FASTStrikeSide
-	{
-		public bool Put;
-		public double Strike;
-	}
+    internal class FASTStrikeSide
+    {
+        public bool Put;
+        public double Strike;
+    }
 
 
-	internal abstract class MDMessageCommand : OutgoingMsgCommand, IOutputFile
-	{
-	    protected List<FAST.MDEntryType> _entries;
-        
-		public string BaseSymbol;
-		public int? ExpirationMonth;
+    internal abstract class MDMessageCommand : OutgoingMsgCommand, IOutputFile
+    {
+        protected List<MDEntryType> Entries;
 
-	    public int UpdateType { get; set; }
+        public string BaseSymbol;
+        public int? ExpirationMonth;
+
+        public int UpdateType { get; set; }
 
         public ContractKind ContractKind;
 
-		public FASTStrikeSide StrikeSide { get; set; }
+        public FASTStrikeSide StrikeSide { get; set; }
 
-		public bool Option
-		{
-			get { return StrikeSide != null; }
-		}
+        public bool Option => StrikeSide != null;
 
-		public abstract int MarketDepth { get; }
+        public abstract int MarketDepth { get; }
 
-		public abstract int SubscriptionType { get; }
+        public abstract int SubscriptionType { get; }
 
-        public virtual int SubscriptionRequestType
+        public virtual int SubscriptionRequestType => 1;
+
+        public MDEntryType[] MDEntries => Entries.ToArray();
+
+        public abstract DateTime? StartTime { get; }
+
+        public virtual DateTime? EndTime => null;
+
+        public string OutputFileName { get; set; }
+
+        protected MDMessageCommand()
         {
-            get { return 1; }
+            UpdateType = 1;
+            Entries = new List<MDEntryType>();
         }
 
-        public MDEntryType[] MDEntries 
+        public void Add(MDEntryType type)
         {
-            get { return _entries.ToArray(); }
+            Entries.Add(type);
         }
 
-		public abstract DateTime? StartTime { get; }
-
-        public virtual DateTime? EndTime 
-			{
-            get { return null; }
-		}
-
-		public string OutputFileName { get; set; }
-
-	    protected MDMessageCommand()
+        public void ResetMDEntries()
         {
-	        UpdateType = 1;
-            _entries = new List<MDEntryType>();
+            Entries.Clear();
         }
+    }
 
-	    public void Add(MDEntryType type)
+    internal class SubscribeQuotesCommand : MDMessageCommand
+    {
+        public override int MarketDepth => 1;
+
+        public override int SubscriptionType => 0;
+
+        public override DateTime? StartTime => null;
+
+        public SubscribeQuotesCommand()
         {
-	        _entries.Add(type);
-        }
-
-	    public void ResetMDEntries()
-			{
-	        _entries.Clear();
-		}
-	}
-
-	internal class SubscribeQuotesCommand : MDMessageCommand
-	{
-		public override int MarketDepth
-		{
-			get { return 1; }
-		}
-
-
-		public override int SubscriptionType
-		{
-			get { return 0; }
-		}
-
-		public override DateTime? StartTime
-		{
-			get { return null; }
-		}
-
-	    public SubscribeQuotesCommand()
-		{
-	        _entries = new List<MDEntryType>(
-	            new[]
-	            {
-	                MDEntryType.BID,
-	                MDEntryType.OFFER, 
-                    MDEntryType.TRADE, 
-                    MDEntryType.OPENING_PRICE, 
-                    MDEntryType.SETTLEMENT_PRICE, 
-                    MDEntryType.TRADE_VOLUME, 
+            Entries = new List<MDEntryType>(
+                new[]
+                {
+                    MDEntryType.BID,
+                    MDEntryType.OFFER,
+                    MDEntryType.TRADE,
+                    MDEntryType.OPENING_PRICE,
+                    MDEntryType.SETTLEMENT_PRICE,
+                    MDEntryType.TRADE_VOLUME,
                     MDEntryType.OPEN_INTEREST
-	            }
-	        );
-		}
-	}
+                }
+            );
+        }
+    }
 
 
-	internal class SubscribeDOMCommand : MDMessageCommand
-	{
-		public override int MarketDepth
-		{
-			get { return 0; }
-		}
+    internal class SubscribeDOMCommand : MDMessageCommand
+    {
+        public override int MarketDepth => 0;
 
-		public override int SubscriptionType
-		{
-			get { return 1; }
-		}
+        public override int SubscriptionType => 1;
 
-		public override DateTime? StartTime
-		{
-			get { return null; }
-		}
+        public override DateTime? StartTime => null;
 
-	    public SubscribeDOMCommand()
-		{
-            _entries = new List<MDEntryType>(new[] { MDEntryType.BID, MDEntryType.OFFER });
-		}
-	}
+        public SubscribeDOMCommand()
+        {
+            Entries = new List<MDEntryType>(new[] { MDEntryType.BID, MDEntryType.OFFER });
+        }
+    }
 
-	internal class SubscribeHistogramCommand : MDMessageCommand
-	{
-		public override int MarketDepth
-		{
-			get { return 0; }
-		}
+    internal class SubscribeHistogramCommand : MDMessageCommand
+    {
+        public override int MarketDepth => 0;
 
-		public override int SubscriptionType
-		{
-			get { return 4; }
-		}
+        public override int SubscriptionType => 4;
 
-		public override DateTime? StartTime
-		{
-			get { return null; }
-		}
+        public override DateTime? StartTime => null;
 
-	    public SubscribeHistogramCommand()
-		{
-            _entries = new List<MDEntryType>(new[] { MDEntryType.TRADE });
-		}
-	}
+        public SubscribeHistogramCommand()
+        {
+            Entries = new List<MDEntryType>(new[] { MDEntryType.TRADE });
+        }
+    }
 
-	internal class SubscribeTicksCommand : MDMessageCommand
-	{
-		private DateTime? _startTime;
-		private TimeSpan? _startTimeSpan;
+    internal class SubscribeTicksCommand : MDMessageCommand
+    {
+        private DateTime? _startTime;
+        private TimeSpan? _startTimeSpan;
 
-		public override int MarketDepth
-		{
-			get { return 1; }
-		}
+        public override int MarketDepth => 1;
 
-		public override int SubscriptionType
-		{
-			get { return 2; }
-		}
+        public override int SubscriptionType => 2;
 
-		public override DateTime? StartTime
-		{
-			get
-			{
-				if (_startTime.HasValue)
-				{
-					return _startTime;
-				}
-				DateTime now = DateTime.UtcNow;
-				if (_startTimeSpan.HasValue)
-				{
-					return now - _startTimeSpan.Value;
-				}
-				return now;
-			}
-		}
+        public override DateTime? StartTime
+        {
+            get
+            {
+                if (_startTime.HasValue)
+                {
+                    return _startTime;
+                }
+                DateTime now = DateTime.UtcNow;
+                if (_startTimeSpan.HasValue)
+                {
+                    return now - _startTimeSpan.Value;
+                }
+                return now;
+            }
+        }
 
-		public void SetStartTime(DateTime startTime)
-		{
-			_startTime = startTime;
-		}
+        public void SetStartTime(DateTime startTime)
+        {
+            _startTime = startTime;
+        }
 
-		public void SetStartTime(TimeSpan startTimeSpan)
-		{
-			_startTimeSpan = startTimeSpan;
-		}
+        public void SetStartTime(TimeSpan startTimeSpan)
+        {
+            _startTimeSpan = startTimeSpan;
+        }
 
-	    public SubscribeTicksCommand()
-	    {
-            _entries = new List<MDEntryType>(new[] { MDEntryType.BID, MDEntryType.OFFER, MDEntryType.TRADE });   
-	    }
-	}
+        public SubscribeTicksCommand()
+        {
+            Entries = new List<MDEntryType>(new[] { MDEntryType.BID, MDEntryType.OFFER, MDEntryType.TRADE });
+        }
+    }
 
-	internal class CancelSubscribeCommand : OutgoingMsgCommand
-	{
-		public string MDMessageVar;
-	}
+    internal class CancelSubscribeCommand : OutgoingMsgCommand
+    {
+        public string MDMessageVar;
+    }
 
     internal class LoadTicksCommand : SubscribeTicksCommand
-	{
-        private DateTime? _endTime = null;
-        private TimeSpan? _endTimeSpan = null;
+    {
+        private DateTime? _endTime;
+        private TimeSpan? _endTimeSpan;
 
-		public override int SubscriptionRequestType
-		{
-			get { return 0; }
-		}
+        public override int SubscriptionRequestType => 0;
 
-		public override DateTime? EndTime
-		{
-			get
-			{
+        public override DateTime? EndTime
+        {
+            get
+            {
                 if (_endTime.HasValue)
                     return _endTime;
 
-					DateTime now = DateTime.UtcNow;
+                DateTime now = DateTime.UtcNow;
                 if (_endTimeSpan.HasValue)
                     return now - _endTimeSpan.Value;
-						return now;
-				}
-			}
+                return now;
+            }
+        }
 
-		public void SetEndTime(DateTime endTime)
-		{
+        public void SetEndTime(DateTime endTime)
+        {
             _endTime = endTime;
-		}
+        }
 
-		public void SetEndTime(TimeSpan endTimeSpan)
-		{
+        public void SetEndTime(TimeSpan endTimeSpan)
+        {
             _endTimeSpan = endTimeSpan;
-		}
-	}
+        }
+    }
 
     internal interface IOutputFile
-	{
-		string OutputFileName { get; set; }
-	}
+    {
+        string OutputFileName { get; set; }
+    }
 
-	#endregion
+    #endregion
 }

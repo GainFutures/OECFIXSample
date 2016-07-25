@@ -2,16 +2,16 @@
 
 namespace OEC.FIX.Sample.FIX.Fields
 {
-	public class MaxRecordsField : IntField
-	{
-		public MaxRecordsField(int value)
-			: base(Tags.MaxRecordsField, value)
-		{
-		}
+    public class MaxRecordsField : IntField
+    {
+        public MaxRecordsField(int value)
+            : base(Tags.MaxRecordsField, value)
+        {
+        }
 
-		public MaxRecordsField()
-			: this(0)
-		{
-		}
-	}
+        public MaxRecordsField()
+            : this(0)
+        {
+        }
+    }
 }

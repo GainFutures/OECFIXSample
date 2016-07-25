@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace OEC.FIX.Sample.FIX.Fields
+﻿namespace OEC.FIX.Sample.FIX.Fields
 {
     public static class Tags
     {

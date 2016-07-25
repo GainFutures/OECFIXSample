@@ -8,13 +8,13 @@ using System.Collections.Generic;
 
 namespace OEC.FIX.Sample
 {
-	internal class Program
-	{
-		private static void Main(string[] args)
-		{
-			Console.WriteLine("FIX Sample Client, ver. {0}", Assembly.GetExecutingAssembly().GetName().Version);
-			Console.WriteLine("FOXScript ver. {0}", ExecEngine.FOXScriptVersion);
-			PrintAuthUsage();
+    internal class Program
+    {
+        private static void Main(string[] args)
+        {
+            Console.WriteLine("FIX Sample Client, ver. {0}", Assembly.GetExecutingAssembly().GetName().Version);
+            Console.WriteLine("FOXScript ver. {0}", ExecEngine.FOXScriptVersion);
+            PrintAuthUsage();
 
             var app = new Program();
 
@@ -27,12 +27,12 @@ namespace OEC.FIX.Sample
             //app.Start(
             //    Configurations.MultipleTestSessions(100).Select(ExecEngine.MakeFixOnly),
             //    app.TestMultimpleConnectionsRoutine);
-            
+
             // Settings from config file; console 
             //app.Start(
             //    ExecEngine.MakeFixFast(Configurations.AppSettingsConfiguration),
             //    app.StartConsoleRoutine);
-            
+
             //// predefined TEST1 user; command console
             //app.Start(
             //    ExecEngine.MakeFixFast(Configurations.Test1OnLocalhost),
@@ -41,7 +41,7 @@ namespace OEC.FIX.Sample
             //app.Start(
             //    ExecEngine.MakeFixFast(Configurations.VitalyLocalHostConfiguration),
             //    app.StartConsoleRoutine);
-          
+
             // predefined TEST1 user connects to FIX and then to FAST two times simulating 
             // drop of an old connection; no command console
             //var configuration = Configurations.Test1OnLocalhost;
@@ -52,7 +52,7 @@ namespace OEC.FIX.Sample
             //    ExecEngine.MakeFastOnly(fixFast.Properties)
             //};
             //app.Start(execEngines, app.MultipleFastConnection);
-		}
+        }
 
         private void Start(IEnumerable<ExecEngine> engines, Action<int, ExecEngine> routine)
         {
@@ -61,7 +61,7 @@ namespace OEC.FIX.Sample
                 Action<ExecEngine> threadRoutine = e => routine(i, e);
                 return new Thread(() => Start(engine, threadRoutine));
             }).ToArray();
-            
+
             foreach (var thread in threads)
                 thread.Start();
             foreach (var thread in threads)
@@ -75,24 +75,24 @@ namespace OEC.FIX.Sample
             execEngine.StoreSeqNumbers();
         }
 
-	    private void TestMultimpleConnectionsRoutine(int no, ExecEngine engine)
-	    {
+        private void TestMultimpleConnectionsRoutine(int no, ExecEngine engine)
+        {
             const string source = "COMMAND";
-            engine.Execute(string.Format("connect '{0}';", no + 1), source);
+            engine.Execute($"connect '{no + 1}';", source);
             engine.Execute("sleep [00:03:00];", source);
             engine.Execute("disconnect;", source);
         }
 
-	    private void MultipleFastConnection(int no, ExecEngine engine)
-	    {
+        private void MultipleFastConnection(int no, ExecEngine engine)
+        {
             const string source = "COMMAND";
             if (engine.IsFixAvailable)
-                engine.Execute(string.Format("connect '{0}';", no + 1), source);
+                engine.Execute($"connect '{no + 1}';", source);
 
             const int fixDelay = 5;
-	        const int orderDelay = 3;
+            const int orderDelay = 3;
             TimeSpan delay = TimeSpan.FromSeconds(fixDelay + orderDelay * no);
-	        var sleepString = string.Format("sleep [{0}];", delay);
+            var sleepString = $"sleep [{delay}];";
 
             if (engine.IsFixAvailable)
                 engine.Execute("disconnect;", source);
@@ -101,29 +101,29 @@ namespace OEC.FIX.Sample
             engine.Execute("ConnectFast;", source);
         }
 
-	    private void ExecuteFileRoutine(ExecEngine engine, string fileName)
-	    {
-	        string command = string.Format("exec '{0}'", fileName);
-	        engine.Execute(command, "COMMAND");
-	    }
+        private void ExecuteFileRoutine(ExecEngine engine, string fileName)
+        {
+            string command = $"exec '{fileName}'";
+            engine.Execute(command, "COMMAND");
+        }
 
-	    private void StartConsoleRoutine(ExecEngine engine)
-	    {
-	        engine.Run();
-	    }
+        private void StartConsoleRoutine(ExecEngine engine)
+        {
+            engine.Run();
+        }
 
-		private static void PrintAuthUsage()
-		{
-			const string fileName = "AuthWorkflow.fox";
-			const string fullFileName = "../../Tests/" + fileName;
-			if (!File.Exists(fullFileName)) return;
+        private static void PrintAuthUsage()
+        {
+            const string fileName = "AuthWorkflow.fox";
+            const string fullFileName = "../../Tests/" + fileName;
+            if (!File.Exists(fullFileName)) return;
 
-			Console.WriteLine();
-			Console.WriteLine("Hint of day from: " + fileName);
-			Console.WriteLine();
-			using (StreamReader file = File.OpenText(fullFileName))
-				Console.Write(file.ReadToEnd());
-			Console.WriteLine();
-		}
-	}
+            Console.WriteLine();
+            Console.WriteLine("Hint of day from: " + fileName);
+            Console.WriteLine();
+            using (StreamReader file = File.OpenText(fullFileName))
+                Console.Write(file.ReadToEnd());
+            Console.WriteLine();
+        }
+    }
 }

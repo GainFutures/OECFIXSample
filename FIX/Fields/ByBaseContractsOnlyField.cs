@@ -2,16 +2,16 @@
 
 namespace OEC.FIX.Sample.FIX.Fields
 {
-	public class ByBaseContractsOnlyField : BooleanField
-	{
-		public ByBaseContractsOnlyField(bool value)
-			: base(Tags.ByBaseContractsOnlyField, value)
-		{
-		}
+    public class ByBaseContractsOnlyField : BooleanField
+    {
+        public ByBaseContractsOnlyField(bool value)
+            : base(Tags.ByBaseContractsOnlyField, value)
+        {
+        }
 
-		public ByBaseContractsOnlyField()
-			: this(false)
-		{
-		}
-	}
+        public ByBaseContractsOnlyField()
+            : this(false)
+        {
+        }
+    }
 }

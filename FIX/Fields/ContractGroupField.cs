@@ -2,16 +2,16 @@
 
 namespace OEC.FIX.Sample.FIX.Fields
 {
-	public class ContractGroupField : StringField
-	{
-		public ContractGroupField(string value)
-			: base(Tags.ContractGroupField, value)
-		{
-		}
+    public class ContractGroupField : StringField
+    {
+        public ContractGroupField(string value)
+            : base(Tags.ContractGroupField, value)
+        {
+        }
 
-		public ContractGroupField()
-			: this(string.Empty)
-		{
-		}
-	}
+        public ContractGroupField()
+            : this(string.Empty)
+        {
+        }
+    }
 }
