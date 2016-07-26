@@ -62,7 +62,7 @@ namespace OEC.FIX.Sample.FIX
                 _connection.OnFromAdmin += ConnectionOnFromAdmin;
                 _connection.OnFromApp += ConnectionOnFromApp;
 
-                _connection.Create((int)_properties[Prop.SenderSeqNum].Value, (int)_properties[Prop.TargetSeqNum].Value);
+                _connection.Create();
 
                 MessageLog.SessionEvent += MessageLog_SessionEvent;
                 MessageLog.OnIncomingMessage += MessageLog_OnIncomingMessage;

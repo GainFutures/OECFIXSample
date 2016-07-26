@@ -1,4 +1,6 @@
-﻿using OEC.FIX.Sample.FIX.Fields;
+﻿using System;
+using System.Linq;
+using OEC.FIX.Sample.FIX.Fields;
 using QuickFix;
 using QuickFix.Fields;
 using QuickFix.Transport;
@@ -18,16 +20,23 @@ namespace OEC.FIX.Sample.FIX
         private string _password;
         private string _uuid = "9e61a8bc-0a31-4542-ad85-33ebab0e4e86";
 
-        public SessionID SessionID { get; private set; }
+        public SessionID SessionID => Session.SessionID;
+        public Session Session { get; private set; }
+
+        private int _inititalSenderSeqNum;
+        private int _inititalTargetSeqNum;
 
         public void Create(Props properties)
         {
             _messageStoreFactory = new MessageStoreFactory(properties);
             var messageFactory = new DefaultMessageFactory();
 
+            _inititalSenderSeqNum = (int)properties[Prop.SenderSeqNum].Value;
+            _inititalTargetSeqNum = (int)properties[Prop.TargetSeqNum].Value;
+
             SessionSettings sessionSettings = GetSessionSettings();
-            _logFactory = new MessageLogFactory();
-            _initiator = new SocketInitiator(this, _messageStoreFactory, sessionSettings, _logFactory, messageFactory);
+
+            _initiator = new SocketInitiator(this, _messageStoreFactory, sessionSettings, new MessageLogFactory(), messageFactory);
         }
 
         public void Destroy()
@@ -40,7 +49,6 @@ namespace OEC.FIX.Sample.FIX
             }
 
             _messageStoreFactory = null;
-            _logFactory = null;
         }
 
         public virtual void Open(string password, string uuid)
@@ -85,7 +93,9 @@ namespace OEC.FIX.Sample.FIX
 
         public void OnCreate(SessionID sessionID)
         {
-            SessionID = sessionID;
+            Session = Session.LookupSession(sessionID);
+            Session.NextSenderMsgSeqNum = _inititalSenderSeqNum;
+            Session.NextTargetMsgSeqNum = _inititalTargetSeqNum;
         }
 
         public void OnLogon(SessionID sessionID)

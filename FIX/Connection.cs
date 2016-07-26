@@ -8,22 +8,17 @@ namespace OEC.FIX.Sample.FIX
     {
         private readonly Props _properties;
         private SslTunnel _sslTunnel;
-        public Session Session { get; private set; }
 
         public Connection(Props properties)
         {
             _properties = properties;
         }
 
-        public void Create(int senderSeqNum, int targetSeqNum)
+        public void Create()
         {
             Create(_properties);
 
-            Session = Session.LookupSession(SessionID);
-            Session.NextSenderMsgSeqNum = senderSeqNum;
-            Session.NextTargetMsgSeqNum = targetSeqNum;
-
-            var ssl = (bool)_properties[Prop.SSL].Value;
+            var ssl = (bool)_properties[Prop.SSL].Value; //TODO: Migrate to built-in SSL 
             _sslTunnel = ssl
                 ? new SslTunnel(_properties[Prop.Host].Value.ToString(), (int)_properties[Prop.Port].Value)
                 : null;
@@ -77,6 +72,7 @@ namespace OEC.FIX.Sample.FIX
 
             writer.Flush();
             stream.Seek(0, SeekOrigin.Begin);
+
             return new SessionSettings(new StreamReader(stream));
         }
     }
