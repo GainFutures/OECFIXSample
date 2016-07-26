@@ -54,6 +54,8 @@ namespace OEC.FIX.Sample
         public string Host { get; set; }
         public string SenderCompID { get; set; }
         public string TargetCompID { get; set; }
+        public string UUID { get; set; }
+
         public string FutureAccount { get; set; }
         public string ForexAccount { get; set; }
 
@@ -68,6 +70,7 @@ namespace OEC.FIX.Sample
         private readonly string _host;
         private readonly string _senderCompID;
         private readonly string _tragetCompID;
+        private readonly string _UUID;
 
         private readonly string _futureAccount;
         private readonly string _forexAccount;
@@ -79,8 +82,11 @@ namespace OEC.FIX.Sample
         public ConstValueConfiguration(ConfigurationParameters configParameters)
         {
             _host = configParameters.Host;
+
             _senderCompID = configParameters.SenderCompID;
             _tragetCompID = configParameters.TargetCompID;
+            _UUID = configParameters.UUID;
+
             _futureAccount = configParameters.FutureAccount;
             _forexAccount = configParameters.ForexAccount;
             _isSSL = configParameters.IsSSL;
@@ -119,6 +125,7 @@ namespace OEC.FIX.Sample
             properties.AddProp(Prop.ResetSeqNumbers, true);
 
             properties.AddProp(Prop.Password, _password);
+            properties.AddProp(Prop.UUID, _UUID);
         }
     }
 

@@ -43,10 +43,13 @@ namespace OEC.FIX.Sample.FIX
         public void Connect(string password, string uuid)
         {
             if (string.IsNullOrWhiteSpace(password))
-                password = _properties[Prop.Password].Value as String;
+                password = _properties[Prop.Password].Value as string;
 
             if (string.IsNullOrWhiteSpace(password))
                 throw new ExecutionException("Password is not specified");
+
+            if (string.IsNullOrWhiteSpace(uuid))
+                uuid = _properties[Prop.UUID].Value as string;
 
             lock (_connectionLock)
             {

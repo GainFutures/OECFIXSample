@@ -54,7 +54,9 @@ namespace OEC.FIX.Sample.FIX
         public virtual void Open(string password, string uuid)
         {
             _password = password;
-            _uuid = uuid;
+
+            if (!string.IsNullOrWhiteSpace(uuid))
+                _uuid = uuid;
 
             _initiator.Start();
         }

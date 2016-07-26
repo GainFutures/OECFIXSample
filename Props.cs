@@ -87,6 +87,8 @@ namespace OEC.FIX.Sample
         public static readonly string SSL = "SSL";
         public static readonly string Password = "Password";
 
+        public static readonly string UUID = "UUID";
+
         public readonly string Name;
         public readonly Type Type;
 
