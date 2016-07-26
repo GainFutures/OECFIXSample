@@ -100,21 +100,15 @@ namespace OEC.FIX.Sample.FIX
         {
             lock (_connectionLock)
             {
-                if (_connection != null)
+                if (_connection?.Session != null)
                 {
                     if (_connection.Session.IsLoggedOn)
-                    {
                         _logoutEvent = new ManualResetEvent(false);
-                    }
                     else
-                    {
                         DestroyConnection();
-                    }
                 }
                 else
-                {
                     WriteLine("Already disconnected from FIX server.");
-                }
             }
 
             if (_logoutEvent != null)
