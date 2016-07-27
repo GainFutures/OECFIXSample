@@ -21,7 +21,7 @@ namespace OEC.FIX.Sample
             //VP: Here are many examples how to run the app with different parameters
 
             //Ordinary way to start. FIX and FAST enabled; console available
-            app.Start(ExecEngine.MakeFixFast(Configurations.PredefinedConfiguration), app.StartConsoleRoutine);
+            app.Start(ExecEngine.MakeFixFast(Configurations.AppSettingsConfiguration), app.StartConsoleRoutine);
 
             // Connects multiple fixengines simultaneously; no command console 
             //app.Start(

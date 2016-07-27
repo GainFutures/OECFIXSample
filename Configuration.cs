@@ -96,8 +96,10 @@ namespace OEC.FIX.Sample
         public void FillProperties(Props properties)
         {
             properties.AddProp(Prop.Host, _host);
-            properties.AddProp(Prop.Port, 9300);
+
+            properties.AddProp(Prop.Port, 9300 + (_isSSL ? 100 : 0));
             properties.AddProp(Prop.FastPort, 9301);
+
             properties.AddProp(Prop.FastHashCode, "");
 
             properties.AddProp(Prop.ReconnectInterval, 30);

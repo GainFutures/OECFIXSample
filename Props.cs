@@ -51,7 +51,7 @@ namespace OEC.FIX.Sample
 
         public bool Contains(string name)
         {
-            return _props.ContainsKey(name);
+            return _props.ContainsKey(name.ToUpperInvariant());
         }
     }
 

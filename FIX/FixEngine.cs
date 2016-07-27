@@ -42,13 +42,13 @@ namespace OEC.FIX.Sample.FIX
 
         public void Connect(string password, string uuid)
         {
-            if (string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrWhiteSpace(password) && _properties.Contains(Prop.Password))
                 password = _properties[Prop.Password].Value as string;
 
             if (string.IsNullOrWhiteSpace(password))
                 throw new ExecutionException("Password is not specified");
 
-            if (string.IsNullOrWhiteSpace(uuid))
+            if (string.IsNullOrWhiteSpace(uuid) && _properties.Contains(Prop.UUID))
                 uuid = _properties[Prop.UUID].Value as string;
 
             lock (_connectionLock)
@@ -89,14 +89,14 @@ namespace OEC.FIX.Sample.FIX
             }
         }
 
-        private void MessageLog_OnOutgoingMessage(SessionID sessionID, string msg)
+        private void MessageLog_OnOutgoingMessage(SessionID sessionID, string message)
         {
-            Console.WriteLine("<out>" + msg);
+            Console.WriteLine($"Out> {message.Replace('\x01', '|')}");
         }
 
-        private void MessageLog_OnIncomingMessage(SessionID sessionID, string msg)
+        private void MessageLog_OnIncomingMessage(SessionID sessionID, string message)
         {
-            Console.WriteLine("<inc>" + msg);
+            Console.WriteLine($" In> {message.Replace('\x01', '|')}");
         }
 
         public void Disconnect()
