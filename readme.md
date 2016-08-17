@@ -20,10 +20,10 @@ Data type defines what values an object can store and what operations can be per
 - **Boolean**. Logical values True or False.  
   Examples: `True`, `False`, `On`, `Off`. 
 - **Timespan**. Time interval.  
-  Format: [D.HH:MM:SS]  
+  Format: [D.HH:MM:SS]; D and SS parts are optional.
   Examples: `[00:05]`, `[1.00:00:01]`
 - **Timestamp**. Date/time moment.  
-  Format: [YYYYMMDD-HH:MM:SS]  
+  Format: [YYYYMMDD-HH:MM:SS]; SS is optional
   Examples: `[20110229-15:30]`
 - **Date**. Date without time.  
   Format: [YYYYMMDD]  
