@@ -389,6 +389,9 @@ namespace OEC.FIX.Sample.FIX
                 BidType = new BidType(BidType.NO_BIDDING_PROCESS)
             };
 
+            if (command.Type == BracketType.OSO && command.OSOGroupingMethod != FoxScript.OSOGroupingMethod.None)
+                msg.SetField(new Fields.OSOGroupingMethod((int)command.OSOGroupingMethod));
+
             int lsq = 1;
             foreach (var cmd in command.BracketCommands)
             {

@@ -93,7 +93,7 @@ public class Parser {
 	public const int _call = 80;
 	public const int _open = 81;
 	public const int _close = 82;
-	public const int maxT = 247;
+	public const int maxT = 250;
 
 	const bool _T = true;
 	const bool _x = false;
@@ -295,7 +295,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			SimpleCommand();
 		} else if (StartOf(4)) {
 			MsgProducingCommand();
-		} else SynErr(248);
+		} else SynErr(251);
 	}
 
 	void Statement() {
@@ -445,7 +445,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			HeartbeatCommand();
 			break;
 		}
-		default: SynErr(249); break;
+		default: SynErr(252); break;
 		}
 		Expect(5);
 	}
@@ -536,7 +536,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			LoadTicksCommand(ref command);
 			break;
 		}
-		default: SynErr(250); break;
+		default: SynErr(253); break;
 		}
 		Expect(5);
 		ExecEngine.MessageCommand(msgVarName, command); 
@@ -563,7 +563,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			SetSeqNumPropCommand();
 		} else if (la.kind == 1) {
 			SetCommonPropCommand();
-		} else SynErr(251);
+		} else SynErr(254);
 	}
 
 	void PingCommand() {
@@ -599,7 +599,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 		} else if (la.kind == 27) {
 			Get();
-		} else SynErr(252);
+		} else SynErr(255);
 		SemanticAction(() => ExecEngine.Exit()); 
 	}
 
@@ -847,7 +847,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			ContractRequest(ref command);
 		} else if (la.kind == 96 || la.kind == 97 || la.kind == 98) {
 			ContractLookup(ref command);
-		} else SynErr(253);
+		} else SynErr(256);
 	}
 
 	void PostAllocationCommand(ref MsgCommand command) {
@@ -858,7 +858,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 		} else if (la.kind == 43) {
 			Get();
-		} else SynErr(254);
+		} else SynErr(257);
 		OrigMsgVarName(ref cmd.OrigMsgVarName);
 		if (la.kind == 1 || la.kind == 67) {
 			OrderContract(ref cmd.Contract);
@@ -895,6 +895,9 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		var cmd = new BracketOrderCommand(); cmd.BracketCommands = new List<BracketCommandItem>(); 
 		Expect(46);
 		BracketType(ref cmd.Type);
+		if (la.kind == 235 || la.kind == 236 || la.kind == 237) {
+			OSOGroupingMethod(ref cmd.OSOGroupingMethod);
+		}
 		Expect(86);
 		var item = new BracketCommandItem(); 
 		if (la.kind == 198) {
@@ -930,7 +933,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		var cmd = new SubscribeQuotesCommand(); var mdCmd = cmd as MDMessageCommand; 
 		Expect(51);
 		FASTUpdateType(mdCmd);
-		if (la.kind == 236) {
+		if (la.kind == 239) {
 			FASTMDEntries(mdCmd);
 		}
 		FASTContract(mdCmd);
@@ -961,8 +964,8 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		Expect(54);
 		FASTUpdateType(mdCmd);
 		FASTContract(mdCmd);
-		if (la.kind == 229 || la.kind == 245) {
-			if (la.kind == 245) {
+		if (la.kind == 229 || la.kind == 248) {
+			if (la.kind == 248) {
 				Get();
 				Expect(74);
 				cmd.SetStartTime(LiteralParser.ParseTimestamp(t.val)); 
@@ -981,18 +984,18 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		Expect(55);
 		FASTUpdateType(mdCmd);
 		FASTContract(mdCmd);
-		if (la.kind == 245) {
+		if (la.kind == 248) {
 			Get();
 			Expect(74);
 			cmd.SetStartTime(LiteralParser.ParseTimestamp(t.val)); 
-			Expect(246);
+			Expect(249);
 			Expect(74);
 			cmd.SetEndTime(LiteralParser.ParseTimestamp(t.val)); 
 		} else if (la.kind == 229) {
 			Get();
 			Expect(73);
 			cmd.SetStartTime(LiteralParser.ParseTimespan(t.val)); 
-		} else SynErr(255);
+		} else SynErr(258);
 		SubscribeMarketDataToFile(ref mdCmd);
 		command = cmd; 
 	}
@@ -1005,7 +1008,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 65) {
 			Get();
 			name = t.val; 
-		} else SynErr(256);
+		} else SynErr(259);
 		Expect(56);
 		RValue(ref value);
 		fields.Add(name, value); 
@@ -1018,7 +1021,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			} else if (la.kind == 65) {
 				Get();
 				name = t.val; 
-			} else SynErr(257);
+			} else SynErr(260);
 			Expect(56);
 			RValue(ref value);
 			fields.Add(name, value); 
@@ -1037,7 +1040,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 4) {
 			Get();
 			value = new Object(ObjectType.GlobalProp, t.val); 
-		} else SynErr(258);
+		} else SynErr(261);
 	}
 
 	void IdentOrString(ref string str) {
@@ -1047,7 +1050,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 67) {
 			Get();
 			str = LiteralParser.ParseString(t.val); 
-		} else SynErr(259);
+		} else SynErr(262);
 	}
 
 	void MarginCalcPosition(out MarginCalcCommand.Position position) {
@@ -1095,7 +1098,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 4) {
 			Get();
 			var prop = new Object(ObjectType.GlobalProp, t.val); account = (string)ExecEngine.GetObjectValue(prop, null); 
-		} else SynErr(260);
+		} else SynErr(263);
 	}
 
 	void ContractRequest(ref MsgCommand command) {
@@ -1105,7 +1108,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 		} else if (la.kind == 93) {
 			Get();
-		} else SynErr(261);
+		} else SynErr(264);
 		if (la.kind == 1 || la.kind == 67) {
 			ContractRequestCommand temp; 
 			ByBaseContractRequest(out temp);
@@ -1114,7 +1117,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			BaseContractRequestCommand temp; 
 			BaseContractRequest(out temp);
 			command = temp; 
-		} else SynErr(262);
+		} else SynErr(265);
 	}
 
 	void ContractLookup(ref MsgCommand command) {
@@ -1125,7 +1128,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 		} else if (la.kind == 98) {
 			Get();
-		} else SynErr(263);
+		} else SynErr(266);
 		IdentOrString(ref lcommand.Name);
 		Expect(6);
 		Expect(99);
@@ -1161,7 +1164,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 		} else if (la.kind == 95) {
 			Get();
-		} else SynErr(264);
+		} else SynErr(267);
 		if (StartOf(6)) {
 			SubscriptionType(ref command.SubscriptionRequestType);
 			Expect(6);
@@ -1186,7 +1189,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 104) {
 			Get();
 			symbolRequestType = 'U'; 
-		} else SynErr(265);
+		} else SynErr(268);
 	}
 
 	void BaseContractParam(ref BaseContractRequestCommand command) {
@@ -1202,7 +1205,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 			Expect(56);
 			CompoundType(ref command.CompoundType);
-		} else SynErr(266);
+		} else SynErr(269);
 	}
 
 	void ContractLookupMode(ref int mode) {
@@ -1221,7 +1224,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 196) {
 			Get();
 			mode = 4; 
-		} else SynErr(267);
+		} else SynErr(270);
 	}
 
 	void ContractLookupParam(ref SymbolLookupCommand command) {
@@ -1273,7 +1276,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			BaseContractParam(ref bcommand);
 			break;
 		}
-		default: SynErr(268); break;
+		default: SynErr(271); break;
 		}
 	}
 
@@ -1292,7 +1295,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 				list.Add(kind); 
 			}
 			Expect(85);
-		} else SynErr(269);
+		} else SynErr(272);
 	}
 
 	void ContractType(ref ContractType? ctype) {
@@ -1302,7 +1305,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 186) {
 			Get();
 			ctype = Sample.FoxScript.ContractType.PIT; 
-		} else SynErr(270);
+		} else SynErr(273);
 	}
 
 	void OptionType(ref OptionType optionType) {
@@ -1313,7 +1316,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 80) {
 			Get();
 			optionType = Sample.FoxScript.OptionType.CALL; 
-		} else SynErr(271);
+		} else SynErr(274);
 	}
 
 	void BoolOptional(ref bool? value) {
@@ -1323,7 +1326,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 69) {
 			Get();
 			value = false; 
-		} else SynErr(272);
+		} else SynErr(275);
 	}
 
 	void ContractDescription(ref Contract contract) {
@@ -1697,7 +1700,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			compoundType = Sample.FoxScript.CompoundType.SPREAD; 
 			break;
 		}
-		default: SynErr(273); break;
+		default: SynErr(276); break;
 		}
 	}
 
@@ -1708,7 +1711,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 66) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else SynErr(274);
+		} else SynErr(277);
 	}
 
 	void ContractKind(out ContractKind kind) {
@@ -1728,7 +1731,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 191) {
 			Get();
 			kind = Sample.FoxScript.ContractKind.OPTIONS_COMPOUND; 
-		} else SynErr(275);
+		} else SynErr(278);
 	}
 
 	void OrderBody(OrderCommand command) {
@@ -1758,7 +1761,20 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 234) {
 			Get();
 			btype = Sample.FoxScript.BracketType.OSO; 
-		} else SynErr(276);
+		} else SynErr(279);
+	}
+
+	void OSOGroupingMethod(ref OSOGroupingMethod btype) {
+		if (la.kind == 235) {
+			Get();
+			btype = Sample.FoxScript.OSOGroupingMethod.ByFirstPrice; 
+		} else if (la.kind == 236) {
+			Get();
+			btype = Sample.FoxScript.OSOGroupingMethod.ByPrice; 
+		} else if (la.kind == 237) {
+			Get();
+			btype = Sample.FoxScript.OSOGroupingMethod.ByFill; 
+		} else SynErr(280);
 	}
 
 	void OrigMsgVarName(ref string origMsgVarName) {
@@ -1774,7 +1790,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 78) {
 			Get();
 			orderSide.Side = QuickFix.Fields.Side.SELL; 
-		} else SynErr(277);
+		} else SynErr(281);
 		if (la.kind == 81 || la.kind == 82) {
 			if (la.kind == 81) {
 				Get();
@@ -1843,7 +1859,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (StartOf(10)) {
 			LogicalExpr(ref expr);
 			arg = expr; 
-		} else SynErr(278);
+		} else SynErr(282);
 	}
 
 	void SetSeqNumPropCommand() {
@@ -1870,7 +1886,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 65) {
 			Get();
 			result = LiteralParser.ParseInteger(t.val); 
-		} else SynErr(279);
+		} else SynErr(283);
 	}
 
 	void Literal(ref Object value) {
@@ -1925,7 +1941,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			value = new Object(ObjectType.Date, t.val); 
 			break;
 		}
-		default: SynErr(280); break;
+		default: SynErr(284); break;
 		}
 	}
 
@@ -1992,7 +2008,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			orderType.Limit = limit; 
 			break;
 		}
-		default: SynErr(281); break;
+		default: SynErr(285); break;
 		}
 	}
 
@@ -2013,14 +2029,14 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			} else if (la.kind == 75) {
 				Get();
 				tif.Expiration = LiteralParser.ParseDate(t.val); 
-			} else SynErr(282);
+			} else SynErr(286);
 		} else if (la.kind == 219) {
 			Get();
 			tif.Type = QuickFix.Fields.TimeInForce.FILL_OR_KILL; 
 		} else if (la.kind == 220) {
 			Get();
 			tif.Type = QuickFix.Fields.TimeInForce.IMMEDIATE_OR_CANCEL; 
-		} else SynErr(283);
+		} else SynErr(287);
 	}
 
 	void TradingSession(ref string session) {
@@ -2059,7 +2075,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			session = t.val; 
 			break;
 		}
-		default: SynErr(284); break;
+		default: SynErr(288); break;
 		}
 	}
 
@@ -2079,7 +2095,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 208) {
 			Get();
 			rule = Sample.FoxScript.AllocationRule.APS; 
-		} else SynErr(285);
+		} else SynErr(289);
 	}
 
 	void AllocationItem(out PreAllocationBlockItem item) {
@@ -2095,7 +2111,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 208) {
 			Get();
 			rule = Sample.FoxScript.AllocationRule.PostAllocationAPS; 
-		} else SynErr(286);
+		} else SynErr(290);
 	}
 
 	void PostAllocationItem(out PostAllocationBlockItem item) {
@@ -2112,7 +2128,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 66) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else SynErr(287);
+		} else SynErr(291);
 	}
 
 	void AccountInfo(ref ExtendedAccount account) {
@@ -2171,7 +2187,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 1) {
 			MsgVarName(ref msgVarName);
 			expr = new Object(ObjectType.FixMsgVar, msgVarName); 
-		} else SynErr(288);
+		} else SynErr(292);
 		if (la.kind == 57 || la.kind == 58) {
 			msgVarName = null; 
 			if (la.kind == 57) {
@@ -2190,7 +2206,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			} else if (la.kind == 1) {
 				MsgVarName(ref msgVarName);
 				expr = new LogicalExpr() { Operation = op.Value, Left = expr, Right = new Object(ObjectType.FixMsgVar, msgVarName) }; 
-			} else SynErr(289);
+			} else SynErr(293);
 		}
 	}
 
@@ -2226,7 +2242,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 			LogicalExpr(ref arg);
 			Expect(85);
-		} else SynErr(290);
+		} else SynErr(294);
 	}
 
 	void MsgCtxOrExpr(ref object expr) {
@@ -2305,7 +2321,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			Get();
 			MsgCtxLogicalExpr(ref arg);
 			Expect(85);
-		} else SynErr(291);
+		} else SynErr(295);
 	}
 
 	void FieldName(ref string fieldName) {
@@ -2320,7 +2336,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 66) {
 			Get();
 			value = LiteralParser.ParseFloat(t.val); 
-		} else SynErr(292);
+		} else SynErr(296);
 	}
 
 	void TrailingStop(ref TrailingStop trailing) {
@@ -2343,7 +2359,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			} else if (la.kind == 66) {
 				Get();
 				trailing.Amount = LiteralParser.ParseFloat(t.val); 
-			} else SynErr(293);
+			} else SynErr(297);
 			if (la.kind == 232) {
 				Get();
 				trailing.AmountInPercents = true; 
@@ -2356,7 +2372,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 				Get();
 				trailing.Amount = LiteralParser.ParseFloat(t.val); 
 			}
-		} else SynErr(294);
+		} else SynErr(298);
 	}
 
 	void Symbol(ref OrderSymbol symbol) {
@@ -2366,7 +2382,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 67) {
 			Get();
 			symbol = TokenParser.ParseOrderSymbol(LiteralParser.ParseString(t.val)); 
-		} else SynErr(295);
+		} else SynErr(299);
 	}
 
 	void StrikeSide(OrderContract contract) {
@@ -2377,13 +2393,13 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 79) {
 			Get();
 			contract.Put = true; 
-		} else SynErr(296);
+		} else SynErr(300);
 		Price(ref strike);
 		contract.Strike = strike; 
 	}
 
 	void FASTUpdateType(MDMessageCommand command) {
-		if (la.kind == 235) {
+		if (la.kind == 238) {
 			Get();
 			command.UpdateType = 0; 
 		}
@@ -2391,7 +2407,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 
 	void FASTMDEntries(MDMessageCommand command) {
 		command.ResetMDEntries(); 
-		Expect(236);
+		Expect(239);
 		Expect(198);
 		if (StartOf(14)) {
 			FAST.MDEntryType type; 
@@ -2414,47 +2430,47 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			type = FAST.MDEntryType.BID; 
 			break;
 		}
-		case 237: {
+		case 240: {
 			Get();
 			type = FAST.MDEntryType.OFFER; 
 			break;
 		}
-		case 238: {
+		case 241: {
 			Get();
 			type = FAST.MDEntryType.TRADE; 
 			break;
 		}
-		case 239: {
+		case 242: {
 			Get();
 			type = FAST.MDEntryType.OPENING_PRICE; 
 			break;
 		}
-		case 240: {
+		case 243: {
 			Get();
 			type = FAST.MDEntryType.SETTLEMENT_PRICE; 
 			break;
 		}
-		case 241: {
+		case 244: {
 			Get();
 			type = FAST.MDEntryType.TRADE_VOLUME; 
 			break;
 		}
-		case 242: {
+		case 245: {
 			Get();
 			type = FAST.MDEntryType.OPEN_INTEREST; 
 			break;
 		}
-		case 243: {
+		case 246: {
 			Get();
 			type = FAST.MDEntryType.WORKUP_TRADE; 
 			break;
 		}
-		case 244: {
+		case 247: {
 			Get();
 			type = FAST.MDEntryType.EMPTY_BOOK; 
 			break;
 		}
-		default: SynErr(297); break;
+		default: SynErr(301); break;
 		}
 	}
 
@@ -2463,7 +2479,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 			FASTSymbolBasedContract(command);
 		} else if (la.kind == 1 || la.kind == 67) {
 			FASTFuturesBasedContract(command);
-		} else SynErr(298);
+		} else SynErr(302);
 	}
 
 	void FASTSymbolBasedContract(MDMessageCommand command) {
@@ -2473,7 +2489,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 189) {
 			Get();
 			command.ContractKind = Sample.FoxScript.ContractKind.FOREX; 
-		} else SynErr(299);
+		} else SynErr(303);
 		IdentOrString(ref command.BaseSymbol);
 		if (la.kind == 79 || la.kind == 80) {
 			FASTStrikeSide(command);
@@ -2502,7 +2518,7 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 		} else if (la.kind == 79) {
 			Get();
 			command.StrikeSide.Put = true; 
-		} else SynErr(300);
+		} else SynErr(304);
 		Price(ref strike);
 		command.StrikeSide.Strike = strike; 
 	}
@@ -2527,21 +2543,21 @@ internal Parser(Scanner scanner, ExecEngine execEngine, Errors errors)
 	}
 	
 	static readonly bool[,] set = {
-		{_T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_T,_T, _T,_T,_T,_T, _T,_x,_x,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_T,_T, _T,_T,_T,_T, _T,_x,_x,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_T, _T,_T,_T,_T, _T,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_T, _T,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_T,_x, _x,_x,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _x,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _x,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _x,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x},
-		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _T,_x,_x,_x, _x}
+		{_T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_T,_T, _T,_T,_T,_T, _T,_x,_x,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_T,_T, _T,_T,_T,_T, _T,_x,_x,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_T, _T,_T,_T,_T, _T,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_T, _T,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_T,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_T,_x, _x,_x,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _x,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _x,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _T,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_T,_T,_T, _x,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x},
+		{_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_T,_T, _x,_x,_x,_x}
 
 	};
 } // end Parser
@@ -2790,72 +2806,76 @@ public class Errors {
 			case 232: s = "\"%\" expected"; break;
 			case 233: s = "\"oco\" expected"; break;
 			case 234: s = "\"oso\" expected"; break;
-			case 235: s = "\"full\" expected"; break;
-			case 236: s = "\"mdentries:\" expected"; break;
-			case 237: s = "\"offer\" expected"; break;
-			case 238: s = "\"trade\" expected"; break;
-			case 239: s = "\"opening_price\" expected"; break;
-			case 240: s = "\"settlement_price\" expected"; break;
-			case 241: s = "\"trade_volume\" expected"; break;
-			case 242: s = "\"open_interest\" expected"; break;
-			case 243: s = "\"workup_trade\" expected"; break;
-			case 244: s = "\"empty_book\" expected"; break;
-			case 245: s = "\"from\" expected"; break;
-			case 246: s = "\"to\" expected"; break;
-			case 247: s = "??? expected"; break;
-			case 248: s = "invalid Command"; break;
-			case 249: s = "invalid SimpleCommand"; break;
-			case 250: s = "invalid MsgProducingCommand"; break;
-			case 251: s = "invalid SetPropCommand"; break;
-			case 252: s = "invalid QuitCommand"; break;
-			case 253: s = "invalid ContractCommand"; break;
-			case 254: s = "invalid PostAllocationCommand"; break;
-			case 255: s = "invalid LoadTicksCommand"; break;
-			case 256: s = "invalid MessageFieldAssignments"; break;
-			case 257: s = "invalid MessageFieldAssignments"; break;
-			case 258: s = "invalid RValue"; break;
-			case 259: s = "invalid IdentOrString"; break;
-			case 260: s = "invalid Account"; break;
-			case 261: s = "invalid ContractRequest"; break;
-			case 262: s = "invalid ContractRequest"; break;
-			case 263: s = "invalid ContractLookup"; break;
-			case 264: s = "invalid BaseContractRequest"; break;
-			case 265: s = "invalid SubscriptionType"; break;
-			case 266: s = "invalid BaseContractParam"; break;
-			case 267: s = "invalid ContractLookupMode"; break;
-			case 268: s = "invalid ContractLookupParam"; break;
-			case 269: s = "invalid ContractKindList"; break;
-			case 270: s = "invalid ContractType"; break;
-			case 271: s = "invalid OptionType"; break;
-			case 272: s = "invalid BoolOptional"; break;
-			case 273: s = "invalid CompoundType"; break;
-			case 274: s = "invalid DoubleOptional"; break;
-			case 275: s = "invalid ContractKind"; break;
-			case 276: s = "invalid BracketType"; break;
-			case 277: s = "invalid OrderSide"; break;
-			case 278: s = "invalid FormatArg"; break;
-			case 279: s = "invalid IntegerOrDefault"; break;
-			case 280: s = "invalid Literal"; break;
-			case 281: s = "invalid OrderType"; break;
-			case 282: s = "invalid TimeInForce"; break;
-			case 283: s = "invalid TimeInForce"; break;
-			case 284: s = "invalid TradingSession"; break;
-			case 285: s = "invalid AllocationRule"; break;
-			case 286: s = "invalid PostAllocationRule"; break;
-			case 287: s = "invalid Double"; break;
-			case 288: s = "invalid EqlExpr"; break;
-			case 289: s = "invalid EqlExpr"; break;
-			case 290: s = "invalid RelExprArg"; break;
-			case 291: s = "invalid MsgCtxRelExprArg"; break;
-			case 292: s = "invalid Price"; break;
-			case 293: s = "invalid TrailingStop"; break;
-			case 294: s = "invalid TrailingStop"; break;
-			case 295: s = "invalid Symbol"; break;
-			case 296: s = "invalid StrikeSide"; break;
-			case 297: s = "invalid FASTMDEntryType"; break;
-			case 298: s = "invalid FASTContract"; break;
-			case 299: s = "invalid FASTSymbolBasedContract"; break;
-			case 300: s = "invalid FASTStrikeSide"; break;
+			case 235: s = "\"byfirstprice\" expected"; break;
+			case 236: s = "\"byprice\" expected"; break;
+			case 237: s = "\"byfill\" expected"; break;
+			case 238: s = "\"full\" expected"; break;
+			case 239: s = "\"mdentries:\" expected"; break;
+			case 240: s = "\"offer\" expected"; break;
+			case 241: s = "\"trade\" expected"; break;
+			case 242: s = "\"opening_price\" expected"; break;
+			case 243: s = "\"settlement_price\" expected"; break;
+			case 244: s = "\"trade_volume\" expected"; break;
+			case 245: s = "\"open_interest\" expected"; break;
+			case 246: s = "\"workup_trade\" expected"; break;
+			case 247: s = "\"empty_book\" expected"; break;
+			case 248: s = "\"from\" expected"; break;
+			case 249: s = "\"to\" expected"; break;
+			case 250: s = "??? expected"; break;
+			case 251: s = "invalid Command"; break;
+			case 252: s = "invalid SimpleCommand"; break;
+			case 253: s = "invalid MsgProducingCommand"; break;
+			case 254: s = "invalid SetPropCommand"; break;
+			case 255: s = "invalid QuitCommand"; break;
+			case 256: s = "invalid ContractCommand"; break;
+			case 257: s = "invalid PostAllocationCommand"; break;
+			case 258: s = "invalid LoadTicksCommand"; break;
+			case 259: s = "invalid MessageFieldAssignments"; break;
+			case 260: s = "invalid MessageFieldAssignments"; break;
+			case 261: s = "invalid RValue"; break;
+			case 262: s = "invalid IdentOrString"; break;
+			case 263: s = "invalid Account"; break;
+			case 264: s = "invalid ContractRequest"; break;
+			case 265: s = "invalid ContractRequest"; break;
+			case 266: s = "invalid ContractLookup"; break;
+			case 267: s = "invalid BaseContractRequest"; break;
+			case 268: s = "invalid SubscriptionType"; break;
+			case 269: s = "invalid BaseContractParam"; break;
+			case 270: s = "invalid ContractLookupMode"; break;
+			case 271: s = "invalid ContractLookupParam"; break;
+			case 272: s = "invalid ContractKindList"; break;
+			case 273: s = "invalid ContractType"; break;
+			case 274: s = "invalid OptionType"; break;
+			case 275: s = "invalid BoolOptional"; break;
+			case 276: s = "invalid CompoundType"; break;
+			case 277: s = "invalid DoubleOptional"; break;
+			case 278: s = "invalid ContractKind"; break;
+			case 279: s = "invalid BracketType"; break;
+			case 280: s = "invalid OSOGroupingMethod"; break;
+			case 281: s = "invalid OrderSide"; break;
+			case 282: s = "invalid FormatArg"; break;
+			case 283: s = "invalid IntegerOrDefault"; break;
+			case 284: s = "invalid Literal"; break;
+			case 285: s = "invalid OrderType"; break;
+			case 286: s = "invalid TimeInForce"; break;
+			case 287: s = "invalid TimeInForce"; break;
+			case 288: s = "invalid TradingSession"; break;
+			case 289: s = "invalid AllocationRule"; break;
+			case 290: s = "invalid PostAllocationRule"; break;
+			case 291: s = "invalid Double"; break;
+			case 292: s = "invalid EqlExpr"; break;
+			case 293: s = "invalid EqlExpr"; break;
+			case 294: s = "invalid RelExprArg"; break;
+			case 295: s = "invalid MsgCtxRelExprArg"; break;
+			case 296: s = "invalid Price"; break;
+			case 297: s = "invalid TrailingStop"; break;
+			case 298: s = "invalid TrailingStop"; break;
+			case 299: s = "invalid Symbol"; break;
+			case 300: s = "invalid StrikeSide"; break;
+			case 301: s = "invalid FASTMDEntryType"; break;
+			case 302: s = "invalid FASTContract"; break;
+			case 303: s = "invalid FASTSymbolBasedContract"; break;
+			case 304: s = "invalid FASTStrikeSide"; break;
 
 			default: s = "error " + n; break;
 		}

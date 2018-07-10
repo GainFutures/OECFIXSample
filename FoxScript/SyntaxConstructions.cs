@@ -77,6 +77,14 @@ namespace OEC.FIX.Sample.FoxScript
         OSO
     }
 
+    public enum OSOGroupingMethod
+    {
+        None = -1,
+        ByFirstPrice,
+        ByPrice,
+        ByFill
+    }
+
     internal class OrderContract
     {
         public bool? Put;
@@ -183,6 +191,8 @@ namespace OEC.FIX.Sample.FoxScript
     internal class BracketOrderCommand : OutgoingMsgCommand
     {
         public BracketType Type;
+
+        public OSOGroupingMethod OSOGroupingMethod = OSOGroupingMethod.None;
 
         public List<BracketCommandItem> BracketCommands;
     }

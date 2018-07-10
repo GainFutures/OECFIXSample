@@ -1,4 +1,4 @@
-bracket OSO { [orderRoot] buy 2 'ESH6' MKT FOR 'TEST00083', [orderOCO1] buy 2 'ESH6' LMT 1993.75 FOR 'TEST00083', [orderOCO2] sell 2 'ESH6' LMT 1996.50 FOR 'TEST00083'};
+bracket OSO ByFill { [orderRoot] buy 2 'ESH6' MKT FOR 'TEST00083', [orderOCO1] buy 2 'ESH6' LMT 1993.75 FOR 'TEST00083', [orderOCO2] sell 2 'ESH6' LMT 1996.50 FOR 'TEST00083'};
 	
 	pendingOSO = Wait ExecutionReport, ClOrdID == orderRoot.ClOrdID;
 	Ensure pendingOSO != null, 'ExecReport not received';

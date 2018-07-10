@@ -95,6 +95,7 @@
     <Compile Include="FIX\Fields\MaxQty.cs" />
     <Compile Include="FIX\Fields\MaxRecordsField.cs" />
     <Compile Include="FIX\Fields\OptionsRequiredField.cs" />
+    <Compile Include="FIX\Fields\OSOGroupingMethod.cs" />
     <Compile Include="FIX\Fields\SymbolLookupModeField.cs" />
     <Compile Include="FIX\Fields\Tags.cs" />
     <Compile Include="FIX\Fields\UpdatesSinceTimestamp.cs" />

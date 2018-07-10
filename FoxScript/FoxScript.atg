@@ -643,6 +643,7 @@ PRODUCTIONS
 	BracketOrderCommand<ref MsgCommand command>	(. var cmd = new BracketOrderCommand(); cmd.BracketCommands = new List<BracketCommandItem>(); .) = 
 		actionBracket
 		BracketType<ref cmd.Type>
+		[OSOGroupingMethod<ref cmd.OSOGroupingMethod>]
 		"{"
 			(. var item = new BracketCommandItem(); .) 
 			[
@@ -1261,6 +1262,12 @@ PRODUCTIONS
 	BracketType<ref BracketType btype> = 
 		"OCO" (. btype = Sample.FoxScript.BracketType.OCO; .)
 		| "OSO" (. btype = Sample.FoxScript.BracketType.OSO; .)
+	.
+
+	OSOGroupingMethod<ref OSOGroupingMethod btype> = 
+		"ByFirstPrice" (. btype = Sample.FoxScript.OSOGroupingMethod.ByFirstPrice; .)
+		| "ByPrice" (. btype = Sample.FoxScript.OSOGroupingMethod.ByPrice; .)
+		| "ByFill" (. btype = Sample.FoxScript.OSOGroupingMethod.ByFill; .)
 	.
 	//FAST Commands
 

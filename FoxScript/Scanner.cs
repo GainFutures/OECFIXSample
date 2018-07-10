@@ -203,8 +203,8 @@ public class UTF8Buffer: Buffer {
 public class Scanner {
 	const char EOL = '\n';
 	const int eofSym = 0; /* pdt */
-	const int maxT = 247;
-	const int noSym = 247;
+	const int maxT = 250;
+	const int noSym = 250;
 	char valCh;       // current input character (for token.val)
 
 	public Buffer buffer; // scanner buffer
@@ -572,17 +572,20 @@ public class Scanner {
 			case "ask": t.kind = 231; break;
 			case "oco": t.kind = 233; break;
 			case "oso": t.kind = 234; break;
-			case "full": t.kind = 235; break;
-			case "offer": t.kind = 237; break;
-			case "trade": t.kind = 238; break;
-			case "opening_price": t.kind = 239; break;
-			case "settlement_price": t.kind = 240; break;
-			case "trade_volume": t.kind = 241; break;
-			case "open_interest": t.kind = 242; break;
-			case "workup_trade": t.kind = 243; break;
-			case "empty_book": t.kind = 244; break;
-			case "from": t.kind = 245; break;
-			case "to": t.kind = 246; break;
+			case "byfirstprice": t.kind = 235; break;
+			case "byprice": t.kind = 236; break;
+			case "byfill": t.kind = 237; break;
+			case "full": t.kind = 238; break;
+			case "offer": t.kind = 240; break;
+			case "trade": t.kind = 241; break;
+			case "opening_price": t.kind = 242; break;
+			case "settlement_price": t.kind = 243; break;
+			case "trade_volume": t.kind = 244; break;
+			case "open_interest": t.kind = 245; break;
+			case "workup_trade": t.kind = 246; break;
+			case "empty_book": t.kind = 247; break;
+			case "from": t.kind = 248; break;
+			case "to": t.kind = 249; break;
 			default: break;
 		}
 	}
@@ -1158,7 +1161,7 @@ public class Scanner {
 			case 146:
 				{t.kind = 232; break;}
 			case 147:
-				{t.kind = 236; break;}
+				{t.kind = 239; break;}
 			case 148:
 				recEnd = pos; recKind = 198;
 				if (ch >= '0' && ch <= '9') {AddCh(); goto case 110;}
